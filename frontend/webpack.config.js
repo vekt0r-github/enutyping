@@ -1,10 +1,14 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
+const entryFile = path.resolve(__dirname, 'src', 'index.tsx');
+const outputDir = path.resolve(__dirname, 'src', 'public');
+
 module.exports = {
-  entry: path.resolve(__dirname, 'src/index.tsx'),
+  entry: entryFile,
   output: {
-    path: path.resolve(__dirname, '..', './build'),
+    path: outputDir,
+    publicPath: "/",
     filename: 'bundle.js',
   },
   resolve: {
@@ -39,8 +43,19 @@ module.exports = {
   plugins: [
     // MAYBE HMR plugin?
     new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, 'src/index.html'),
+      template: path.resolve(__dirname, 'src/public/index.html'),
     }),
   ],
+  devServer: {
+    historyApiFallback: {
+      index: entryFile,
+      rewrites: [
+        // shows favicon
+        { from: /favicon.ico/, to: path.resolve(outputDir, 'favicon.ico') }
+      ]
+    },
+    static: outputDir,
+    hot: true,
+  },
   stats: 'errors-only',
 }
