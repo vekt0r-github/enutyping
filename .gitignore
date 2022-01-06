@@ -1,0 +1,4 @@
+__pycache__/
+env/
+client/dist/bundle.js
+node_modules/
