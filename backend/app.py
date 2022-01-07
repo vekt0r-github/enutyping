@@ -3,9 +3,14 @@ import requests
 from flask import Flask, redirect, request, url_for, jsonify, session
 
 import oauth
+from database import db_session
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "supersekritsfasdfsaflksjfajlksjfsk")
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
 
 @app.route('/')
 def index():
