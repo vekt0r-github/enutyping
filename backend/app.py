@@ -4,9 +4,11 @@ from flask import Flask, redirect, request, url_for, jsonify, session
 
 import oauth
 from database import db_session
+from api import api
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "supersekritsfasdfsaflksjfajlksjfsk")
+app.register_blueprint(api, url_prefix='/api')
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):

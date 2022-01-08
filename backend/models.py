@@ -1,6 +1,9 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
+
 from database import Base
+
+# TODO: lol copy paste as_dict but w/e
 
 class User(Base):
     __tablename__ = 'users'
@@ -12,14 +15,27 @@ class User(Base):
         self.id = id
         self.name = name
 
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 class Beatmap(Base):
     __tablename__ = 'beatmaps'
     id = Column(Integer, primary_key=True)
     song_name = Column(String(50))
     scores = relationship('Score', back_populates='beatmap')
 
-    def __init__(self, song_name):
+    def __init__(self, song_name, id = None):
         self.song_name = song_name
+        self.id = id
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    def scores_select(self):
+        sc = Score.query.filter(Score.beatmap.has(Beatmap.id == self.id)).all()
+        serialized = [s.as_dict() for s in sc]
+        return serialized
+
 
 class Score(Base):
     __tablename__ = 'scores'
@@ -31,7 +47,31 @@ class Score(Base):
     user = relationship('User', back_populates='scores')
     beatmap = relationship('Beatmap', back_populates='scores')
 
-    def __init__(self, user_id, beatmap_id, score):
+    def __init__(self, user_id, beatmap_id, score, id = None):
         self.user_id = user_id
         self.beatmap_id = beatmap_id
         self.score = score
+        self.id = id
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
+def init_db():
+    from database import db_session, engine
+
+    Base.metadata.create_all(bind=engine)
+    
+    objects = [
+        User(id=1234, name='ppfarmer'),
+        User(id=4321, name='songenjoyer'),
+        Beatmap(id=1, song_name='banger'),
+        Score(user_id=1234, beatmap_id=1, score=727),
+        Score(user_id=4321, beatmap_id=1, score=72727),
+    ]
+
+    db_session.bulk_save_objects(objects)
+    db_session.commit()
+
+if __name__ == '__main__':
+    init_db()
