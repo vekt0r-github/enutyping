@@ -1,9 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship, joinedload
+from sqlalchemy.orm import relationship
 
 from database import Base
-
-# TODO: lol copy paste as_dict but w/e
 
 class User(Base):
     __tablename__ = 'users'
@@ -15,9 +13,6 @@ class User(Base):
         self.id = id
         self.name = name
 
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
 class Beatmap(Base):
     __tablename__ = 'beatmaps'
     id = Column(Integer, primary_key=True)
@@ -27,16 +22,6 @@ class Beatmap(Base):
     def __init__(self, song_name, id = None):
         self.song_name = song_name
         self.id = id
-
-    def beatmap_data(self):
-        # Get scores along with the beatmap
-        bm = Beatmap.query.options(joinedload(Beatmap.scores)) \
-                          .filter(Beatmap.id == self.id) \
-                          .one()
-        return dict(bm.as_dict(), scores = [s.as_dict() for s in bm.scores])
-
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 class Score(Base):
     __tablename__ = 'scores'
@@ -53,10 +38,6 @@ class Score(Base):
         self.beatmap_id = beatmap_id
         self.score = score
         self.id = id
-
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
 
 def init_db():
     from database import db_session, engine

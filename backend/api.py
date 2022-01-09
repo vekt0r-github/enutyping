@@ -3,7 +3,7 @@ from marshmallow import ValidationError
 from operator import itemgetter
 
 from models import Beatmap, Score
-from schemas import score_schema
+from schemas import beatmap_schema, score_schema, scores_schema
 from database import db_session
 
 api = Blueprint('api', __name__)
@@ -14,7 +14,9 @@ def get_beatmap_scores(beatmap_id):
     if beatmap is None:
         abort(404, description = 'Beatmap not found')
 
-    return beatmap.beatmap_data()
+    beatmap_result = beatmap_schema.dump(beatmap)
+    scores_result = scores_schema.dump(beatmap.scores)
+    return {'beatmap': beatmap_result, 'scores': scores_result}
 
 @api.route('/scores', methods=['POST'])
 def new_score():
@@ -31,5 +33,6 @@ def new_score():
     s = Score(beatmap_id=bid, user_id=uid, score=score)
     db_session.add(s)
     db_session.commit()
-    
-    return s.as_dict(), 201
+
+    score_result = score_schema.dump(s)
+    return score_result, 201
