@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, joinedload
 
 from database import Base
 
@@ -28,14 +28,15 @@ class Beatmap(Base):
         self.song_name = song_name
         self.id = id
 
+    def beatmap_data(self):
+        # Get scores along with the beatmap
+        bm = Beatmap.query.options(joinedload(Beatmap.scores)) \
+                          .filter(Beatmap.id == self.id) \
+                          .one()
+        return dict(bm.as_dict(), scores = [s.as_dict() for s in bm.scores])
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-    def scores_select(self):
-        sc = Score.query.filter(Score.beatmap.has(Beatmap.id == self.id)).all()
-        serialized = [s.as_dict() for s in sc]
-        return serialized
-
 
 class Score(Base):
     __tablename__ = 'scores'
