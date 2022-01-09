@@ -4,6 +4,7 @@ from flask import Flask, redirect, request, url_for, jsonify, session
 
 import oauth
 from database import db_session
+from models import User
 from api import api
 
 app = Flask(__name__)
@@ -34,6 +35,15 @@ def unauthorized():
 def authorized():
     state = request.args.get('state')
     if state == oauth.OAUTH_SECRET_KEY:
+        def get_or_create_user(id, name):
+            user = User.query.get(id)
+            if user:
+                return user
+            user = User(id, name)
+            db_session.add(user)
+            db_session.commit()
+            return user
+
         auth = oauth.OAuth()
 
         code = request.args.get('code')
@@ -41,9 +51,13 @@ def authorized():
         access_token = auth_response['access_token']
         gh_api_response = requests.get('https://api.github.com/user', headers = { 'Authorization': f'token {access_token}' })
         gh_user = gh_api_response.json()
+        gh_name = gh_user['login']
+        gh_uid = gh_user['id']
 
-        session['user'] = gh_user['login']
-        session['user_id'] = gh_user['id']
+        session['user'] = gh_name
+        session['user_id'] = gh_uid
+
+        get_or_create_user(gh_uid, gh_name)
 
         return redirect('/')
     else:

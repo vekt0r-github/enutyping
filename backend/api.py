@@ -27,7 +27,7 @@ def get_beatmap_scores(beatmap_id):
 
 @api.route('/scores', methods=['POST'])
 def new_score():
-    # XXX: UID probably is in session or something
+    # XXX: UID probably is in session or something, so we can't fake for someone else
     # TODO: Probably need protection lol fake scores
     json_data = request.get_json()
     if not json_data:
