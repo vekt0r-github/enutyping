@@ -2,21 +2,28 @@ from flask import Blueprint, abort, request
 from marshmallow import ValidationError
 from operator import itemgetter
 
-from models import Beatmap, Score
-from schemas import beatmap_schema, score_schema, scores_schema
+from models import Beatmap, Score, User
+from schemas import beatmap_schema, score_schema, scores_schema, user_schema
 from database import db_session
 
 api = Blueprint('api', __name__)
+
+@api.route('/users/<int:user_id>', methods=['GET'])
+def get_user(user_id):
+    user = User.query.get(user_id)
+    if user is None:
+        abort(404, description = 'User not found')
+    user_result = user_schema.dump(user)
+    return user_result
 
 @api.route('/beatmaps/<int:beatmap_id>', methods=['GET'])
 def get_beatmap_scores(beatmap_id):
     beatmap = Beatmap.query.get(beatmap_id)
     if beatmap is None:
         abort(404, description = 'Beatmap not found')
-
     beatmap_result = beatmap_schema.dump(beatmap)
     scores_result = scores_schema.dump(beatmap.scores)
-    return {'beatmap': beatmap_result, 'scores': scores_result}
+    return { **beatmap_result, 'scores' : scores_result }
 
 @api.route('/scores', methods=['POST'])
 def new_score():
