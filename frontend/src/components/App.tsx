@@ -40,7 +40,10 @@ const App = ({} : Props) => {
   return (
     <>
       <BrowserRouter>
-        <NavBar />
+        <NavBar
+          handleLogout={handleLogout}
+          user={user}
+        />
         <Routes>
           <Route path="/" element={
             <Home user={user} />

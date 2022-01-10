@@ -34,9 +34,9 @@ const Login = ({ handleLogin, user } : Props) => {
       { isLoading ? (
         <p>Loading...</p>
       ): (
-        <p>You are not logged in.&nbsp;
+        <p>Login options:&nbsp;
           <a href="/api/login">
-            Login here!
+            Log in with GitHub
           </a>
         </p>
       )}
