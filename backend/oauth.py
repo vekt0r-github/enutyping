@@ -12,15 +12,15 @@ REQUEST_TOKEN_URL = 'https://github.com/login/oauth/access_token'
 # TODO: have base_url instead of localhost
 
 class OAuth():
-    def __init__(self, redirect_uri = 'http://localhost:5000/login/authorized'):
+    def __init__(self, redirect_uri = None):
         self.redirect_uri = redirect_uri
 
     def request_url(self):
         params = {
             'client_id': GITHUB_OAUTH_CLIENT_ID,
-            'redirect_uri': self.redirect_uri,
             'state': OAUTH_SECRET_KEY,
         }
+        if self.redirect_uri: params['redirect_uri'] = self.redirect_uri
         p = requests.Request('GET', REQUEST_AUTH_URL, params = params).prepare()
         return p.url
     

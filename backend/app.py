@@ -34,9 +34,10 @@ def login():
 def unauthorized():
     return 'wtf are you doing here?'
 
-@app.route('/api/login/authorized/')
+@app.route('/api/login/authorize', methods = ['POST'])
 def authorized():
-    state = request.args.get('state')
+    req_json = request.get_json()
+    state = req_json.get('state')
     if state == oauth.OAUTH_SECRET_KEY:
         def get_or_create_user(id, name):
             user = User.query.get(id)
@@ -49,7 +50,7 @@ def authorized():
 
         auth = oauth.OAuth()
 
-        code = request.args.get('code')
+        code = req_json.get('code')
         auth_response = auth.authorize(code)
         access_token = auth_response['access_token']
         gh_api_response = requests.get('https://api.github.com/user', headers = { 'Authorization': f'token {access_token}' })
@@ -63,4 +64,4 @@ def authorized():
         user = get_or_create_user(gh_uid, gh_name)
         return user_schema.dump(user)
     else:
-        return redirect('/unauthorized/')
+        return redirect('/api/unauthorized/')
