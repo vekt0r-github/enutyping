@@ -47,13 +47,7 @@ module.exports = {
     }),
   ],
   devServer: {
-    historyApiFallback: {
-      index: entryFile,
-      rewrites: [
-        // shows favicon
-        { from: /favicon.ico/, to: path.resolve(outputDir, 'favicon.ico') }
-      ]
-    },
+    historyApiFallback: true,
     static: outputDir,
     hot: true,
   },
