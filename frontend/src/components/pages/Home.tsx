@@ -7,25 +7,16 @@ type Props = {
   user: User,
 };
 
-type State = {};
-
-class Home extends Component<Props, State> {
-  constructor(props : Props) {
-    super(props);
-    this.state = {};
+const Home = ({ user } : Props) => {
+  if (!user) {
+    return <Navigate to='/login' replace={true} />
   }
-
-  render() {
-    const user = this.props.user;
-    if (!user) {
-      return <Navigate to='/login' replace={true} />
-    }
-    return (
-      <>
-        <p>You are logged in as {user.name} with id {user.id}</p>
-      </>
-    );
-  }
+  return (
+    <>
+      <h1>Home</h1>
+      <p>You are logged in as {user.name} with id {user.id}</p>
+    </>
+  );
 }
 
 export default Home;

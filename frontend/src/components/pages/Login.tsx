@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, useSearchParams } from "react-router-dom";
 
-const Login = ({ handleLogin, handleLogout, user }) => {
+import { User } from "../App";
+
+type Props = {
+  handleLogin: (code: string|null, state: string|null) => void,
+  user: User,
+}
+
+const Login = ({ handleLogin, user } : Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchParams, _] = useSearchParams();
 
@@ -23,6 +30,7 @@ const Login = ({ handleLogin, handleLogout, user }) => {
 
   return (
     <>
+      <h1>Login</h1>
       { isLoading ? (
         <p>Loading...</p>
       ): (
