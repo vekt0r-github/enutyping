@@ -1,25 +1,31 @@
-import React from "react";
+import React, { Component } from "react";
 import { Navigate } from "react-router-dom";
-import NavBar from "../modules/NavBar";
 
-export type User = { // example
-  id: number;
-  name: string;
-} | undefined;
+import { User } from "../App";
 
-const Home = ({ user }: { user: User }) => {
-  if (!user) {
-    return <Navigate to='/login' replace={true} />
+type Props = {
+  user: User,
+};
+
+type State = {};
+
+class Home extends Component<Props, State> {
+  constructor(props : Props) {
+    super(props);
+    this.state = {};
   }
 
-  return (
-    <>
-      <NavBar />
-      { user && 
+  render() {
+    const user = this.props.user;
+    if (!user) {
+      return <Navigate to='/login' replace={true} />
+    }
+    return (
+      <>
         <p>You are logged in as {user.name} with id {user.id}</p>
-      }
-    </>
-  )
-};
+      </>
+    );
+  }
+}
 
 export default Home;

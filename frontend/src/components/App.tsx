@@ -1,43 +1,88 @@
-import React, { useEffect, useState } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import React, { Component } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Home, { User } from "./pages/Home";
-import Login from "./modules/Login";
+import NavBar from "./modules/NavBar";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import NotFound from "./pages/NotFound";
+
 import { get, post } from "../utilities";
 
-const App = () => {
-  const [user, setUser] = useState<User>();
-  // useEffect(() => {
+export type User = { // example
+  id: number;
+  name: string;
+} | undefined;
+
+type Props = {};
+
+type State = {
+  user: User,
+};
+
+class App extends Component<Props, State> {
+  constructor(props : Props) {
+    super(props);
+    this.state = {
+      user: undefined,
+    };
+  }
+
+  // componentDidMount() {
   //   get("/api/whoami").then((user) => {
-  //     if (user._id) {
-  //       setUserId(user._id);
+  //     if (user) {
+  //       this.setState({ user: user });
   //     }
   //   });
-  // });
+  // }
 
-  const handleLogin = (code: string, state: string) => {
+  handleLogin = (code: string, state: string) => {
     post("/api/login/authorize", { code, state }).then((user) => {
-      setUser(user);
+      this.setState({ user: user });
     });
   };
 
-  const handleLogout = () => {
-    setUser(undefined);
+  handleLogout = () => {
+    this.setState({ user: undefined });
     post("/api/logout");
   };
 
 
-  // We can nest shit later, so maybe global navbar but w/e
-  return (
-    <>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home user={user} />} />
-          <Route path="login" element={<Login handleLogin={handleLogin} handleLogout={handleLogout} user={user} />} />
-        </Routes>
-      </BrowserRouter>
-    </>
-  );
+  render() {
+    return (
+      <>
+        <BrowserRouter>
+          <NavBar />
+          <Routes>
+            <Route path="/" element={
+              <Home user={this.state.user} />
+            }/>
+            <Route path="/login" element={
+              <Login 
+                handleLogin={this.handleLogin}
+                handleLogout={this.handleLogout}
+                user={this.state.user}
+              />
+            }/>
+            {/* <Route path="/play" element={
+              <SongSelect user={this.state.user} />
+            }/>
+            <Route path="/play/:mapId" element={
+              <Game user={this.state.user} />
+            }/>
+            <Route path="/user/:userId" element={
+              <UserPage user={this.state.user} />
+            }/>
+            <Route path="/account" element={
+              <Account user={this.state.user} />
+            }/> */}
+            <Route path="*" element={
+              <NotFound />
+            }/>
+          </Routes>
+        </BrowserRouter>
+      </>
+    );
+  }
 }
 
 export default App;

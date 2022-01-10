@@ -1,14 +1,13 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 
 const NavBar = () => (
   <>
     <nav>
-      <nav>
-        <a href="/" ><span>HOOLESU</span></a>
-      </nav>
-      <nav>
-        <a href="/">Home</a>
-      </nav>
+      <NavLink to="/">Home</NavLink>{" "}
+      <NavLink to="/play">Play</NavLink>{" "}
+      <NavLink to="/account">Account</NavLink>
+      {/* Login/Logout will live here as a popup */}
     </nav>
   </>
 );
