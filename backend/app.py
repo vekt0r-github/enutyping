@@ -1,10 +1,11 @@
 import os
 import requests
-from flask import Flask, redirect, request, url_for, jsonify, session
+from flask import Flask, redirect, request, url_for, session
 
 import oauth
 from database import db_session
 from models import User
+from schemas import user_schema
 from api import api
 
 app = Flask(__name__)
@@ -22,16 +23,18 @@ def index():
         return f'Hello! You are logged in as {user} with id: {user_id}'
     return '<p>You are not logged in. Log in <a href="/login">here</a></p>'
 
-@app.route('/login/', methods = ['GET'])
+# TODO, api start probably nice
+
+@app.route('/api/login/', methods = ['GET'])
 def login():
     auth = oauth.OAuth()
     return redirect(auth.request_url())
 
-@app.route('/unauthorized/')
+@app.route('/api/unauthorized/')
 def unauthorized():
     return 'wtf are you doing here?'
 
-@app.route('/login/authorized/')
+@app.route('/api/login/authorized/')
 def authorized():
     state = request.args.get('state')
     if state == oauth.OAUTH_SECRET_KEY:
@@ -57,8 +60,7 @@ def authorized():
         session['user'] = gh_name
         session['user_id'] = gh_uid
 
-        get_or_create_user(gh_uid, gh_name)
-
-        return redirect('/')
+        user = get_or_create_user(gh_uid, gh_name)
+        return user_schema.dump(user)
     else:
         return redirect('/unauthorized/')
