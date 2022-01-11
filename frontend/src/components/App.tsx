@@ -18,13 +18,13 @@ type Props = {};
 const App = ({} : Props) => {
   const [user, setUser] = useState<User>();
 
-  // useEffect(() => {
-  //   get("/api/whoami").then((user) => {
-  //     if (user) {
-  //       setUser(user);
-  //     }
-  //   });
-  // });
+  useEffect(() => {
+    get("/api/whoami").then((user) => {
+      if (user) {
+        setUser(user);
+      }
+    });
+  }, []);
 
   const handleLogin = (code: string|null, state: string|null) => {
     post("/api/login/authorize", { code, state }).then((user) => {

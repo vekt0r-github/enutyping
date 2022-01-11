@@ -16,19 +16,17 @@ app.register_blueprint(api, url_prefix='/api')
 def shutdown_session(exception=None):
     db_session.remove()
 
-@app.route('/')
-def index():
-    user, user_id = session.get('user'), session.get('user_id')
-    if user and user_id:
-        return f'Hello! You are logged in as {user} with id: {user_id}'
-    return '<p>You are not logged in. Log in <a href="/login">here</a></p>'
-
 # TODO, api start probably nice
 
 @app.route('/api/login/', methods = ['GET'])
 def login():
     auth = oauth.OAuth()
     return redirect(auth.request_url())
+
+@app.route('/api/logout/', methods = ['POST'])
+def logout():
+    session.pop('user', None)
+    return redirect('/')
 
 @app.route('/api/unauthorized/')
 def unauthorized():
@@ -58,10 +56,18 @@ def authorized():
         gh_name = gh_user['login']
         gh_uid = gh_user['id']
 
-        session['user'] = gh_name
-        session['user_id'] = gh_uid
-
         user = get_or_create_user(gh_uid, gh_name)
-        return user_schema.dump(user)
+        user_object = user_schema.dump(user)
+        session['user'] = user_object
+        return user_object
     else:
         return redirect('/api/unauthorized/')
+
+@app.route('/api/whoami', methods = ['GET'])
+def whoami():
+    user = session.get('user')
+    if not user:
+        # Not logged in
+        return {}
+    return user
+
