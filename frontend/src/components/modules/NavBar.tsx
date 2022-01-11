@@ -16,16 +16,16 @@ const Link = styled(NavLink)`
   margin: var(--s);
 
   // figure out how to use utility styles
-  color: var(--link);
+  color: var(--clr-link);
   text-decoration: none;
   cursor: pointer;
   &:hover {
-    color: var(--link-hover);
+    color: var(--clr-link-hover);
   }
 `;
 
 const Nav = styled.nav`
-  background-color: #eee;
+  background-color: var(--clr-primary-light);
   display: flex;
 `;
 

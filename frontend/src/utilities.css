@@ -18,12 +18,16 @@
 @import url("https://fonts.googleapis.com/css?family=Roboto&display=swap");
 
 :root {
-  --link: #396dff;
-  --link-hover: #6987db;
-  --darkgrey: #d4d4d4;
-  --medgrey: #e0e0e0;
-  --grey: #f7f7f7;
-  --white: #fff;
+  /* yoru ni kakeru colors */
+  --clr-primary-dim: #0e6183;
+  --clr-primary: #4d8fa8;
+  --clr-primary-light: #a1c3d1;
+  --clr-secondary-dim: #1e8897;
+  --clr-secondary: #58aeb9;
+  --clr-accent: #be3234;
+  --clr-neutral: #e2d1c8;
+  --clr-link: #123bb6;
+  --clr-link-hover: #7991da;
 
   --xs: 4px;
   --s: 8px;
@@ -36,6 +40,7 @@ body {
   padding: 0;
   font-family: "Roboto", sans-serif;
   font-weight: 300;
+  background-color: var(--clr-neutral);
 }
 
 .u-link {
