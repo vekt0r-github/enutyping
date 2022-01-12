@@ -4,7 +4,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NavBar from "@/components/modules/NavBar";
 import Home from "@/components/pages/Home";
 import Login from "@/components/pages/Login";
-import Register from "@/components/pages/Register";
 import NotFound from "@/components/pages/NotFound";
 
 import { get, post } from "@/utils/functions";
@@ -63,9 +62,6 @@ const App = ({} : Props) => {
                 handleLogin={handleLogin}
                 user={user}
               />
-            }/>
-            <Route path="/register" element={
-              <Register />
             }/>
             {/* <Route path="/play" element={
               <SongSelect user={user} />

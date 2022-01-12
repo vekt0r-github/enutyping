@@ -63,8 +63,7 @@ const NavBar = ({ handleLogout, user } : Props) => (
           <Button as="span" onClick={handleLogout}>Logout</Button>
         </> :
         <>
-          <Button href="/login">Login</Button>
-          <InvertedButton href="/register">Register</InvertedButton>
+          <InvertedButton href="/login">Login</InvertedButton>
         </>}
     </div>
   </NavContainer>
