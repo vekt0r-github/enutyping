@@ -13,10 +13,8 @@
 * do rigorous styling. You shoud not need to change this file
 * much after initial creation.
 */
-
-/* TODO: REPLACE WITH YOUR OWN FONT! */
-@import url("https://fonts.googleapis.com/css?family=Roboto&display=swap");
-
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400&display=swap");
 :root {
   /* yoru ni kakeru colors */
   --clr-primary-dim: #0e6183;
@@ -29,6 +27,9 @@
   --clr-link: #123bb6;
   --clr-link-hover: #7991da;
 
+  --ff-heading: "Noto Serif";
+  --ff-body: "Noto Sans";
+
   --xs: 4px;
   --s: 8px;
   --m: 16px;
@@ -38,9 +39,12 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: "Roboto", sans-serif;
-  font-weight: 300;
+  font-family: var(--ff-body);
   background-color: var(--clr-neutral);
+}
+
+h1, h2, h3 {
+  font-family: var(--ff-heading);
 }
 
 .u-link {
