@@ -13,6 +13,13 @@ module.exports = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    modules: [
+        'node_modules',
+        path.resolve(__dirname + '/src')
+    ],
+    alias: {
+        '@': path.resolve(__dirname + '/src')
+    },
   },
   devtool: "eval-source-map", // TODO: This might need to change, we also might want something different for prod
   module: {

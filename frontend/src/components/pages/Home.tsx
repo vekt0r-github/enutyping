@@ -1,29 +1,15 @@
 import React, { Component } from "react";
 import { Navigate } from "react-router-dom";
 
-import { User } from "../App";
+import { User } from "../../utils/types";
 
 import styled, { css } from 'styled-components';
-import '../../utilities.css'
+import '../../utils/styles.css';
+import { MainBox, SubBox } from '../../utils/styles';
 
 type Props = {
   user: User,
 };
-
-const Box = styled.div`
-  padding: var(--s);
-  border-radius: var(--s);
-`;
-
-const MainBox = styled(Box)`
-  background-color: var(--clr-primary);
-  max-width: 300px;
-`;
-
-const SubBox = styled(Box)`
-  background-color: var(--clr-secondary);
-  width: fit-content;
-`;
 
 const Home = ({ user } : Props) => {
   if (!user) {

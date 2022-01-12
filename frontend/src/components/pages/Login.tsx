@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, useSearchParams } from "react-router-dom";
 
-import { User } from "../App";
+import { User } from "../../utils/types";
 
 type Props = {
   handleLogin: (code: string|null, state: string|null) => void,

@@ -1,10 +1,11 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-import { User } from "../App";
+import { User } from "../../utils/types";
 
 import styled, { css } from 'styled-components';
-import '../../utilities.css'
+import '../../utils/styles.css';
+import { Spacer } from '../../utils/styles';
 
 type Props = {
   handleLogout: () => void,
@@ -27,10 +28,6 @@ const Link = styled(NavLink)`
 const Nav = styled.nav`
   background-color: var(--clr-primary-light);
   display: flex;
-`;
-
-const Spacer = styled.div`
-  flex-grow: 1;
 `;
 
 const NavBar = ({ handleLogout, user } : Props) => (

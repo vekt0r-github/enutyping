@@ -6,12 +6,8 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
-import { get, post } from "../utilities";
-
-export type User = { // example
-  id: number;
-  name: string;
-} | undefined;
+import { get, post } from "../utils/functions";
+import { User } from "../utils/types";
 
 type Props = {};
 
