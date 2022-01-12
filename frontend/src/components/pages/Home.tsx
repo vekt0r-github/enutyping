@@ -1,5 +1,4 @@
-import React, { Component } from "react";
-import { Navigate } from "react-router-dom";
+import React from "react";
 
 import { User } from "@/utils/types";
 
@@ -12,9 +11,6 @@ type Props = {
 };
 
 const Home = ({ user } : Props) => {
-  // if (!user) { // include this in every restricted page
-  //   return <Navigate to='/login' replace={true} />
-  // }
   return (
     <>
       <h1>Home</h1>

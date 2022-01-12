@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NavBar from "@/components/modules/NavBar";
 import Home from "@/components/pages/Home";
 import Login from "@/components/pages/Login";
+import SongSelect from "@/components/pages/SongSelect";
 import NotFound from "@/components/pages/NotFound";
 
 import { get, post } from "@/utils/functions";
@@ -17,6 +18,7 @@ type Props = {};
 const Content = styled.div`
   padding: var(--s); /* if you want */
   margin: 0;
+  box-sizing: border-box;
   width: 100%;
   height: calc(100% - var(--content-offset));
   position: absolute;
@@ -63,10 +65,10 @@ const App = ({} : Props) => {
                 user={user}
               />
             }/>
-            {/* <Route path="/play" element={
+            <Route path="/play" element={
               <SongSelect user={user} />
             }/>
-            <Route path="/play/:mapId" element={
+            {/* <Route path="/play/:mapId" element={
               <Game user={user} />
             }/>
             <Route path="/user/:userId" element={
