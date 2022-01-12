@@ -33,9 +33,9 @@ const NavBar = ({ handleLogout, user } : Props) => (
   <NavContainer>
     <div>
       Logo
-      <NavBarLink as="NavLink" to="/">Home</NavBarLink>
-      <NavBarLink as="NavLink" to="/play">Play</NavBarLink>
-      <NavBarLink as="NavLink" to="/account">Account</NavBarLink>
+      <NavBarLink as={NavLink} to="/">Home</NavBarLink>
+      <NavBarLink as={NavLink} to="/play">Play</NavBarLink>
+      <NavBarLink as={NavLink} to="/account">Account</NavBarLink>
     </div>
     <Spacer />
     <div>
@@ -44,7 +44,7 @@ const NavBar = ({ handleLogout, user } : Props) => (
           <span>Welcome, {user.name}!</span>
           <NavBarLink as="span" onClick={handleLogout}>Logout</NavBarLink>
         </>
-        : <AccentLink to="/login">Login</AccentLink>}
+        : <AccentLink href="/login">Login</AccentLink>}
     </div>
   </NavContainer>
 );
