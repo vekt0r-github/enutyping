@@ -1,9 +1,9 @@
-from flask import Blueprint, abort, request
+from flask import Blueprint, abort, request, jsonify
 from marshmallow import ValidationError
 from operator import itemgetter
 
 from models import Beatmap, Score, User
-from schemas import beatmap_schema, score_schema, scores_schema, user_schema
+from schemas import beatmap_schema, beatmaps_schema, score_schema, scores_schema, user_schema
 from database import db_session
 
 api = Blueprint('api', __name__)
@@ -24,6 +24,12 @@ def get_beatmap_scores(beatmap_id):
     beatmap_result = beatmap_schema.dump(beatmap)
     scores_result = scores_schema.dump(beatmap.scores)
     return { **beatmap_result, 'scores' : scores_result }
+
+@api.route('/beatmaplist')
+def get_beatmap_list():
+    search_query = request.args.get('search', '')
+    title_result = Beatmap.query.filter(Beatmap.song_name.ilike('%' + search_query + '%')).all()
+    return jsonify(beatmaps_schema.dump(title_result))
 
 @api.route('/scores', methods=['POST'])
 def new_score():

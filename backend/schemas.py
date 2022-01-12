@@ -15,6 +15,7 @@ class BeatmapSchema(Schema):
     # scores = fields.Nested(scores_schema)
 
 beatmap_schema = BeatmapSchema()
+beatmaps_schema = BeatmapSchema(many=True)
 
 class UserSchema(Schema):
     id = fields.Int(dump_only=True)
