@@ -10,7 +10,19 @@ import NotFound from "@/components/pages/NotFound";
 import { get, post } from "@/utils/functions";
 import { User } from "@/utils/types";
 
+import styled, { css } from 'styled-components';
+import '@/utils/styles.css';
+
 type Props = {};
+
+const Content = styled.div`
+  padding: var(--s); /* if you want */
+  margin: 0;
+  width: 100%;
+  height: calc(100% - var(--content-offset));
+  position: absolute;
+  top: var(--content-offset);
+`;
 
 const App = ({} : Props) => {
   const [user, setUser] = useState<User>();
@@ -41,35 +53,37 @@ const App = ({} : Props) => {
           handleLogout={handleLogout}
           user={user}
         />
-        <Routes>
-          <Route path="/" element={
-            <Home user={user} />
-          }/>
-          <Route path="/login" element={
-            <Login 
-              handleLogin={handleLogin}
-              user={user}
-            />
-          }/>
-          <Route path="/register" element={
-            <Register />
-          }/>
-          {/* <Route path="/play" element={
-            <SongSelect user={user} />
-          }/>
-          <Route path="/play/:mapId" element={
-            <Game user={user} />
-          }/>
-          <Route path="/user/:userId" element={
-            <UserPage user={user} />
-          }/>
-          <Route path="/account" element={
-            <Account user={user} />
-          }/> */}
-          <Route path="*" element={
-            <NotFound />
-          }/>
-        </Routes>
+        <Content>
+          <Routes>
+            <Route path="/" element={
+              <Home user={user} />
+            }/>
+            <Route path="/login" element={
+              <Login 
+                handleLogin={handleLogin}
+                user={user}
+              />
+            }/>
+            <Route path="/register" element={
+              <Register />
+            }/>
+            {/* <Route path="/play" element={
+              <SongSelect user={user} />
+            }/>
+            <Route path="/play/:mapId" element={
+              <Game user={user} />
+            }/>
+            <Route path="/user/:userId" element={
+              <UserPage user={user} />
+            }/>
+            <Route path="/account" element={
+              <Account user={user} />
+            }/> */}
+            <Route path="*" element={
+              <NotFound />
+            }/>
+          </Routes>
+        </Content>
       </BrowserRouter>
     </>
   );

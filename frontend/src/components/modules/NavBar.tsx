@@ -44,6 +44,7 @@ const NavContainer = styled.nav`
   background-color: var(--clr-primary-light);
   display: flex;
   padding: var(--m) 0;
+  margin: 0;
 `;
 
 const NavBar = ({ handleLogout, user } : Props) => (
