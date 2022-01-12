@@ -42,7 +42,7 @@ const SongSelect = ({ user } : Props) => {
           <p>{map.artist} - {map.title}</p>
           <p>ID: {map.id}</p>
           <p>Source: {map.source}</p>
-          <Link href={`/play/${map.id}`}>osu!</Link>
+          <Link to={`/play/${map.id}`}>osu!</Link>
         </MainBox>
       )}
     </>

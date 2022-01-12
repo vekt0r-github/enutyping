@@ -8,8 +8,7 @@ export type Beatmap = { // example
   artist: string;
   title: string;
   source: string;
+  content?: string;
 };
-
-// BeatmapData for the content
 
 // Score for a score

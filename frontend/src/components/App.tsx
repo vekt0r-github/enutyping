@@ -5,6 +5,7 @@ import NavBar from "@/components/modules/NavBar";
 import Home from "@/components/pages/Home";
 import Login from "@/components/pages/Login";
 import SongSelect from "@/components/pages/SongSelect";
+import Game from "@/components/pages/Game";
 import NotFound from "@/components/pages/NotFound";
 
 import { get, post } from "@/utils/functions";
@@ -68,10 +69,10 @@ const App = ({} : Props) => {
             <Route path="/play" element={
               <SongSelect user={user} />
             }/>
-            {/* <Route path="/play/:mapId" element={
+            <Route path="/play/:mapId" element={
               <Game user={user} />
             }/>
-            <Route path="/user/:userId" element={
+            {/* <Route path="/user/:userId" element={
               <UserPage user={user} />
             }/>
             <Route path="/account" element={
