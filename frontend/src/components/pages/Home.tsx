@@ -12,13 +12,16 @@ type Props = {
 };
 
 const Home = ({ user } : Props) => {
-  if (!user) {
-    return <Navigate to='/login' replace={true} />
-  }
+  // if (!user) { // include this in every restricted page
+  //   return <Navigate to='/login' replace={true} />
+  // }
   return (
     <>
       <h1>Home</h1>
-      <p>You are logged in as {user.name} with id {user.id}</p>
+      {user ?
+        <p>You are logged in as {user.name} with id {user.id}</p>
+        :
+        <p>You are not logged in.</p>}
       <MainBox>
         HOOLESU
         <SubBox>

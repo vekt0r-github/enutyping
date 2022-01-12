@@ -22,10 +22,11 @@
   --clr-primary-light: #a1c3d1;
   --clr-secondary-dim: #1e8897;
   --clr-secondary: #58aeb9;
-  --clr-accent: #be3234;
-  --clr-neutral: #e2d1c8;
+  --clr-accent: #d82d30;
+  --clr-neutral: #e7dfdb;
   --clr-link: #123bb6;
   --clr-link-hover: #7991da;
+  --clr-highlight: #f8f7b0bb;
 
   --ff-heading: "Noto Serif";
   --ff-body: "Noto Sans";
@@ -45,14 +46,4 @@ body {
 
 h1, h2, h3 {
   font-family: var(--ff-heading);
-}
-
-.u-link {
-  color: var(--primary);
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.u-link:hover {
-  color: var(--primary--dim);
 }

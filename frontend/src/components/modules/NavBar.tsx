@@ -13,20 +13,37 @@ type Props = {
 }
 
 const NavBarLink = styled(Link)`
-  font-size: 30px;
-  padding: 0 var(--xs);
-  margin: var(--xs);
+  font-size: 24px;
+  padding: var(--m);
+  &.active {
+    background-color: var(--clr-primary-dim);
+    color: white;
+  }
+  &:not(.active):hover {
+    color: var(--clr-link);
+    background-color: var(--clr-highlight);
+  }
 `;
 
-const AccentLink = styled(NavBarLink)`
-  background-color: var(--clr-accent);
-  border-radius: var(--s);
+const Button = styled(NavBarLink)`
+  border: 3px solid var(--clr-link);
+  border-radius: var(--xs);
+  padding: var(--xs) var(--m);
+  margin: var(--s);
+`;
+
+const InvertedButton = styled(Button)`
+  background-color: var(--clr-link);
+  color: white;
+  &:hover {
+    border-color: #0000;
+  }
 `;
 
 const NavContainer = styled.nav`
   background-color: var(--clr-primary-light);
   display: flex;
-  padding: var(--xs);
+  padding: var(--m) 0;
 `;
 
 const NavBar = ({ handleLogout, user } : Props) => (
@@ -42,9 +59,12 @@ const NavBar = ({ handleLogout, user } : Props) => (
       {user ? 
         <>
           <span>Welcome, {user.name}!</span>
-          <NavBarLink as="span" onClick={handleLogout}>Logout</NavBarLink>
-        </>
-        : <AccentLink href="/login">Login</AccentLink>}
+          <Button as="span" onClick={handleLogout}>Logout</Button>
+        </> :
+        <>
+          <Button href="/login">Login</Button>
+          <InvertedButton href="/register">Register</InvertedButton>
+        </>}
     </div>
   </NavContainer>
 );
