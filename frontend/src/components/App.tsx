@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import NavBar from "./modules/NavBar";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import NotFound from "./pages/NotFound";
+import NavBar from "@/components/modules/NavBar";
+import Home from "@/components/pages/Home";
+import Login from "@/components/pages/Login";
+import NotFound from "@/components/pages/NotFound";
 
-import { get, post } from "../utils/functions";
-import { User } from "../utils/types";
+import { get, post } from "@/utils/functions";
+import { User } from "@/utils/types";
 
 type Props = {};
 

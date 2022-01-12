@@ -1,11 +1,11 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-import { User } from "../../utils/types";
+import { User } from "@/utils/types";
 
 import styled, { css } from 'styled-components';
-import '../../utils/styles.css';
-import { Link, Spacer } from '../../utils/styles';
+import '@/utils/styles.css';
+import { Link, Spacer } from '@/utils/styles';
 
 type Props = {
   handleLogout: () => void,
@@ -21,7 +21,7 @@ const NavBarLink = styled(Link)`
 const AccentLink = styled(NavBarLink)`
   background-color: var(--clr-accent);
   border-radius: var(--s);
-`
+`;
 
 const NavContainer = styled.nav`
   background-color: var(--clr-primary-light);

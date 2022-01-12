@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import { Navigate } from "react-router-dom";
 
-import { User } from "../../utils/types";
+import { User } from "@/utils/types";
 
 import styled, { css } from 'styled-components';
-import '../../utils/styles.css';
-import { MainBox, SubBox } from '../../utils/styles';
+import '@/utils/styles.css';
+import { MainBox, SubBox } from '@/utils/styles';
 
 type Props = {
   user: User,
