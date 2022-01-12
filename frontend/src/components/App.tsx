@@ -16,7 +16,7 @@ const App = ({} : Props) => {
 
   useEffect(() => {
     get("/api/whoami").then((user) => {
-      if (user) {
+      if (user && user.id) {
         setUser(user);
       }
     });

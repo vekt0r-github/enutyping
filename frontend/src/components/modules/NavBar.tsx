@@ -5,49 +5,48 @@ import { User } from "../../utils/types";
 
 import styled, { css } from 'styled-components';
 import '../../utils/styles.css';
-import { Spacer } from '../../utils/styles';
+import { Link, Spacer } from '../../utils/styles';
 
 type Props = {
   handleLogout: () => void,
   user: User,
 }
 
-const Link = styled(NavLink)`
+const NavBarLink = styled(Link)`
   font-size: 30px;
-  margin: var(--s);
-
-  // figure out how to use utility styles
-  color: var(--clr-link);
-  text-decoration: none;
-  cursor: pointer;
-  &:hover {
-    color: var(--clr-link-hover);
-  }
+  padding: 0 var(--xs);
+  margin: var(--xs);
 `;
 
-const Nav = styled.nav`
+const AccentLink = styled(NavBarLink)`
+  background-color: var(--clr-accent);
+  border-radius: var(--s);
+`
+
+const NavContainer = styled.nav`
   background-color: var(--clr-primary-light);
   display: flex;
+  padding: var(--xs);
 `;
 
 const NavBar = ({ handleLogout, user } : Props) => (
-  <Nav>
+  <NavContainer>
     <div>
       Logo
-      <Link to="/">Home</Link>
-      <Link to="/play">Play</Link>
-      <Link to="/account">Account</Link>
+      <NavBarLink as="NavLink" to="/">Home</NavBarLink>
+      <NavBarLink as="NavLink" to="/play">Play</NavBarLink>
+      <NavBarLink as="NavLink" to="/account">Account</NavBarLink>
     </div>
     <Spacer />
     <div>
       {user ? 
         <>
           <span>Welcome, {user.name}!</span>
-          <Link as="span" onClick={handleLogout}>Logout</Link>
+          <NavBarLink as="span" onClick={handleLogout}>Logout</NavBarLink>
         </>
-        : <Link to="/login">Login</Link>}
+        : <AccentLink to="/login">Login</AccentLink>}
     </div>
-  </Nav>
+  </NavContainer>
 );
 
 export default NavBar;
