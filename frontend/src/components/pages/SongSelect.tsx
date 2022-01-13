@@ -27,18 +27,11 @@ const SongSelect = ({ user } : Props) => {
       }
     });
   }, []);
-
-  const testMaps = [{ // testing
-    id: 727,
-    artist: "Nanahira",
-    title: "Nanahira singing from the window to a fucking van",
-    source: "https://www.youtube.com/watch?v=9USxPiJzdv0",
-  }];
   
   return (
     <>
       <h1>Song Select</h1>
-      {testMaps?.map((map) => 
+      {maps?.map((map) => 
         <MainBox>
           <p>{map.artist} - {map.title}</p>
           <p>ID: {map.id}</p>

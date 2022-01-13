@@ -22,7 +22,6 @@ const PageContainer = styled.div`
 
 const Game = ({ user } : Props) => {
   if (!user) { // include this in every restricted page
-    console.log(user)
     return <Navigate to='/login' replace={true} />
   }
 
