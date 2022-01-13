@@ -22,3 +22,4 @@ class UserSchema(Schema):
     name = fields.Str()
 
 user_schema = UserSchema()
+users_schema = UserSchema(many=True)

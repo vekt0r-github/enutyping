@@ -1,12 +1,22 @@
-from flask import Blueprint, abort, request, jsonify
+from flask import Blueprint, abort, request, session
+from functools import wraps
 from marshmallow import ValidationError
 from operator import itemgetter
 
 from models import Beatmap, Score, User
-from schemas import beatmap_schema, beatmaps_schema, score_schema, scores_schema, user_schema
+from schemas import beatmap_schema, beatmaps_schema, score_schema, scores_schema, user_schema, users_schema
 from database import db_session
 
 api = Blueprint('api', __name__)
+
+def login_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwds):
+        user = session.get('user')
+        if not user:
+            return 'You are not logged in', 401
+        return f(*args, **kwds)
+    return wrapper
 
 @api.route('/users/<int:user_id>', methods=['GET'])
 def get_user(user_id):
@@ -15,6 +25,12 @@ def get_user(user_id):
         abort(404, description = 'User not found')
     user_result = user_schema.dump(user)
     return user_result
+
+@api.route('/users/', methods=['GET'])
+def get_users():
+    users = User.query.all()
+    res = users_schema.dump(users)
+    return { 'users': res }
 
 @api.route('/beatmaps/<int:beatmap_id>', methods=['GET'])
 def get_beatmap_scores(beatmap_id):
@@ -29,9 +45,11 @@ def get_beatmap_scores(beatmap_id):
 def get_beatmap_list():
     search_query = request.args.get('search', '')
     title_result = Beatmap.query.filter(Beatmap.song_name.ilike('%' + search_query + '%')).all()
-    return jsonify(beatmaps_schema.dump(title_result))
+    # https://softwareengineering.stackexchange.com/questions/286293/whats-the-best-way-to-return-an-array-as-a-response-in-a-restful-api
+    return { 'beatmaps': beatmaps_schema.dump(title_result) }
 
 @api.route('/scores', methods=['POST'])
+@login_required
 def new_score():
     # XXX: UID probably is in session or something, so we can't fake for someone else
     # TODO: Probably need protection lol fake scores
