@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { User, Beatmap } from "@/utils/types";
+
+import GameVideo from "@/components/modules/GameVideo";
 
 import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
@@ -17,7 +19,13 @@ const GameContainer = styled.div`
 `;
 
 const GameArea = ({ user, beatmap } : Props) => {
-  return <GameContainer />
+  const [starting, setStarting] = useState<boolean>(false);
+
+  return (
+    <GameContainer onClick={() => setStarting(true)}>
+      <GameVideo source={beatmap.source} starting={starting} />
+    </GameContainer>
+  );
 }
 
 export default GameArea;

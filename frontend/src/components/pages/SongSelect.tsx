@@ -32,7 +32,7 @@ const SongSelect = ({ user } : Props) => {
     <>
       <h1>Song Select</h1>
       {maps?.map((map) => 
-        <MainBox>
+        <MainBox key={map.id}>
           <p>{map.artist} - {map.title}</p>
           <p>ID: {map.id}</p>
           <p>Source: {map.source}</p>
