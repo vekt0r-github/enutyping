@@ -41,10 +41,10 @@ def get_beatmap_scores(beatmap_id):
     scores_result = scores_schema.dump(beatmap.scores)
     return { **beatmap_result, 'scores' : scores_result }
 
-@api.route('/beatmaplist')
+@api.route('/beatmaps')
 def get_beatmap_list():
     search_query = request.args.get('search', '')
-    title_result = Beatmap.query.filter(Beatmap.song_name.ilike('%' + search_query + '%')).all()
+    title_result = Beatmap.query.filter(Beatmap.title.ilike('%' + search_query + '%')).all()
     # https://softwareengineering.stackexchange.com/questions/286293/whats-the-best-way-to-return-an-array-as-a-response-in-a-restful-api
     return { 'beatmaps': beatmaps_schema.dump(title_result) }
 

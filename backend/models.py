@@ -16,11 +16,15 @@ class User(Base):
 class Beatmap(Base):
     __tablename__ = 'beatmaps'
     id = Column(Integer, primary_key=True)
-    song_name = Column(String(50))
+    artist = Column(String(50))
+    title = Column(String(50))
+    source = Column(String(100))
     scores = relationship('Score', back_populates='beatmap')
 
-    def __init__(self, song_name, id = None):
-        self.song_name = song_name
+    def __init__(self, artist, title, source, id = None):
+        self.artist = artist
+        self.title = title
+        self.source = source
         self.id = id
 
 class Score(Base):
@@ -43,13 +47,15 @@ def init_db():
     from database import db_session, engine
 
     Base.metadata.create_all(bind=engine)
-    
+
     objects = [
         User(id=1234, name='ppfarmer'),
         User(id=4321, name='songenjoyer'),
-        Beatmap(id=1, song_name='banger'),
-        Score(user_id=1234, beatmap_id=1, score=727),
-        Score(user_id=4321, beatmap_id=1, score=72727),
+        Beatmap(id=727, artist='Nanahira', \
+                        title='Nanahira singing from the window to a fucking van', \
+                        source='https://www.youtube.com/watch?v=9USxPiJzdv0'),
+        Score(user_id=1234, beatmap_id=727, score=727),
+        Score(user_id=4321, beatmap_id=727, score=72727),
     ]
 
     db_session.bulk_save_objects(objects)

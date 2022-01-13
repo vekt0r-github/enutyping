@@ -11,7 +11,9 @@ scores_schema = ScoreSchema(many=True)
 
 class BeatmapSchema(Schema):
     id = fields.Int(dump_only=True)
-    song_name = fields.Str()
+    artist = fields.Str()
+    title = fields.Str()
+    source = fields.Str()
     # scores = fields.Nested(scores_schema)
 
 beatmap_schema = BeatmapSchema()

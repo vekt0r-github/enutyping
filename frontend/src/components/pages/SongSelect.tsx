@@ -20,7 +20,8 @@ const SongSelect = ({ user } : Props) => {
   const [maps, setMaps] = useState<[Beatmap]>();
   
   useEffect(() => {
-    get("/api/beatmaps").then((beatmaps) => {
+    get("/api/beatmaps").then((res) => {
+      const beatmaps = res.beatmaps;
       if (beatmaps && beatmaps.length) {
         setMaps(beatmaps);
       }
