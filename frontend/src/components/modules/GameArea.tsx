@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { User, Beatmap } from "@/utils/types";
 
 import GameVideo from "@/components/modules/GameVideo";
 import Volume from "@/components/modules/Volume";
 import ProgressBar from "@/components/modules/ProgressBar";
-
+import GameLine from "@/components/modules/GameLine";
 import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
 import {} from '@/utils/styles';
@@ -30,6 +30,27 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(Infinity);
 
+  const hits = useRef(0);
+  const misses = useRef(0);
+
+  const getAcc = () => {
+    const hitCount = hits.current;
+    const missCount = misses.current;
+    if(hitCount + missCount == 0) {
+      return 100;
+    }
+    return 100 * hitCount / (hitCount + missCount);
+  }
+
+  const keyCallback = (hit: boolean) => {
+    if(hit) {
+      hits.current++;
+    }
+    else {
+      misses.current++;
+    }
+  }
+
   return (
     <GameContainer>
       <GameVideo
@@ -47,6 +68,11 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
       <ProgressBar
         currentTime={currentTime}
         duration={duration}
+      />
+      <GameLine
+        line={"asodfihasdpfoi"}
+        keyCallback={keyCallback}
+        getAcc={getAcc}
       />
     </GameContainer>
   );
