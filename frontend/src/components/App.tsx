@@ -28,6 +28,7 @@ const Content = styled.div`
 
 const App = ({} : Props) => {
   const [user, setUser] = useState<User>();
+  const [volume, setVolume] = useState<number>(1.0);
 
   useEffect(() => {
     get("/api/whoami").then((user) => {
@@ -67,10 +68,18 @@ const App = ({} : Props) => {
               />
             }/>
             <Route path="/play" element={
-              <SongSelect user={user} />
+              <SongSelect
+                user={user}
+                volume={volume}
+                setVolume={setVolume}
+              />
             }/>
             <Route path="/play/:mapId" element={
-              <Game user={user} />
+              <Game
+                user={user}
+                volume={volume}
+                setVolume={setVolume}
+              />
             }/>
             {/* <Route path="/user/:userId" element={
               <UserPage user={user} />

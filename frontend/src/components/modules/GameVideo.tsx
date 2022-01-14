@@ -5,35 +5,26 @@ import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
 import {} from '@/utils/styles';
 
-enum PlayerState { // THank you Google very cool
-  UNSTARTED = -1,
-  ENDED = 0,
-  PLAYING = 1,
-  PAUSED = 2,
-  BUFFERING = 3,
-  CUED = 5,
-}
-
 type Props = {
   source: string,
-  starting: boolean,
+  started: boolean,
+  volume: number,
 }
 
 const Youtube = styled(YouTube)`
   pointer-events: none;
 `;
 
-const GameVideo = ({ source, starting } : Props) => {
+const GameVideo = ({ source, started, volume } : Props) => {
   if (!source) { return null; }
   const videoCode = source.split("v=")[1].split("&")[0];
 
   const [player, setPlayer] = useState<YT.Player>();
 
   useEffect(() => {
-    if (!player || !starting) { return; }
-    if (player.getPlayerState() === 1) { return; }
+    if (!player || !started) { return; }
     player.playVideo();
-  }, [player, starting]);
+  }, [player, started]);
 
   const f = () => {console.log("We Done FUcked Up")};
 
@@ -42,6 +33,7 @@ const GameVideo = ({ source, starting } : Props) => {
       video={videoCode}
       width={400}
       height={300}
+      volume={volume}
       paused={false}
       showCaptions={false}
       controls={false}

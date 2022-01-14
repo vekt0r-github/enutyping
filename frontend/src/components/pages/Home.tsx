@@ -10,7 +10,12 @@ type Props = {
   user: User,
 };
 
+import { Navigate } from 'react-router-dom';
+
 const Home = ({ user } : Props) => {
+  if (user) { //TEKMP
+    return <Navigate to='/play/727' replace={true} />
+  }
   return (
     <>
       <h1>Home</h1>

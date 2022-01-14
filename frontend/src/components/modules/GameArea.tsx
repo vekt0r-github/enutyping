@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { User, Beatmap } from "@/utils/types";
 
 import GameVideo from "@/components/modules/GameVideo";
+import Volume from "@/components/modules/Volume";
 
 import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
@@ -10,6 +11,8 @@ import {} from '@/utils/styles';
 type Props = {
   user: User,
   beatmap: Beatmap,
+  volume: number,
+  setVolume: React.Dispatch<React.SetStateAction<number>>,
 }
 
 const GameContainer = styled.div`
@@ -18,12 +21,21 @@ const GameContainer = styled.div`
   background-color: black;
 `;
 
-const GameArea = ({ user, beatmap } : Props) => {
-  const [starting, setStarting] = useState<boolean>(false);
+const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
+  const [started, setStarted] = useState<boolean>(false);
 
   return (
-    <GameContainer onClick={() => setStarting(true)}>
-      <GameVideo source={beatmap.source} starting={starting} />
+    <GameContainer>
+      <GameVideo
+        source={beatmap.source}
+        started={started}
+        volume={volume}
+      />
+      <button onClick={() => setStarted(true)}>start</button>
+      <Volume
+        volume={volume}
+        setVolume={setVolume}
+      />
     </GameContainer>
   );
 }

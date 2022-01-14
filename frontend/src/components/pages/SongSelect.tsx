@@ -10,9 +10,11 @@ import { MainBox, Link } from '@/utils/styles';
 
 type Props = {
   user: User,
+  volume: number,
+  setVolume: React.Dispatch<React.SetStateAction<number>>,
 };
 
-const SongSelect = ({ user } : Props) => {
+const SongSelect = ({ user, volume, setVolume } : Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />
   }
