@@ -3,6 +3,7 @@ import { User, Beatmap } from "@/utils/types";
 
 import GameVideo from "@/components/modules/GameVideo";
 import Volume from "@/components/modules/Volume";
+import ProgressBar from "@/components/modules/ProgressBar";
 
 import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
@@ -24,17 +25,28 @@ const GameContainer = styled.div`
 const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
   const [started, setStarted] = useState<boolean>(false);
 
+  // iframe API seems to return in seconds
+  // I think currentTime is floating point but not duration
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(Infinity);
+
   return (
     <GameContainer>
       <GameVideo
         source={beatmap.source}
         started={started}
         volume={volume}
+        setCurrentTime={setCurrentTime}
+        setDuration={setDuration}
       />
       <button onClick={() => setStarted(true)}>start</button>
       <Volume
         volume={volume}
         setVolume={setVolume}
+      />
+      <ProgressBar
+        currentTime={currentTime}
+        duration={duration}
       />
     </GameContainer>
   );

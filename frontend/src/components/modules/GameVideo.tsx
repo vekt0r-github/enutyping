@@ -9,13 +9,15 @@ type Props = {
   source: string,
   started: boolean,
   volume: number,
+  setCurrentTime: React.Dispatch<React.SetStateAction<number>>,
+  setDuration: React.Dispatch<React.SetStateAction<number>>,
 }
 
 const Youtube = styled(YouTube)`
   pointer-events: none;
 `;
 
-const GameVideo = ({ source, started, volume } : Props) => {
+const GameVideo = ({ source, started, volume, setCurrentTime, setDuration } : Props) => {
   if (!source) { return null; }
   const videoCode = source.split("v=")[1].split("&")[0];
 
@@ -24,7 +26,17 @@ const GameVideo = ({ source, started, volume } : Props) => {
   useEffect(() => {
     if (!player || !started) { return; }
     player.playVideo();
+    setInterval(() => {
+      setCurrentTime(player.getCurrentTime());
+    }, 250);
   }, [player, started]);
+
+  useEffect(() => {
+    if (!player) {
+      return;
+    }
+    setDuration(player.getDuration());
+  }, [player]);
 
   const f = () => {console.log("We Done FUcked Up")};
 
