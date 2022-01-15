@@ -93,8 +93,12 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
     });
   })();
 
-  const startGame = () => {
+  const prepareStartGame = () => {
     if (gameStartTime) { return; }
+    setGameStartTime(727); // let them know we've started
+  };
+
+  const startGame = () => {
     setGameStartTime(new Date().getTime());
     lines.forEach((line) => {
       // if this loop is too slow, save original time and reference
@@ -130,7 +134,7 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
   return (
     <GameContainer>
       <TopHalf>
-        <button onClick={startGame}>start</button>
+        <button onClick={prepareStartGame}>start</button>
         <Volume
           volume={volume}
           setVolume={setVolume}
@@ -148,6 +152,7 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
         <GameVideo
           source={beatmap.source}
           gameStartTime={gameStartTime}
+          startGame={startGame}
           volume={volume}
           // setDuration={setDuration}
         />

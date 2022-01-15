@@ -8,6 +8,7 @@ import {} from '@/utils/styles';
 type Props = {
   source: string,
   gameStartTime?: number,
+  startGame: () => void,
   volume: number,
   // setDuration: React.Dispatch<React.SetStateAction<number>>,
 }
@@ -16,7 +17,7 @@ const Youtube = styled(YouTube)`
   pointer-events: none;
 `;
 
-const GameVideo = ({ source, gameStartTime, volume } : Props) => {
+const GameVideo = ({ source, gameStartTime, startGame, volume } : Props) => {
   if (!source) { return null; }
   const videoCode = source.split("v=")[1].split("&")[0];
 
@@ -33,6 +34,16 @@ const GameVideo = ({ source, gameStartTime, volume } : Props) => {
     }
     // setDuration(player.getDuration());
   }, [player]);
+
+  const onReady = (e : YT.PlayerEvent) => {
+    setPlayer(e.target);
+  };
+
+  const onStateChange = (e : YT.OnStateChangeEvent) => {
+    if (e.data === 1) { // playing
+      startGame();
+    }
+  };
 
   const f = () => {console.log("We Done FUcked Up")};
 
@@ -51,9 +62,8 @@ const GameVideo = ({ source, gameStartTime, volume } : Props) => {
       modestBranding={true}
       playsInline={true}
       showRelatedVideos={false}
-      onReady={(e : YT.PlayerEvent) => {
-        setPlayer(e.target);
-      }}
+      onReady={onReady}
+      onStateChange={onStateChange}
       onBuffering={f}
       onPause={f}
     />

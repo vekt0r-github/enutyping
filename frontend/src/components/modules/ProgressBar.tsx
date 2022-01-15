@@ -4,26 +4,40 @@ import styled from 'styled-components';
 import '@/utils/styles.css';
 import {} from '@/utils/styles';
 
+type BarStyle = {
+  width?: number,
+  height?: number,
+  baseColor?: string,
+  fillColor?: string,
+}
+
 type Props = {
   startTime: number,
   endTime: number,
+  barStyle?: BarStyle,
 };
 
-const Container = styled.div`
-  width: 200px;
-  height: var(--xs);
-  background-color: var(--clr-medgrey);
+const Container = styled.div.attrs<BarStyle>(({width, height, baseColor}) => ({
+  style: {
+    'width': width ?? '100%',
+    'height': height ?? 'var(--xs)',
+    'background-color': baseColor ?? 'var(--clr-medgrey)',
+  },
+}))<BarStyle>`
   display: flex;
 `;
 
-const ProgressFill = styled.div.attrs<{progress: number}>((props) => ({
-  style: { width: `${props.progress * 100}%` },
-}))<{progress: number}>`
-  height: var(--xs);
-  background-color: var(--clr-primary);
+type FillProps = {progress: number, color?: string};
+const ProgressFill = styled.div.attrs<FillProps>(({progress, color}) => ({
+  style: {
+    'width': `${progress * 100}%`,
+    'background-color': color ?? 'var(--clr-primary)',
+  },
+}))<FillProps>`
+  height: 100%;
 `;
 
-const ProgressBar = ({ startTime, endTime }: Props) => {
+const ProgressBar = ({ startTime, endTime, barStyle }: Props) => {
   const [currTime, setCurrTime] = useState<number>();
   
   useEffect(() => {
@@ -40,10 +54,11 @@ const ProgressBar = ({ startTime, endTime }: Props) => {
 
   return (
     <>
-      <p>Current time: { currTime }</p>
-      <p>Duration: { duration }</p>
-      <Container>
-        <ProgressFill progress={currTime / duration} />
+      <Container {...barStyle}>
+        <ProgressFill 
+          progress={currTime / duration} 
+          color={barStyle ? barStyle.fillColor : undefined}
+        />
       </Container>
     </>
   );
