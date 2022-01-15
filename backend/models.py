@@ -57,6 +57,10 @@ def init_db():
                         title='Nanahira singing from the window to a fucking van', \
                         source='https://www.youtube.com/watch?v=9USxPiJzdv0', \
                         content=content),
+        Beatmap(id=1337, artist='Nekomata Okayu', \
+                         title='flos', \
+                         source='https://www.youtube.com/watch?v=4muYzftomAE', \
+                         content=flos_content),
         Score(user_id=1234, beatmap_id=727, score=727),
         Score(user_id=4321, beatmap_id=727, score=72727),
     ]
@@ -123,6 +127,34 @@ S,15698,り
 S,15985,ぷ
 S,16029,りーん
 E,18014'''
+
+flos_content = '''L,4646,daphne
+S,4646,daph
+S,4900,ne
+L,5663,ficus
+S,5663,fi
+S,5917,cus
+L,6680,iris
+S,6680,i
+S,6934,ris
+L,7697,maackia
+S,7697,maac
+S,7951,ki
+S,8078,a
+L,8714,lythrum
+S,8714,lyth
+S,9095,rum
+L,9731,myrica
+S,9731,my
+S,9858,ri
+S,9985,ca
+L,10748,sabia
+S,10748,sa
+S,11002,bi
+S,11129,a
+L,11765,flos
+S,11765,flos
+E,13000'''
 
 if __name__ == '__main__':
     init_db()
