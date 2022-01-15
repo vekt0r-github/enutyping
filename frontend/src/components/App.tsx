@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import Loading from "@/components/modules/Loading";
 import NavBar from "@/components/modules/NavBar";
 import Home from "@/components/pages/Home";
 import Login from "@/components/pages/Login";
@@ -34,6 +35,8 @@ const App = ({} : Props) => {
     get("/api/whoami").then((user) => {
       if (user && user.id) {
         setUser(user);
+      } else {
+        setUser(null);
       }
     });
   }, []);
@@ -45,9 +48,11 @@ const App = ({} : Props) => {
   };
 
   const handleLogout = () => {
-    setUser(undefined);
+    setUser(null);
     post("/api/logout");
   };
+
+  if (user === undefined) { return <Loading />; }
 
   return (
     <>

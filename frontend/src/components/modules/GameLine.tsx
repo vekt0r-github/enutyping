@@ -14,7 +14,7 @@ const LineContainer = styled.div`
   width: 800px;
   height: 150px;
   background-color: white;
-  font-size: 24px
+  font-size: 24px;
 `;
 
 const LineText = styled.p`
@@ -23,7 +23,7 @@ const LineText = styled.p`
 
 const FutureText = styled.span`
   color: black;
-`
+`;
 
 const GameLine = ({ line, keyCallback, getAcc } : Props) => {
   const [position, _setPosition] = useState<number>(0);
@@ -36,7 +36,7 @@ const GameLine = ({ line, keyCallback, getAcc } : Props) => {
     _setPosition(newPos);
   };
 
-  const handleKeyPress = (e: Event) => {
+  const handleKeyPress = (e: KeyboardEvent) => {
     const pos = positionRef.current;
     if(line.length > pos && e.key == line[pos]) {
       setPosition(pos + 1);

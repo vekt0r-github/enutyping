@@ -4,7 +4,7 @@ from marshmallow import ValidationError
 from operator import itemgetter
 
 from models import Beatmap, Score, User
-from schemas import beatmap_schema, beatmaps_schema, score_schema, scores_schema, user_schema, users_schema
+from schemas import beatmap_schema, beatmaps_metadata_schema, score_schema, scores_schema, user_schema, users_schema
 from database import db_session
 
 api = Blueprint('api', __name__)
@@ -46,7 +46,7 @@ def get_beatmap_list():
     search_query = request.args.get('search', '')
     title_result = Beatmap.query.filter(Beatmap.title.ilike('%' + search_query + '%')).all()
     # https://softwareengineering.stackexchange.com/questions/286293/whats-the-best-way-to-return-an-array-as-a-response-in-a-restful-api
-    return { 'beatmaps': beatmaps_schema.dump(title_result) }
+    return { 'beatmaps': beatmaps_metadata_schema.dump(title_result) }
 
 @api.route('/scores', methods=['POST'])
 @login_required

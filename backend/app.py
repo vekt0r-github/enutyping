@@ -5,7 +5,7 @@ from flask import Flask, redirect, request, url_for, session
 import oauth
 from database import db_session
 from models import User
-from schemas import user_schema
+from schemas import UserSchema
 from api import api
 
 app = Flask(__name__)
@@ -57,7 +57,7 @@ def authorized():
         gh_uid = gh_user['id']
 
         user = get_or_create_user(gh_uid, gh_name)
-        user_object = user_schema.dump(user)
+        user_object = UserSchema().dump(user)
         session['user'] = user_object
         return user_object
     else:

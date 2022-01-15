@@ -1,7 +1,7 @@
 export type User = { // example
   id: number;
   name: string;
-} | undefined;
+} | null;
 
 export type Beatmap = { // example
   id: number;
