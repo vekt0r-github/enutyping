@@ -2,7 +2,7 @@ import React from "react";
 
 import { User } from "@/utils/types";
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import '@/utils/styles.css';
 import { MainBox, SubBox } from '@/utils/styles';
 

@@ -12,7 +12,7 @@ import NotFound from "@/components/pages/NotFound";
 import { get, post } from "@/utils/functions";
 import { User } from "@/utils/types";
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import '@/utils/styles.css';
 
 type Props = {};

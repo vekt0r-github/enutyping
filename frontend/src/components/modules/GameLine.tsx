@@ -1,32 +1,40 @@
 import React, { useState, useEffect, useRef } from "react";
 
+import ProgressBar from "@/components/modules/ProgressBar";
+
 import { LineData } from '@/components/modules/GameArea'
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import '@/utils/styles.css';
 import {} from '@/utils/styles';
 
 type Props = {
+  gameStartTime: number,
   lineData: LineData,
   keyCallback: (hit: boolean) => void,
 }
 
 const LineContainer = styled.div`
-  width: 800px;
-  height: 50px;
+  width: 100%;
   background-color: white;
-  font-size: 24px;
 `;
 
-const LineText = styled.p`
-  color: gray;
+const LineText = styled.div`
+  font-size: 18px;
+  color: var(--clr-medgrey);
 `;
 
 const FutureText = styled.span`
   color: black;
 `;
 
-const GameLine = ({ lineData, keyCallback } : Props) => {
+const LyricLine = styled.div`
+  font-size: 24px;
+  color: black;
+`;
+
+
+const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
   const [position, _setPosition] = useState<number>(0);
   const positionRef = useRef(position);
 
@@ -55,7 +63,12 @@ const GameLine = ({ lineData, keyCallback } : Props) => {
 
   return (
     <LineContainer>
+      <ProgressBar
+        startTime={gameStartTime + lineData.startTime}
+        endTime={gameStartTime + lineData.endTime}
+      />
       <LineText>{line.substring(0, position)}<FutureText>{line.substring(position)}</FutureText></LineText>
+      <LyricLine>{lineData.lyric}</LyricLine>
     </LineContainer>
   ); // idk if there's a better way to make this happen
 }

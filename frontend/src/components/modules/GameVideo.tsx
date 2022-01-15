@@ -1,41 +1,37 @@
 import React, { useState, useEffect } from "react";
 import YouTube from "@u-wave/react-youtube";
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import '@/utils/styles.css';
 import {} from '@/utils/styles';
 
 type Props = {
   source: string,
-  started: boolean,
+  gameStartTime?: number,
   volume: number,
-  setCurrentTime: React.Dispatch<React.SetStateAction<number>>,
-  setDuration: React.Dispatch<React.SetStateAction<number>>,
+  // setDuration: React.Dispatch<React.SetStateAction<number>>,
 }
 
 const Youtube = styled(YouTube)`
   pointer-events: none;
 `;
 
-const GameVideo = ({ source, started, volume, setCurrentTime, setDuration } : Props) => {
+const GameVideo = ({ source, gameStartTime, volume } : Props) => {
   if (!source) { return null; }
   const videoCode = source.split("v=")[1].split("&")[0];
 
   const [player, setPlayer] = useState<YT.Player>();
 
   useEffect(() => {
-    if (!player || !started) { return; }
+    if (!player || !gameStartTime) { return; }
     player.playVideo();
-    setInterval(() => {
-      setCurrentTime(player.getCurrentTime());
-    }, 250);
-  }, [player, started]);
+  }, [player, gameStartTime]);
 
   useEffect(() => {
     if (!player) {
       return;
     }
-    setDuration(player.getDuration());
+    // setDuration(player.getDuration());
   }, [player]);
 
   const f = () => {console.log("We Done FUcked Up")};

@@ -1,6 +1,6 @@
 import React from "react";
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import '@/utils/styles.css';
 import {} from '@/utils/styles';
 
@@ -12,7 +12,7 @@ type Props = {
 const Container = styled.div`
   width: 200px;
   height: 20px;
-  background-color: var(--clr-primary-light);
+  background-color: var(--clr-secondary-light);
   display: flex;
 `;
 

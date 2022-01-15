@@ -4,7 +4,7 @@ import { Navigate } from "react-router-dom";
 import { get, post } from "@/utils/functions";
 import { User, Beatmap } from "@/utils/types";
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import '@/utils/styles.css';
 import { MainBox, Link } from '@/utils/styles';
 

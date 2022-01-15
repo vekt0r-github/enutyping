@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 
 import { User } from "@/utils/types";
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import '@/utils/styles.css';
 import { Link, Spacer } from '@/utils/styles';
 

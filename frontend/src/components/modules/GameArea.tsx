@@ -3,9 +3,8 @@ import { User, Beatmap } from "@/utils/types";
 
 import GameVideo from "@/components/modules/GameVideo";
 import Volume from "@/components/modules/Volume";
-import ProgressBar from "@/components/modules/ProgressBar";
 import GameLine from "@/components/modules/GameLine";
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import '@/utils/styles.css';
 import {} from '@/utils/styles';
 
@@ -41,10 +40,6 @@ const TopHalf = styled.div`
   height: 50%;
 `;
 
-const LyricLine = styled.div`
-  width: 100%;
-`;
-
 const BottomHalf = styled.div`
   display: flex;
   width: 100%;
@@ -59,13 +54,13 @@ const StatBox = styled.div`
 `;
 
 const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
-  const [started, setStarted] = useState<boolean>(false);
+  // these are maintained via timer independent of video
+  const [gameStartTime, setGameStartTime] = useState<number>();
   const [currLine, setCurrLine] = useState<LineData>();
 
-  // iframe API seems to return in seconds
-  // I think currentTime is floating point but not duration
-  const [currentTime, setCurrentTime] = useState<number>(0);
-  const [duration, setDuration] = useState<number>(Infinity);
+  // from iframe API; in seconds, rounded? maybe
+  // maybe need later but idk
+  // const [duration, setDuration] = useState<number>(Infinity);
 
   const hits = useRef(0);
   const misses = useRef(0);
@@ -99,8 +94,8 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
   })();
 
   const startGame = () => {
-    if (started) { return; }
-    setStarted(true);
+    if (gameStartTime) { return; }
+    setGameStartTime(new Date().getTime());
     lines.forEach((line) => {
       // if this loop is too slow, save original time and reference
       setTimeout(() => {
@@ -140,26 +135,21 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
           volume={volume}
           setVolume={setVolume}
         />
-        <ProgressBar
-          currentTime={currentTime}
-          duration={duration}
-        />
-        {currLine ? <>
+        {currLine && gameStartTime ? <>
           <GameLine
+            gameStartTime={gameStartTime}
             lineData={currLine}
             keyCallback={keyCallback}
           />
-          <LyricLine>{currLine.lyric}</LyricLine>
         </> : null}
       </TopHalf>
       <BottomHalf>
         <StatBox>Acc: {acc.toFixed(2)}</StatBox>
         <GameVideo
           source={beatmap.source}
-          started={started}
+          gameStartTime={gameStartTime}
           volume={volume}
-          setCurrentTime={setCurrentTime}
-          setDuration={setDuration}
+          // setDuration={setDuration}
         />
         <StatBox>,</StatBox>
       </BottomHalf>
