@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 
+import { LineData } from '@/components/modules/GameArea'
+
 import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
 import {} from '@/utils/styles';
 
 type Props = {
-  line: string,
+  lineData: LineData,
   keyCallback: (hit: boolean) => void,
 }
 
@@ -24,9 +26,11 @@ const FutureText = styled.span`
   color: black;
 `;
 
-const GameLine = ({ line, keyCallback } : Props) => {
+const GameLine = ({ lineData, keyCallback } : Props) => {
   const [position, _setPosition] = useState<number>(0);
   const positionRef = useRef(position);
+
+  const line = lineData.syllables.map(s => s.text).join('');
 
   const setPosition = (newPos: number) => {
     positionRef.current = newPos;

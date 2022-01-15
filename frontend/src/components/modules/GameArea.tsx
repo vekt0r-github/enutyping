@@ -9,6 +9,16 @@ import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
 import {} from '@/utils/styles';
 
+export type LineData = {
+  startTime: number,
+  endTime: number,
+  lyric: string,
+  syllables: {
+    time: number,
+    text: string,
+  }[],
+}
+
 type Props = {
   user: User,
   beatmap: Beatmap,
@@ -50,8 +60,7 @@ const StatBox = styled.div`
 
 const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
   const [started, setStarted] = useState<boolean>(false);
-  const [currLine, setCurrLine] = useState<string>();
-  const [currSyllable, setCurrSyllable] = useState<string>();
+  const [currLine, setCurrLine] = useState<LineData>();
 
   // iframe API seems to return in seconds
   // I think currentTime is floating point but not duration
@@ -61,42 +70,48 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
   const hits = useRef(0);
   const misses = useRef(0);
 
-  if (!beatmap.content) { return null; } // idk man
-  const objects = beatmap.content.split(/\r?\n/);
+  let lines : LineData[] = [];
+  (() => { // process beatmap "file"
+    if (!beatmap.content) { return null; } // idk man
+    const objects = beatmap.content.split(/\r?\n/);
+    let line : LineData;
+    objects.forEach((obj_str) => {
+      const obj = obj_str.split(',');
+      const type = obj[0];
+      const time = parseInt(obj[1]);
+      
+      if (line && ['L','E'].includes(type)) {
+        line.endTime = time;
+        lines.push(line);
+      }
+      if (type === 'L') {
+        line = {
+          startTime: time,
+          endTime: 0, // set when line ends
+          lyric: obj[2],
+          syllables: [],
+        };
+      } else if (type === 'S') {
+        const text = obj[2];
+        line.syllables.push({ time, text });
+      }
+    });
+  })();
 
   const startGame = () => {
     if (started) { return; }
     setStarted(true);
-    objects.forEach((obj_str) => {
+    lines.forEach((line) => {
       // if this loop is too slow, save original time and reference
-      const obj = obj_str.split(',');
-      const type = obj[0];
-      const time = parseInt(obj[1]);
-      switch (type) {
-        case 'L':
-          const lyric = obj[2];
-          setTimeout(() => {
-            setCurrLine(lyric);
-          }, time)
-          break;
-        case 'S':
-          const syllable = obj[2];
-          setTimeout(() => {
-            setCurrSyllable(syllable);
-          }, time)
-          break;
-        case 'E': 
-        setTimeout(() => {
-          endGame();
-        }, time)
-        break;
-      }
-    })
-  }
+      setTimeout(() => {
+        setCurrLine(line);
+      }, line.startTime);
+    });
+    setTimeout(endGame, lines[lines.length - 1].endTime);
+  };
 
   const endGame = () => {
-    setCurrLine('');
-    setCurrSyllable('');
+    setCurrLine(undefined);
   }
 
   const acc = (() => {
@@ -129,12 +144,13 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
           currentTime={currentTime}
           duration={duration}
         />
-        <GameLine
-          line={"asodfihasdpfoi"}
-          keyCallback={keyCallback}
-        />
-        <LyricLine>{currLine}</LyricLine>
-        <LyricLine>{currSyllable}</LyricLine> {/* just to see */}
+        {currLine ? <>
+          <GameLine
+            lineData={currLine}
+            keyCallback={keyCallback}
+          />
+          <LyricLine>{currLine.lyric}</LyricLine>
+        </> : null}
       </TopHalf>
       <BottomHalf>
         <StatBox>Acc: {acc.toFixed(2)}</StatBox>

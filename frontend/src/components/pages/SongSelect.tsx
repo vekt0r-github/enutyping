@@ -19,7 +19,7 @@ const SongSelect = ({ user, volume, setVolume } : Props) => {
     return <Navigate to='/login' replace={true} />
   }
 
-  const [maps, setMaps] = useState<[Beatmap]>();
+  const [maps, setMaps] = useState<Beatmap[]>();
   
   useEffect(() => {
     get("/api/beatmaps").then((res) => {
