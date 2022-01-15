@@ -19,11 +19,33 @@ type Props = {
 const GameContainer = styled.div`
   width: 800px;
   height: 600px;
+  min-width: 800px;
+  min-height: 600px;
+  margin: var(--s);
+  padding: 0;
   background-color: var(--clr-primary-light);
+`;
+
+const TopHalf = styled.div`
+  width: 100%;
+  height: 50%;
 `;
 
 const LyricLine = styled.div`
   width: 100%;
+`;
+
+const BottomHalf = styled.div`
+  display: flex;
+  width: 100%;
+  height: 50%;
+`;
+
+const StatBox = styled.div`
+  width: calc(200px - 2 * var(--s));
+  height: auto;
+  margin: var(--s);
+  background-color: white;
 `;
 
 const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
@@ -43,6 +65,7 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
   const objects = beatmap.content.split(/\r?\n/);
 
   const startGame = () => {
+    if (started) { return; }
     setStarted(true);
     objects.forEach((obj_str) => {
       // if this loop is too slow, save original time and reference
@@ -76,14 +99,14 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
     setCurrSyllable('');
   }
 
-  const getAcc = () => {
+  const acc = (() => {
     const hitCount = hits.current;
     const missCount = misses.current;
     if (hitCount + missCount == 0) {
       return 100;
     }
     return 100 * hitCount / (hitCount + missCount);
-  }
+  })();
 
   const keyCallback = (hit: boolean) => {
     if(hit) {
@@ -96,29 +119,34 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
 
   return (
     <GameContainer>
-      <GameVideo
-        source={beatmap.source}
-        started={started}
-        volume={volume}
-        setCurrentTime={setCurrentTime}
-        setDuration={setDuration}
-      />
-      <button onClick={startGame}>start</button>
-      <Volume
-        volume={volume}
-        setVolume={setVolume}
-      />
-      <ProgressBar
-        currentTime={currentTime}
-        duration={duration}
-      />
-      <GameLine
-        line={"asodfihasdpfoi"}
-        keyCallback={keyCallback}
-        getAcc={getAcc}
-      />
-      <LyricLine>{currLine}</LyricLine>
-      <LyricLine>{currSyllable}</LyricLine> {/* just to see */}
+      <TopHalf>
+        <button onClick={startGame}>start</button>
+        <Volume
+          volume={volume}
+          setVolume={setVolume}
+        />
+        <ProgressBar
+          currentTime={currentTime}
+          duration={duration}
+        />
+        <GameLine
+          line={"asodfihasdpfoi"}
+          keyCallback={keyCallback}
+        />
+        <LyricLine>{currLine}</LyricLine>
+        <LyricLine>{currSyllable}</LyricLine> {/* just to see */}
+      </TopHalf>
+      <BottomHalf>
+        <StatBox>Acc: {acc.toFixed(2)}</StatBox>
+        <GameVideo
+          source={beatmap.source}
+          started={started}
+          volume={volume}
+          setCurrentTime={setCurrentTime}
+          setDuration={setDuration}
+        />
+        <StatBox>,</StatBox>
+      </BottomHalf>
     </GameContainer>
   );
 }

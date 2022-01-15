@@ -7,12 +7,11 @@ import {} from '@/utils/styles';
 type Props = {
   line: string,
   keyCallback: (hit: boolean) => void,
-  getAcc: () => number
 }
 
 const LineContainer = styled.div`
   width: 800px;
-  height: 150px;
+  height: 50px;
   background-color: white;
   font-size: 24px;
 `;
@@ -25,10 +24,8 @@ const FutureText = styled.span`
   color: black;
 `;
 
-const GameLine = ({ line, keyCallback, getAcc } : Props) => {
+const GameLine = ({ line, keyCallback } : Props) => {
   const [position, _setPosition] = useState<number>(0);
-  const [acc, setAcc] = useState<number>(100);
-
   const positionRef = useRef(position);
 
   const setPosition = (newPos: number) => {
@@ -37,6 +34,7 @@ const GameLine = ({ line, keyCallback, getAcc } : Props) => {
   };
 
   const handleKeyPress = (e: KeyboardEvent) => {
+    // TODO: handle japanese input as well
     const pos = positionRef.current;
     if(line.length > pos && e.key == line[pos]) {
       setPosition(pos + 1);
@@ -45,7 +43,6 @@ const GameLine = ({ line, keyCallback, getAcc } : Props) => {
     else if(line.length > pos) {
       keyCallback(false);
     }
-    setAcc(getAcc()); // this is here to trigger a rerender
   };
 
   useEffect(() => {
@@ -55,7 +52,6 @@ const GameLine = ({ line, keyCallback, getAcc } : Props) => {
   return (
     <LineContainer>
       <LineText>{line.substring(0, position)}<FutureText>{line.substring(position)}</FutureText></LineText>
-      <LineText>Acc: {acc.toFixed(2)}</LineText>
     </LineContainer>
   ); // idk if there's a better way to make this happen
 }
