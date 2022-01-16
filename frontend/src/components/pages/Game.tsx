@@ -63,7 +63,7 @@ const Game = ({ user, volume, setVolume } : Props) => {
           <ul>
             { map?.scores?.map((score) =>
               // XXX: hmm is this okay to be optional?
-              <li>{score.user?.name}: {score.score}</li>
+              <li key={score.id}>{score.user?.name}: {score.score}</li>
             )}
           </ul>
         </MainBox>
