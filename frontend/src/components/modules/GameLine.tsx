@@ -16,6 +16,13 @@ type Props = {
   keyCallback: (hit: boolean) => void,
 }
 
+type Kana = {
+  length: number,
+  romanizations: string[],
+  prefix: string,
+  suffix: string
+}
+
 const LineContainer = styled.div`
   width: 100%;
   background-color: white;
@@ -67,16 +74,13 @@ const kanaRespellings = {
 };
 
 const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
-  const [position, _setPosition] = useState<number>(0);
-  const positionRef = useRef(position);
+  const [position, setPosition] = useState<number>(0);
+  const [curKana, setCurKana] = useState<Kana>({length: 0, romanizations: [], prefix: "", suffix: ""});
+  const {length, romanizations, prefix, suffix} = curKana;
+
 
   const {startTime, endTime, lyric, syllables} = lineData;
   const line = syllables.map(s => s.text).join('');
-
-  const setPosition = (newPos: number) => {
-    positionRef.current = newPos;
-    _setPosition(newPos);
-  };
 
   const getRomanizations = (kana: string) => {
     const canonical = toRomaji(kana);
@@ -102,89 +106,97 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
     return normals.concat(weirds);
   };
 
-  const kanaLength = useRef(0);
-  const romanizations = useRef([]);
-
-  const [prefix, _setPrefix] = useState<string>("");
-  const prefixRef = useRef(""); // what the player has typed
-
-  const setPrefix = (newPrefix: string) => {
-    prefixRef.current = newPrefix;
-    _setPrefix(newPrefix);
-  }
-
-  const sampleSuffix = useRef(""); // suggested autocomplete for current kana
-
-  const populateNextKana = () => {
-    const pos = positionRef.current;
+  const populateNextKana = (pos: number) => {
+    let newKana: Kana = {length: 1, romanizations: [], prefix: "", suffix: ""};
     if(pos >= line.length) {
-      setPrefix("");
-      return;
+      newKana.prefix = "";
     }
-
-    romanizations.current = [];
-    kanaLength.current = 1;
-    if(line[pos] == "っ") {
-      kanaLength.current++;
+    else {
+      newKana.length = 1;
+      if(line[pos] == "っ") {
+        newKana.length++;
+      }
+      if(line[pos + length] in ["ょ", "ゃ", "ゅ"]) {
+        newKana.length++;
+      } 
+      newKana.romanizations = getRomanizations(line.substr(pos, newKana.length));
+      newKana.suffix = newKana.romanizations[0];
+      newKana.prefix = "";
     }
-    if(line[pos + kanaLength.current] in ["ょ", "ゃ", "ゅ"]) {
-      kanaLength.current++;
-    } 
-
-    romanizations.current = getRomanizations(line.substr(pos, kanaLength.current));
-    sampleSuffix.current = romanizations.current[0];
-    setPrefix("");
+    setCurKana(newKana);
   };
 
   const handleKeyPress = (e: KeyboardEvent) => {
     // TODO: handle japanese input as well
-    const pos = positionRef.current;
-    if(line.length <= pos) return;
-    const newPrefix = prefixRef.current + e.key;
-    const filteredRomanizations = romanizations.current.filter(s => s.substr(0, newPrefix.length) == newPrefix);
+    if(line.length <= position) return;
+    const newPrefix = prefix + e.key;
+    const filteredRomanizations = romanizations.filter(s => s.substr(0, newPrefix.length) == newPrefix);
     if(filteredRomanizations.length == 0) {
       keyCallback(false);
     }
     else {
-      sampleSuffix.current = filteredRomanizations[0].substr(newPrefix.length);
-      romanizations.current = filteredRomanizations;
-      setPrefix(newPrefix);
+      const newSuffix = filteredRomanizations[0].substr(newPrefix.length)
+      const newKana: Kana = {length: length, romanizations: filteredRomanizations, prefix: newPrefix, suffix: newSuffix};
+      setCurKana(newKana);
+      if(newSuffix == "") {
+        setPosition(position + length);
+      }
       keyCallback(true);
-    }
-
-    if(sampleSuffix.current == "") {
-      setPosition(pos + kanaLength.current);
-      populateNextKana();
     }
 
   };
 
   useEffect(() => {
     setPosition(0);
-    populateNextKana();
+  }, [lineData]);
+
+  useEffect(() => {
+    populateNextKana(position);
+  }, [position, lineData]);
+
+  useEffect(() => {
     document.addEventListener("keydown", handleKeyPress);
 
     return () => {
       document.removeEventListener("keydown", handleKeyPress);
     }
-  }, [lineData]);
+  }, [position, lineData, prefix, suffix]);
+
+  let syllableList = [];
+  let syllablePos: int = 0;
+  syllables.forEach(({time, text}) => {
+    if(syllablePos + text.length <= position) {
+      syllableList.push(<LineText 
+        pos={(time - startTime) / (endTime - startTime)}
+        active={1}
+        >{text}</LineText>);
+    }
+    else if(syllablePos > position) {
+      syllableList.push(<LineText 
+        pos={(time - startTime) / (endTime - startTime)}
+        active={-1}
+        >{text}</LineText>);
+    }
+    else {
+      syllableList.push(<LineText 
+        pos={(time - startTime) / (endTime - startTime)}
+        active={0}
+        >{text}</LineText>);
+    }
+    syllablePos += text.length;
+  });
 
   return (
     <LineContainer>
       <Timeline>
-        {syllables.map(({time, text}, index) => 
-          <LineText
-            pos={(time - startTime) / (endTime - startTime)}
-            active={index - position}
-            >{text}</LineText>
-        )}
+        {syllableList}
         <ProgressBar
           startTime={gameStartTime + startTime}
           endTime={gameStartTime + endTime}
         />
       </Timeline>
-      <LineText active={-1}>{toRomaji(line.substring(0, position)) + prefixRef.current}</LineText>
-      <LineText active={1}>{sampleSuffix.current + toRomaji(line.substring(position + kanaLength.current))}</LineText>
+      <LineText active={-1}>{toRomaji(line.substring(0, position)) + prefix}</LineText>
+      <LineText active={1}>{suffix + toRomaji(line.substring(position + length))}</LineText>
       <LyricLine>{lyric}</LyricLine>
     </LineContainer>
   );
