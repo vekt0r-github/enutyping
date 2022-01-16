@@ -4,7 +4,7 @@ import { Navigate, useParams } from "react-router-dom";
 import Loading from "@/components/modules/Loading";
 import GameArea from "@/components/modules/GameArea";
 
-import { get, post } from "@/utils/functions";
+import { get } from "@/utils/functions";
 import { User, Beatmap } from "@/utils/types";
 
 import styled from 'styled-components';
@@ -61,8 +61,10 @@ const Game = ({ user, volume, setVolume } : Props) => {
         <MainBox>
           <h2>Leaderboard</h2>
           <ul>
-            <li>sampai_: 727</li>
-            <li>Erik Demaine: 69</li>
+            { map?.scores?.map((score) =>
+              // XXX: hmm is this okay to be optional?
+              <li>{score.user?.name}: {score.score}</li>
+            )}
           </ul>
         </MainBox>
       </PageContainer>
