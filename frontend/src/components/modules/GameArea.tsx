@@ -62,8 +62,8 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
   // maybe need later but idk
   // const [duration, setDuration] = useState<number>(Infinity);
 
-  const hits = useRef(0);
-  const misses = useRef(0);
+  const [hits, setHits] = useState<number>(0);
+  const [misses, setMisses] = useState<number>(0);
 
   let lines : LineData[] = [];
   (() => { // process beatmap "file"
@@ -114,8 +114,8 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
   }
 
   const acc = (() => {
-    const hitCount = hits.current;
-    const missCount = misses.current;
+    const hitCount = hits;
+    const missCount = misses;
     if (hitCount + missCount == 0) {
       return 100;
     }
@@ -124,10 +124,10 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
 
   const keyCallback = (hit: boolean) => {
     if(hit) {
-      hits.current++;
+      setHits((oldHits) => oldHits + 1);
     }
     else {
-      misses.current++;
+      setMisses((oldMisses) => oldMisses + 1);
     }
   }
 
