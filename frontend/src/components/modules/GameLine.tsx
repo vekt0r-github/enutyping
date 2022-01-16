@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
-import { toRomaji, toHiragana } from "wanakana";
+import { toRomaji } from "wanakana";
 
 import ProgressBar from "@/components/modules/ProgressBar";
 
@@ -55,6 +55,8 @@ const LyricLine = styled.div`
   color: black;
 `;
 
+const smallKana = ["ょ", "ゃ", "ゅ", "ぃ", "ぇ", "ぁ", "ぉ", "ぅ"];
+
 const kanaRespellings = {
   shi: ["shi", "si", "ci"],
   chi: ["chi", "ti"],
@@ -70,12 +72,14 @@ const kanaRespellings = {
   ku: ["ku", "cu", "qu"],
   ko: ["ko", "co"],
   se: ["se", "ce"],
-  fu: ["fu", "hu"]
+  fu: ["fu", "hu"],
+  nn: ["n", "nn"]
 };
 
 const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
   const [position, setPosition] = useState<number>(0);
   const [curKana, setCurKana] = useState<Kana>({length: 0, romanizations: [], prefix: "", suffix: ""});
+  const [typedLine, setTypedLine] = useState<string>("");
   const {length, romanizations, prefix, suffix} = curKana;
 
 
@@ -123,10 +127,15 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
       if(line[pos] == "っ") {
         newKana.length++;
       }
-      if(line[pos + length] in ["ょ", "ゃ", "ゅ"]) {
+      if(smallKana.includes(line[pos + newKana.length])) {
         newKana.length++;
       } 
-      newKana.romanizations = getRomanizations(line.substr(pos, newKana.length));
+      console.log(newKana.length);
+      const isNextN = (toRomaji(line.substring(newKana.length + pos)[0]) == "n");
+      newKana.romanizations = getRomanizations(line.substring(pos, newKana.length + pos));
+      if(line[pos] == "ん" && isNextN) {
+      	newKana.romanizations = ["nn"];
+      }
       newKana.suffix = newKana.romanizations[0];
       newKana.prefix = "";
     }
@@ -137,16 +146,19 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
     // TODO: handle japanese input as well
     if(line.length <= position) return;
     const newPrefix = prefix + e.key;
-    const filteredRomanizations = romanizations.filter(s => s.substr(0, newPrefix.length) == newPrefix);
+    const filteredRomanizations = romanizations.filter(s => s.substring(0, newPrefix.length) == newPrefix);
+    console.log("fuck");
+    console.log(romanizations);
     if(filteredRomanizations.length == 0) {
       keyCallback(false);
     }
     else {
-      const newSuffix = filteredRomanizations[0].substr(newPrefix.length)
+      const newSuffix = filteredRomanizations[0].substring(newPrefix.length);
       const newKana: Kana = {length: length, romanizations: filteredRomanizations, prefix: newPrefix, suffix: newSuffix};
       setCurKana(newKana);
       if(newSuffix == "") {
         setPosition(position + length);
+	setTypedLine((s) => s + newPrefix);
       }
       keyCallback(true);
     }
@@ -155,6 +167,7 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
 
   useEffect(() => {
     setPosition(0);
+    setTypedLine("");
   }, [lineData]);
 
   useEffect(() => {
@@ -202,7 +215,7 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
           endTime={gameStartTime + endTime}
         />
       </Timeline>
-      <LineText active={-1}>{toRomaji(line.substring(0, position)) + prefix}</LineText>
+      <LineText active={-1}>{typedLine + prefix}</LineText>
       <LineText active={1}>{suffix + toRomaji(line.substring(position + length))}</LineText>
       <LyricLine>{lyric}</LyricLine>
     </LineContainer>

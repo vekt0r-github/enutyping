@@ -65,12 +65,22 @@ def init_db():
                          title='Yoru ni Kakeru', \
                          source='https://www.youtube.com/watch?v=xtfXl7TZTac', \
                          content=yorunicontent),
+        Beatmap(id=2727, artist='idk', \
+                         title='dev map', \
+                         source='https://www.youtube.com/watch?v=xtfXl7TZTac', \
+                         content=test_map_content),
         Score(user_id=1234, beatmap_id=727, score=727),
         Score(user_id=4321, beatmap_id=727, score=72727),
     ]
 
     db_session.bulk_save_objects(objects)
     db_session.commit()
+
+
+test_map_content = '''L, 500,んなってっしゃじょん
+S, 500,んなってっしゃじょん
+E, 20000
+'''
 
 content = '''L,500,ぷるーん
 S,500,ぷ
