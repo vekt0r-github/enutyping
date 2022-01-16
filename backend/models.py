@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, UnicodeText, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import deferred, relationship
 
 from database import Base
 
@@ -19,7 +19,7 @@ class Beatmap(Base):
     artist = Column(String(50))
     title = Column(String(50))
     source = Column(String(100))
-    content = Column(UnicodeText)
+    content = deferred(Column(UnicodeText))
     scores = relationship('Score', back_populates='beatmap')
 
     def __init__(self, artist, title, source, content, id = None):

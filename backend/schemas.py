@@ -1,10 +1,17 @@
 from marshmallow import Schema, fields
 
+class UserSchema(Schema):
+    id = fields.Int(dump_only=True)
+    name = fields.Str()
+
+user_schema = UserSchema()
+users_schema = UserSchema(many=True)
+
 class ScoreSchema(Schema):
     id = fields.Int(dump_only=True)
-    user_id = fields.Int()
     beatmap_id = fields.Int()
     score = fields.Int()
+    user = fields.Nested(UserSchema(only=("name", "id")))
 
 score_schema = ScoreSchema()
 scores_schema = ScoreSchema(many=True)
@@ -19,10 +26,3 @@ class BeatmapSchema(Schema):
 
 beatmap_schema = BeatmapSchema()
 beatmaps_metadata_schema = BeatmapSchema(exclude=['content'], many=True)
-
-class UserSchema(Schema):
-    id = fields.Int(dump_only=True)
-    name = fields.Str()
-
-user_schema = UserSchema()
-users_schema = UserSchema(many=True)
