@@ -82,22 +82,29 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
   const {startTime, endTime, lyric, syllables} = lineData;
   const line = syllables.map(s => s.text).join('');
 
-  const getRomanizations = (kana: string) => {
+  const getRomanizations = (kana: string) : string[] => {
+    function hasKey<O>(obj: O, key: PropertyKey): key is keyof O {
+      return key in obj; // fix ts error even though this looks stupid
+    }
     const canonical = toRomaji(kana);
-    if(kana.length == 1) {
-      if(canonical in kanaRespellings) return kanaRespellings[canonical];
-      return [toRomaji(kana)];
+    if (kana.length == 1) {
+      if (hasKey(kanaRespellings, canonical)) {
+        return kanaRespellings[canonical];
+      }
+      return [canonical];
     }
 
     // small tsu case
     if(kana[0] == "っ") {
       const subRomanizations = getRomanizations(kana.substring(1));
-      return [].concat.apply([], subRomanizations.map(r => [r[0] + r, "xtu" + r, "xtsu" + r]));
+      return ([] as string[]).concat.apply([], subRomanizations.map(r => [r[0] + r, "xtu" + r, "xtsu" + r]));
     }
 
     // all that's left after the first 2 cases is combinations e.g. きょ
     let normals: string[] = [];
-    if(canonical in kanaRespellings) normals = kanaRespellings[canonical];
+    if (hasKey(kanaRespellings, canonical)) {
+      normals = kanaRespellings[canonical];
+    }
     else normals = [canonical];
 
     let modifierRomaji: string = toRomaji(kana[1]);
@@ -162,8 +169,8 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
     }
   }, [position, lineData, prefix, suffix]);
 
-  let syllableList = [];
-  let syllablePos: int = 0;
+  let syllableList : JSX.Element[] = [];
+  let syllablePos : number = 0;
   syllables.forEach(({time, text}) => {
     if(syllablePos + text.length <= position) {
       syllableList.push(<LineText 
