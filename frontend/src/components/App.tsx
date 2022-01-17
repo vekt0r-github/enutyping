@@ -19,6 +19,7 @@ import '@/utils/styles.css';
 type Props = {};
 
 const Content = styled.div`
+  padding: var(--s); /* if you want */
   margin: 0;
   box-sizing: border-box;
   width: 100%;

@@ -6,7 +6,7 @@ import { User, Beatmap } from "@/utils/types";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Link } from '@/utils/styles';
+import { MainBox, Link, Line } from '@/utils/styles';
 
 type Props = {
   user: User,
@@ -51,16 +51,6 @@ const Info = styled.div`
   min-width: 0;
 `;
 
-const Line = styled.span<{size: string}>`
-  max-width: 100%;
-  font-size: ${(props) => props.size};
-  margin: 0;
-  display: block;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-`;
-
 const SongSelect = ({ user, volume, setVolume } : Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />
@@ -85,10 +75,10 @@ const SongSelect = ({ user, volume, setVolume } : Props) => {
           <SongBox as={Link} to={`/play/${map.id}`} key={map.id}>
             <Thumbnail src={`http://img.youtube.com/vi/${map.yt_id}/default.jpg`} />
             <Info>
-              <Line size='20px' as='h2'>{map.title}</Line>
-              <Line size='16px'>by {map.artist}</Line>
-              <Line size='14px'>mapped by Erik Demaine</Line>
-              <Line size='14px'>727 thumbs up</Line>
+              <Line size='1.25em' as='h2'>{map.title}</Line>
+              <Line size='1em'>by {map.artist}</Line>
+              <Line size='0.8em'>mapped by Erik Demaine</Line>
+              <Line size='0.8em'>727 thumbs up</Line>
             </Info>
           </SongBox>
         )}

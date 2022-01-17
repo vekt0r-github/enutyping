@@ -28,3 +28,16 @@ export const Link = styled(RouterLink)`
 export const Spacer = styled.div`
   flex-grow: 1;
 `;
+
+export const Line = styled.span<{
+  size?: string,
+  margin?: string,
+}>`
+  max-width: 100%;
+  font-size: ${(props) => props.size ?? '1em'};
+  margin: ${(props) => props.margin ?? 0};
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+`;

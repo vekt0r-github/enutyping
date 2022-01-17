@@ -43,6 +43,9 @@
 
   /* must be equal to effective navbar height */
   --content-offset: 65px;
+  /* probably still unsafe to change these */
+  --game-width: 800px;
+  --game-height: 600px;
 }
 
 html, body, #root {

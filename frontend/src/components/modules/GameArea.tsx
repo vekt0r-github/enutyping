@@ -26,10 +26,10 @@ type Props = {
 }
 
 const GameContainer = styled.div`
-  width: 800px;
-  height: 600px;
-  min-width: 800px;
-  min-height: 600px;
+  width: var(--game-width);
+  height: var(--game-height);
+  min-width: var(--game-width);
+  min-height: var(--game-height);
   margin: var(--s);
   padding: 0;
   background-color: var(--clr-primary-light);
@@ -54,6 +54,8 @@ const StatBox = styled.div`
 `;
 
 const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
+  const [started, setStarted] = useState<boolean>(false);
+  const [offset, setOffset] = useState<number>(0);
   // these are maintained via timer independent of video
   const [gameStartTime, setGameStartTime] = useState<number>();
   const [currLine, setCurrLine] = useState<LineData>();
@@ -94,19 +96,19 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
   })();
 
   const prepareStartGame = () => {
-    if (gameStartTime) { return; }
-    setGameStartTime(727); // let them know we've started
+    if (started) { return; }
+    setStarted(true); // let them know we've started
   };
 
   const startGame = () => {
-    setGameStartTime(new Date().getTime());
+    setGameStartTime(new Date().getTime() + offset);
     lines.forEach((line) => {
       // if this loop is too slow, save original time and reference
       setTimeout(() => {
         setCurrLine(line);
-      }, line.startTime);
+      }, line.startTime + offset);
     });
-    setTimeout(endGame, lines[lines.length - 1].endTime);
+    setTimeout(endGame, lines[lines.length - 1].endTime + offset);
   };
 
   const endGame = () => {
@@ -135,6 +137,10 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
     <GameContainer>
       <TopHalf>
         <button onClick={prepareStartGame}>start</button>
+        offset: <input defaultValue='0' onChange={(e) => {
+          const intValue = parseInt(e.target.value)
+          if (!isNaN(intValue)) { setOffset(intValue); }
+        }}></input>
         <Volume
           volume={volume}
           setVolume={setVolume}
@@ -151,6 +157,7 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
         <StatBox>Acc: {acc.toFixed(2)}</StatBox>
         <GameVideo
           source={beatmap.source}
+          started={started}
           gameStartTime={gameStartTime}
           startGame={startGame}
           volume={volume}

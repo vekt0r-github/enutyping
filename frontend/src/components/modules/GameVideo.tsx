@@ -7,6 +7,7 @@ import {} from '@/utils/styles';
 
 type Props = {
   source: string,
+  started: boolean,
   gameStartTime?: number,
   startGame: () => void,
   volume: number,
@@ -17,16 +18,16 @@ const Youtube = styled(YouTube)`
   pointer-events: none;
 `;
 
-const GameVideo = ({ source, gameStartTime, startGame, volume } : Props) => {
+const GameVideo = ({ source, started, gameStartTime, startGame, volume } : Props) => {
   if (!source) { return null; }
   const videoCode = source.split("v=")[1].split("&")[0];
 
   const [player, setPlayer] = useState<YT.Player>();
 
   useEffect(() => {
-    if (!player || !gameStartTime) { return; }
+    if (!player || !started) { return; }
     player.playVideo();
-  }, [player, gameStartTime]);
+  }, [player, started]);
 
   useEffect(() => {
     if (!player) {
@@ -40,7 +41,7 @@ const GameVideo = ({ source, gameStartTime, startGame, volume } : Props) => {
   };
 
   const onStateChange = (e : YT.OnStateChangeEvent) => {
-    if (e.data === 1) { // playing
+    if (e.data === 1 && !gameStartTime) { // playing and hasn't started before
       startGame();
     }
   };

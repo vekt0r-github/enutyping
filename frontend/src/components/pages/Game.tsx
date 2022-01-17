@@ -9,7 +9,7 @@ import { User, Beatmap } from "@/utils/types";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox } from '@/utils/styles';
+import { MainBox, Line } from '@/utils/styles';
 
 type Props = {
   user: User,
@@ -17,10 +17,31 @@ type Props = {
   setVolume: React.Dispatch<React.SetStateAction<number>>,
 };
 
+const Sidebar = styled(MainBox)`
+  min-width: 300px;
+  max-width: 400px;
+  height: var(--game-height);
+  flex-basis: 300px;
+  flex-grow: 1;
+  flex-shrink: 0;
+  box-sizing: content-box;
+  margin: 0 var(--s);
+`;
+
 const PageContainer = styled.div`
   width: 100%;
+  min-width: var(--game-width);
   display: flex;
   flex-direction: row;
+  justify-content: center;
+  @media (max-width: 1496px) { // 800 + 2*(300+2*3*8)
+    width: calc(var(--game-width) + 4*var(--s));
+    flex-wrap: wrap;
+    & ${Sidebar} {
+      order: 1;
+      margin-top: var(--s);
+    }
+  }
 `;
 
 const Game = ({ user, volume, setVolume } : Props) => {
@@ -46,19 +67,20 @@ const Game = ({ user, volume, setVolume } : Props) => {
     <>
       <h1>{map.artist} - {map.title}</h1>
       <PageContainer>
-        <MainBox>
+        <Sidebar>
           <h2>Map info and stats etc.</h2>
-          <p>{map.artist} - {map.title}</p>
-          <p>ID: {map.id}</p>
-          <p>Source: {map.source}</p>
-        </MainBox>
+          <Line>Title: {map.title}</Line>
+          <Line>Artist: {map.artist}</Line>
+          <Line>ID: {map.id}</Line>
+          <Line>Source: {map.source}</Line>
+        </Sidebar>
         <GameArea
           user={user}
           beatmap={map}
           volume={volume}
           setVolume={setVolume}
         />
-        <MainBox>
+        <Sidebar>
           <h2>Leaderboard</h2>
           <ul>
             { map?.scores?.map((score) =>
@@ -66,7 +88,7 @@ const Game = ({ user, volume, setVolume } : Props) => {
               <li key={score.id}>{score.user?.name}: {score.score}</li>
             )}
           </ul>
-        </MainBox>
+        </Sidebar>
       </PageContainer>
     </>
   );
