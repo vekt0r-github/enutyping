@@ -21,7 +21,7 @@ const Container = styled.div.attrs<BarStyle>(({width, height, baseColor}) => ({
   style: {
     'width': width ?? '100%',
     'height': height ?? 'var(--xs)',
-    'background-color': baseColor ?? 'var(--clr-medgrey)',
+    'backgroundColor': baseColor ?? 'var(--clr-medgrey)',
   },
 }))<BarStyle>`
   display: flex;
@@ -31,7 +31,7 @@ type FillProps = {progress: number, color?: string};
 const ProgressFill = styled.div.attrs<FillProps>(({progress, color}) => ({
   style: {
     'width': `${progress * 100}%`,
-    'background-color': color ?? 'var(--clr-primary)',
+    'backgroundColor': color ?? 'var(--clr-primary)',
   },
 }))<FillProps>`
   height: 100%;

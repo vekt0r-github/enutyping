@@ -136,7 +136,7 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
     if (smallKana.includes(line[pos + newKana.length])) {
       newKana.length++;
     } 
-    console.log(newKana.length);
+    // console.log(newKana.length);
     const isNextN = (toRomaji(line.substring(newKana.length + pos)[0]) == "n");
     newKana.romanizations = getRomanizations(line.substring(pos, newKana.length + pos));
     if (line[pos] == "ん" && isNextN) {
@@ -154,8 +154,8 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
     if(line.length <= position) return;
     const newPrefix = prefix + e.key;
     const filteredRomanizations = romanizations.filter(s => s.substring(0, newPrefix.length) == newPrefix);
-    console.log("fuck");
-    console.log(romanizations);
+    // console.log("fuck");
+    // console.log(romanizations);
     if(filteredRomanizations.length == 0) {
       keyCallback(false);
     }
@@ -194,25 +194,22 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
 
   let syllableList : JSX.Element[] = [];
   let syllablePos : number = 0;
-  syllables.forEach(({time, text}) => {
+  syllables.forEach(({time, text}, index) => {
+    let active;
     if(syllablePos + text.length <= position) {
-      syllableList.push(<LineText 
-        pos={(time - startTime) / (endTime - startTime)}
-        active={1}
-        >{text}</LineText>);
+      active = 1;
+    } else if(syllablePos > position) {
+      active = -1;
+    } else {
+      active = 0;
     }
-    else if(syllablePos > position) {
-      syllableList.push(<LineText 
+    syllableList.push(
+      <LineText 
+        key={index}
         pos={(time - startTime) / (endTime - startTime)}
-        active={-1}
-        >{text}</LineText>);
-    }
-    else {
-      syllableList.push(<LineText 
-        pos={(time - startTime) / (endTime - startTime)}
-        active={0}
-        >{text}</LineText>);
-    }
+        active={active}
+      >{text}</LineText>
+    );
     syllablePos += text.length;
   });
 

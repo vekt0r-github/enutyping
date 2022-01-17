@@ -45,13 +45,11 @@ const GameVideo = ({ yt_id, status, gameStartTime, startGame, volume } : Props) 
 
   const [player, setPlayer] = useState<YT.Player>();
 
-  const playing = status === Status.PLAYING;
-
   useEffect(() => {
     if (!player || gameStartTime) { return; }
     if (status === Status.UNSTARTED) {
       player.stopVideo();
-    } else if (playing) {
+    } else if (status === Status.STARTQUEUED) {
       player.playVideo();
     }
   }, [player, status]);
@@ -61,13 +59,15 @@ const GameVideo = ({ yt_id, status, gameStartTime, startGame, volume } : Props) 
   };
 
   const onStateChange = (e : YT.OnStateChangeEvent) => {
-    if (e.data === 1 && playing && !gameStartTime) { 
+    if (e.data === 1 && status === Status.STARTQUEUED && !gameStartTime) { 
       // playing and should be playing and didn't start game
       startGame();
     }
   };
 
   const f = () => {console.log("We Done FUcked Up")};
+
+  const playing = status === Status.PLAYING;
 
   return (
     <VideoContainer>

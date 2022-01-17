@@ -18,7 +18,7 @@ export type LineData = {
   }[],
 };
 
-export enum Status { UNSTARTED, PLAYING, ENDED };
+export enum Status { UNSTARTED, STARTQUEUED, PLAYING, ENDED };
 
 type Props = {
   user: User,
@@ -136,19 +136,34 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
 
   const prepareStartGame = () => {
     if (status !== Status.UNSTARTED) { return; }
-    set('status', Status.PLAYING);
+    set('status', Status.STARTQUEUED);
   }
 
   const startGame = () => {
-    set('gameStartTime', new Date().getTime() + offset);
+    if (status !== Status.STARTQUEUED) { return; }
+    setGameState((state) => ({ ...state,
+      status: Status.PLAYING,
+      gameStartTime: new Date().getTime() + offset,
+    }));
+  };
+
+  useEffect(() => {
+    // start game-- status must change to PLAYING
+    // will cancel all game actions if status changes from PLAYING
+    if (status !== Status.PLAYING) { return; }
+    let timeoutIds : NodeJS.Timeout[] = [];
     lines.forEach((line) => {
       // if this loop is too slow, save original time and reference
-      setTimeout(() => {
+      timeoutIds.push(setTimeout(() => {
         set('currLine', line);
-      }, line.startTime + offset);
+      }, line.startTime + offset));
     });
-    setTimeout(endGame, lines[lines.length - 1].endTime + offset);
-  };
+    const endTime = lines[lines.length-1].endTime;
+    timeoutIds.push(setTimeout(endGame, endTime + offset));
+    return () => {
+      timeoutIds.forEach((id) => clearTimeout(id));
+    };
+  }, [status]);
 
   const endGame = () => {
     setGameState((state) => ({ ...state,
