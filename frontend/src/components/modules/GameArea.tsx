@@ -6,7 +6,7 @@ import Volume from "@/components/modules/Volume";
 import GameLine from "@/components/modules/GameLine";
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import {} from '@/utils/styles';
+import { SubBox } from '@/utils/styles';
 
 export type LineData = {
   startTime: number,
@@ -46,11 +46,11 @@ const BottomHalf = styled.div`
   height: 50%;
 `;
 
-const StatBox = styled.div`
-  width: calc(200px - 2 * var(--s));
+const StatBox = styled(SubBox)`
+  flex-basis: 0;
+  flex-grow: 1;
   height: auto;
   margin: var(--s);
-  background-color: white;
 `;
 
 const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {

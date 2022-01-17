@@ -23,6 +23,12 @@ type Kana = {
   suffix: string
 }
 
+type State = {
+  position: number, // in terms of kana (or letters) in joined syllables
+  curKana: Kana,
+  typedLine: string, // the correct keystrokes user has typed
+}
+
 const LineContainer = styled.div`
   width: 100%;
   background-color: white;
@@ -77,12 +83,14 @@ const kanaRespellings = {
 };
 
 const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
-  const [position, setPosition] = useState<number>(0);
-  const [curKana, setCurKana] = useState<Kana>({length: 0, romanizations: [], prefix: "", suffix: ""});
-  const [typedLine, setTypedLine] = useState<string>("");
+  const [state, setState] = useState<State>({
+    position: 0,
+    curKana: {length: 0, romanizations: [], prefix: "", suffix: ""},
+    typedLine: "",
+  });
+
+  const {position, curKana, typedLine} = state;
   const {length, romanizations, prefix, suffix} = curKana;
-
-
   const {startTime, endTime, lyric, syllables} = lineData;
   const line = syllables.map(s => s.text).join('');
 
@@ -117,29 +125,26 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
     return normals.concat(weirds);
   };
 
-  const populateNextKana = (pos: number) => {
+  const computeKanaAt = (pos: number) => {
     let newKana: Kana = {length: 1, romanizations: [], prefix: "", suffix: ""};
-    if(pos >= line.length) {
-      newKana.prefix = "";
+    if (pos >= line.length) { return newKana; }
+
+    newKana.length = 1;
+    if (line[pos] == "っ") {
+      newKana.length++;
     }
-    else {
-      newKana.length = 1;
-      if(line[pos] == "っ") {
-        newKana.length++;
-      }
-      if(smallKana.includes(line[pos + newKana.length])) {
-        newKana.length++;
-      } 
-      console.log(newKana.length);
-      const isNextN = (toRomaji(line.substring(newKana.length + pos)[0]) == "n");
-      newKana.romanizations = getRomanizations(line.substring(pos, newKana.length + pos));
-      if(line[pos] == "ん" && isNextN) {
-      	newKana.romanizations = ["nn"];
-      }
-      newKana.suffix = newKana.romanizations[0];
-      newKana.prefix = "";
+    if (smallKana.includes(line[pos + newKana.length])) {
+      newKana.length++;
+    } 
+    console.log(newKana.length);
+    const isNextN = (toRomaji(line.substring(newKana.length + pos)[0]) == "n");
+    newKana.romanizations = getRomanizations(line.substring(pos, newKana.length + pos));
+    if (line[pos] == "ん" && isNextN) {
+      newKana.romanizations = ["nn"];
     }
-    setCurKana(newKana);
+    newKana.suffix = newKana.romanizations[0];
+    newKana.prefix = "";
+    return newKana;
   };
 
   const handleKeyPress = (e: KeyboardEvent) => {
@@ -154,11 +159,15 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
     }
     else {
       const newSuffix = filteredRomanizations[0].substring(newPrefix.length);
-      const newKana: Kana = {length: length, romanizations: filteredRomanizations, prefix: newPrefix, suffix: newSuffix};
-      setCurKana(newKana);
-      if(newSuffix == "") {
-        setPosition(position + length);
-	setTypedLine((s) => s + newPrefix);
+      if (newSuffix !== "") {
+        const newKana: Kana = {length: length, romanizations: filteredRomanizations, prefix: newPrefix, suffix: newSuffix};
+        setState((state) => ({ ...state, curKana: newKana }));
+      } else {
+        setState(({position, typedLine}) => {
+          position += length;
+          typedLine += newPrefix;
+          return {position, curKana: computeKanaAt(position), typedLine};
+        });
       }
       keyCallback(true);
     }
@@ -166,13 +175,12 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
   };
 
   useEffect(() => {
-    setPosition(0);
-    setTypedLine("");
+    setState({
+      position: 0,
+      curKana: computeKanaAt(0),
+      typedLine: "",
+    });
   }, [lineData]);
-
-  useEffect(() => {
-    populateNextKana(position);
-  }, [position, lineData]);
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyPress);
