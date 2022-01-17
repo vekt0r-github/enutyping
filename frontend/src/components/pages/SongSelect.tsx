@@ -1,6 +1,8 @@
 import React, { useEffect, useState }  from "react";
 import { Navigate } from "react-router-dom";
 
+import YTThumbnail from "@/components/modules/YTThumbnail";
+
 import { get, post } from "@/utils/functions";
 import { User, Beatmap } from "@/utils/types";
 
@@ -41,11 +43,6 @@ const SongBox = styled(MainBox)`
   }
 `;
 
-const Thumbnail = styled.img`
-  width: 120px;
-  height: 90px;
-`;
-
 const Info = styled.div`
   margin-left: var(--s);
   min-width: 0;
@@ -73,7 +70,7 @@ const SongSelect = ({ user, volume, setVolume } : Props) => {
       <SongsContainer>
         {maps?.map((map) => 
           <SongBox as={Link} to={`/play/${map.id}`} key={map.id}>
-            <Thumbnail src={`http://img.youtube.com/vi/${map.yt_id}/default.jpg`} />
+            <YTThumbnail yt_id={map.yt_id} width={120} height={90} />
             <Info>
               <Line size='1.25em' as='h2'>{map.title}</Line>
               <Line size='1em'>by {map.artist}</Line>

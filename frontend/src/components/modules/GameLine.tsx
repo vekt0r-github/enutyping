@@ -148,7 +148,9 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
   };
 
   const handleKeyPress = (e: KeyboardEvent) => {
-    // TODO: handle japanese input as well
+    if (["Escape"].includes(e.key)) {
+      return; // GameArea is handling it
+    }
     if(line.length <= position) return;
     const newPrefix = prefix + e.key;
     const filteredRomanizations = romanizations.filter(s => s.substring(0, newPrefix.length) == newPrefix);
@@ -188,7 +190,7 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
     return () => {
       document.removeEventListener("keydown", handleKeyPress);
     }
-  }, [position, lineData, prefix, suffix]);
+  }, [lineData, state]); // any change in state affects the listener
 
   let syllableList : JSX.Element[] = [];
   let syllablePos : number = 0;

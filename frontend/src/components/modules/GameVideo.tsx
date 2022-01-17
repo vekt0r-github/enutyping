@@ -1,47 +1,68 @@
 import React, { useState, useEffect } from "react";
 import YouTube from "@u-wave/react-youtube";
 
-import styled from 'styled-components';
+import YTThumbnail from "@/components/modules/YTThumbnail";
+
+import { Status } from "@/components/modules/GameArea";
+
+import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
 import {} from '@/utils/styles';
 
 type Props = {
-  source: string,
-  started: boolean,
+  yt_id: string,
+  status: Status,
   gameStartTime?: number,
   startGame: () => void,
   volume: number,
   // setDuration: React.Dispatch<React.SetStateAction<number>>,
 }
 
-const Youtube = styled(YouTube)`
-  pointer-events: none;
+const VideoContainer = styled.div`
+  width: calc(var(--game-width) / 2);
+  height: calc(var(--game-height) / 2);
+  position: relative;
 `;
 
-const GameVideo = ({ source, started, gameStartTime, startGame, volume } : Props) => {
-  if (!source) { return null; }
+const Video = styled(YouTube)<{show: boolean}>`
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+  ${(props) => !props.show ? css`
+    display: none
+  ` : ''};
+`;
+
+const Overlay = styled(YTThumbnail)`
+  position: absolute;
+  z-index: 1;
+`;
+
+const GameVideo = ({ yt_id, status, gameStartTime, startGame, volume } : Props) => {
+  if (!yt_id) { return null; }
+  const source = `https://www.youtube.com/watch?v=${yt_id}`;
   const videoCode = source.split("v=")[1].split("&")[0];
 
   const [player, setPlayer] = useState<YT.Player>();
 
-  useEffect(() => {
-    if (!player || !started) { return; }
-    player.playVideo();
-  }, [player, started]);
+  const playing = status === Status.PLAYING;
 
   useEffect(() => {
-    if (!player) {
-      return;
+    if (!player || gameStartTime) { return; }
+    if (status === Status.UNSTARTED) {
+      player.stopVideo();
+    } else if (playing) {
+      player.playVideo();
     }
-    // setDuration(player.getDuration());
-  }, [player]);
+  }, [player, status]);
 
   const onReady = (e : YT.PlayerEvent) => {
     setPlayer(e.target);
   };
 
   const onStateChange = (e : YT.OnStateChangeEvent) => {
-    if (e.data === 1 && !gameStartTime) { // playing and hasn't started before
+    if (e.data === 1 && playing && !gameStartTime) { 
+      // playing and should be playing and didn't start game
       startGame();
     }
   };
@@ -49,25 +70,31 @@ const GameVideo = ({ source, started, gameStartTime, startGame, volume } : Props
   const f = () => {console.log("We Done FUcked Up")};
 
   return (
-    <Youtube
-      video={videoCode}
-      width={400}
-      height={300}
-      volume={volume}
-      paused={false}
-      showCaptions={false}
-      controls={false}
-      disableKeyboard={true}
-      allowFullscreen={false}
-      annotations={false}
-      modestBranding={true}
-      playsInline={true}
-      showRelatedVideos={false}
-      onReady={onReady}
-      onStateChange={onStateChange}
-      onBuffering={f}
-      onPause={f}
-    />
+    <VideoContainer>
+      <Video
+        video={videoCode}
+        show={playing}
+        width={400}
+        height={300}
+        volume={volume}
+        paused={false}
+        showCaptions={false}
+        controls={false}
+        disableKeyboard={true}
+        allowFullscreen={false}
+        annotations={false}
+        modestBranding={true}
+        playsInline={true}
+        showRelatedVideos={false}
+        onReady={onReady}
+        onStateChange={onStateChange}
+        onBuffering={f}
+        onPause={f}
+      />
+      {!playing ? 
+        <Overlay yt_id={yt_id} width={400} height={300} />
+        : null}
+    </VideoContainer>
   );
 }
 

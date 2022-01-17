@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { User, Beatmap } from "@/utils/types";
 
 import GameVideo from "@/components/modules/GameVideo";
@@ -6,7 +6,7 @@ import Volume from "@/components/modules/Volume";
 import GameLine from "@/components/modules/GameLine";
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { SubBox } from '@/utils/styles';
+import { SubBox, Line } from '@/utils/styles';
 
 export type LineData = {
   startTime: number,
@@ -16,14 +16,24 @@ export type LineData = {
     time: number,
     text: string,
   }[],
-}
+};
+
+export enum Status { UNSTARTED, PLAYING, ENDED };
 
 type Props = {
   user: User,
   beatmap: Beatmap,
   volume: number,
   setVolume: React.Dispatch<React.SetStateAction<number>>,
-}
+};
+
+type GameState = {
+  status: Status,
+  gameStartTime?: number,
+  currLine?: LineData,
+  hits: number,
+  misses: number,
+};
 
 const GameContainer = styled.div`
   width: var(--game-width);
@@ -33,6 +43,7 @@ const GameContainer = styled.div`
   margin: var(--s);
   padding: 0;
   background-color: var(--clr-primary-light);
+  position: relative;
 `;
 
 const TopHalf = styled.div`
@@ -53,19 +64,47 @@ const StatBox = styled(SubBox)`
   margin: var(--s);
 `;
 
+const Overlay = styled.div`
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-color: #0006;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  & > ${Line} {
+    width: 100%;
+    text-align: center;
+    font-style: italic;
+  }
+`;
+
 const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
-  const [started, setStarted] = useState<boolean>(false);
+  const [gameState, setGameState] = useState<GameState>({
+    status: Status.UNSTARTED,
+    gameStartTime: undefined, 
+    currLine: undefined, // maintained via timer independent of video
+    hits: 0,
+    misses: 0,
+  });
+  const set = <K extends keyof GameState>(
+    prop : K, 
+    val : GameState[K] | ((oldState: GameState[K]) => GameState[K]),
+  ) => {
+    setGameState((state) => ({ ...state, 
+      [prop]: typeof val === "function" ? val(state[prop]) : val,
+    }))
+  };
   const [offset, setOffset] = useState<number>(0);
-  // these are maintained via timer independent of video
-  const [gameStartTime, setGameStartTime] = useState<number>();
-  const [currLine, setCurrLine] = useState<LineData>();
 
   // from iframe API; in seconds, rounded? maybe
   // maybe need later but idk
   // const [duration, setDuration] = useState<number>(Infinity);
 
-  const [hits, setHits] = useState<number>(0);
-  const [misses, setMisses] = useState<number>(0);
+  const {status, gameStartTime, currLine, hits, misses} = gameState;
 
   let lines : LineData[] = [];
   (() => { // process beatmap "file"
@@ -96,24 +135,55 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
   })();
 
   const prepareStartGame = () => {
-    if (started) { return; }
-    setStarted(true); // let them know we've started
-  };
+    if (status !== Status.UNSTARTED) { return; }
+    set('status', Status.PLAYING);
+  }
 
   const startGame = () => {
-    setGameStartTime(new Date().getTime() + offset);
+    set('gameStartTime', new Date().getTime() + offset);
     lines.forEach((line) => {
       // if this loop is too slow, save original time and reference
       setTimeout(() => {
-        setCurrLine(line);
+        set('currLine', line);
       }, line.startTime + offset);
     });
     setTimeout(endGame, lines[lines.length - 1].endTime + offset);
   };
 
   const endGame = () => {
-    setCurrLine(undefined);
-  }
+    setGameState((state) => ({ ...state,
+      status: Status.ENDED,
+      gameStartTime: undefined,
+      currLine: undefined,
+    }));
+  };
+
+  const resetGame = () => {
+    setGameState((state) => ({ ...state,
+      status: Status.UNSTARTED,
+      hits: 0,
+      misses: 0,
+    }));
+  };
+
+  const onKeyPress = (e: KeyboardEvent) => {
+    if (e.key === " ") { // send signal to start game
+      e.preventDefault();
+      e.stopPropagation();
+      prepareStartGame();
+    };
+    if (e.key === "Escape") {
+      if (status === Status.PLAYING) { endGame(); } 
+      if (status === Status.ENDED) { resetGame(); } 
+    }
+  };
+  
+  useEffect(() => {
+    document.addEventListener("keydown", onKeyPress);
+    return () => {
+      document.removeEventListener("keydown", onKeyPress);
+    }
+  }, [status]); // may eventually depend on other things
 
   const acc = (() => {
     const hitCount = hits;
@@ -126,17 +196,16 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
 
   const keyCallback = (hit: boolean) => {
     if(hit) {
-      setHits((oldHits) => oldHits + 1);
+      set('hits', (oldHits) => oldHits + 1);
     }
     else {
-      setMisses((oldMisses) => oldMisses + 1);
+      set('misses', (oldMisses) => oldMisses + 1);
     }
   }
 
   return (
     <GameContainer>
       <TopHalf>
-        <button onClick={prepareStartGame}>start</button>
         offset: <input defaultValue='0' onChange={(e) => {
           const intValue = parseInt(e.target.value)
           if (!isNaN(intValue)) { setOffset(intValue); }
@@ -152,12 +221,15 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
             keyCallback={keyCallback}
           />
         </> : null}
+        {status === Status.ENDED ?
+          <h2>YOUR SCORE IS 727</h2>
+          : null} 
       </TopHalf>
       <BottomHalf>
         <StatBox>Acc: {acc.toFixed(2)}</StatBox>
         <GameVideo
-          source={beatmap.source}
-          started={started}
+          yt_id={beatmap.yt_id}
+          status={status}
           gameStartTime={gameStartTime}
           startGame={startGame}
           volume={volume}
@@ -165,6 +237,12 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
         />
         <StatBox>,</StatBox>
       </BottomHalf>
+      {status === Status.UNSTARTED ? 
+        <Overlay onClick={prepareStartGame}>
+          <Line size="1.5em">Click or press Space to play</Line>
+          <Line size="1em">Press Esc to exit during a game</Line>
+        </Overlay>
+        : null}
     </GameContainer>
   );
 }
