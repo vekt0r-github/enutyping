@@ -8,8 +8,9 @@ module.exports = {
   entry: entryFile,
   output: {
     path: outputDir,
-    publicPath: "/",
+    publicPath: "/static/",
     filename: 'bundle.js',
+    clean: true,
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
