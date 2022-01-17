@@ -2,7 +2,7 @@ const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 const entryFile = path.resolve(__dirname, 'src', 'index.tsx');
-const outputDir = path.resolve(__dirname, 'src', 'public');
+const outputDir = path.resolve(__dirname, 'build');
 
 module.exports = {
   entry: entryFile,
@@ -51,6 +51,7 @@ module.exports = {
     // MAYBE HMR plugin?
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'src/public/index.html'),
+      favicon: path.resolve(__dirname, 'src/public/favicon.ico'),
     }),
   ],
   devServer: {

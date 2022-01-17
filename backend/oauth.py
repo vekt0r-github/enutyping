@@ -9,10 +9,12 @@ OAUTH_SECRET_KEY = os.environ.get("FLASK_SECRET_KEY", "supersekritsfasdfsaflksjf
 REQUEST_AUTH_URL = 'https://github.com/login/oauth/authorize'
 REQUEST_TOKEN_URL = 'https://github.com/login/oauth/access_token'
 
+REDIRECT_URL = os.environ.get('OAUTH_REDIRECT_URL', 'http://localhost:8000/login')
+
 # TODO: have base_url instead of localhost
 
 class OAuth():
-    def __init__(self, redirect_uri = None):
+    def __init__(self, redirect_uri = REDIRECT_URL):
         self.redirect_uri = redirect_uri
 
     def request_url(self):

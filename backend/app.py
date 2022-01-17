@@ -8,7 +8,8 @@ from models import User
 from schemas import UserSchema
 from api import api
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="../frontend/build", static_url_path='/')
+
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "supersekritsfasdfsaflksjfajlksjfsk")
 app.register_blueprint(api, url_prefix='/api')
 
@@ -16,7 +17,11 @@ app.register_blueprint(api, url_prefix='/api')
 def shutdown_session(exception=None):
     db_session.remove()
 
-# TODO, api start probably nice
+@app.route('/', defaults={'path': ''})
+@app.route('/<string:path>')
+@app.route('/<path:path>')
+def index(path):
+    return app.send_static_file('index.html')
 
 @app.route('/api/login/', methods = ['GET'])
 def login():
