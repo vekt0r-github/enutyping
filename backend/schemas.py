@@ -20,7 +20,7 @@ class BeatmapSchema(Schema):
     id = fields.Int(dump_only=True)
     artist = fields.Str()
     title = fields.Str()
-    source = fields.Str()
+    yt_id = fields.Str()
     # scores = fields.Nested(scores_schema)
     content = fields.Str()
 

@@ -10,6 +10,10 @@ type Props = {
   user: User,
 };
 
+const InfoBox = styled(MainBox)`
+  max-width: 300px;
+`;
+
 const Home = ({ user } : Props) => {
   return (
     <>
@@ -18,12 +22,12 @@ const Home = ({ user } : Props) => {
         <p>You are logged in as {user.name} with id {user.id}</p>
         :
         <p>You are not logged in.</p>}
-      <MainBox>
+      <InfoBox>
         HOOLESU
         <SubBox>
           this page is just pretending to be the osu front page i think
         </SubBox>
-      </MainBox>
+      </InfoBox>
     </>
   );
 }

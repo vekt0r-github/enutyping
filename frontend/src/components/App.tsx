@@ -19,13 +19,17 @@ import '@/utils/styles.css';
 type Props = {};
 
 const Content = styled.div`
-  padding: var(--s); /* if you want */
   margin: 0;
   box-sizing: border-box;
   width: 100%;
   height: calc(100% - var(--content-offset));
   position: absolute;
   top: var(--content-offset);
+
+  /* force a default layout onto multi-component pages */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const App = ({} : Props) => {

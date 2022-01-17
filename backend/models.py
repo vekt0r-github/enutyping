@@ -18,14 +18,14 @@ class Beatmap(Base):
     id = Column(Integer, primary_key=True)
     artist = Column(String(50))
     title = Column(String(50))
-    source = Column(String(100))
+    yt_id = Column(String(100))
     content = deferred(Column(UnicodeText))
     scores = relationship('Score', back_populates='beatmap')
 
-    def __init__(self, artist, title, source, content, id = None):
+    def __init__(self, artist, title, yt_id, content, id = None):
         self.artist = artist
         self.title = title
-        self.source = source
+        self.yt_id = yt_id
         self.content = content
         self.id = id
 
@@ -55,19 +55,19 @@ def init_db():
         User(id=4321, name='songenjoyer'),
         Beatmap(id=727, artist='Nanahira', \
                         title='Nanahira singing from the window to a fucking van', \
-                        source='https://www.youtube.com/watch?v=9USxPiJzdv0', \
+                        yt_id='9USxPiJzdv0', \
                         content=content),
         Beatmap(id=1337, artist='Nekomata Okayu', \
                          title='flos', \
-                         source='https://www.youtube.com/watch?v=4muYzftomAE', \
+                         yt_id='4muYzftomAE', \
                          content=flos_content),
         Beatmap(id=272, artist='YOASOBI', \
                          title='Yoru ni Kakeru', \
-                         source='https://www.youtube.com/watch?v=xtfXl7TZTac', \
+                         yt_id='xtfXl7TZTac', \
                          content=yorunicontent),
         Beatmap(id=2727, artist='idk', \
                          title='dev map', \
-                         source='https://www.youtube.com/watch?v=xtfXl7TZTac', \
+                         yt_id='xtfXl7TZTac', \
                          content=test_map_content),
         Score(user_id=1234, beatmap_id=727, score=727),
         Score(user_id=4321, beatmap_id=727, score=72727),

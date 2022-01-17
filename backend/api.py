@@ -18,6 +18,10 @@ def login_required(f):
         return f(*args, **kwds)
     return wrapper
 
+def process_beatmap(beatmap):
+    source = f"https://www.youtube.com/watch?v={beatmap['yt_id']}"
+    return { **beatmap, 'source' : source }
+
 @api.route('/users/<int:user_id>', methods=['GET'])
 def get_user(user_id):
     user = User.query.get(user_id)
@@ -39,14 +43,15 @@ def get_beatmap_scores(beatmap_id):
         abort(404, description = 'Beatmap not found')
     beatmap_result = beatmap_schema.dump(beatmap)
     scores_result = scores_schema.dump(beatmap.scores)
-    return { **beatmap_result, 'scores' : scores_result }
+    return { **process_beatmap(beatmap_result), 'scores' : scores_result }
 
 @api.route('/beatmaps')
 def get_beatmap_list():
     search_query = request.args.get('search', '')
     title_result = Beatmap.query.filter(Beatmap.title.ilike('%' + search_query + '%')).all()
     # https://softwareengineering.stackexchange.com/questions/286293/whats-the-best-way-to-return-an-array-as-a-response-in-a-restful-api
-    return { 'beatmaps': beatmaps_metadata_schema.dump(title_result) }
+    beatmap_results = beatmaps_metadata_schema.dump(title_result)
+    return { 'beatmaps': list(map(process_beatmap, beatmap_results)) }
 
 @api.route('/scores', methods=['POST'])
 @login_required

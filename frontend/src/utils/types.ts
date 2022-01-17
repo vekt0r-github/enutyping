@@ -14,7 +14,8 @@ export type Beatmap = { // example
   id: number;
   artist: string;
   title: string;
-  source: string;
+  yt_id: string;
+  source: string; // created from yt_id on backend
   content?: string;
   scores?: Score[];
 };

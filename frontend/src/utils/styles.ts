@@ -9,7 +9,6 @@ const Box = styled.div`
 
 export const MainBox = styled(Box)`
   background-color: var(--clr-primary);
-  max-width: 300px;
 `;
 
 export const SubBox = styled(Box)`
