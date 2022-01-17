@@ -23,7 +23,7 @@ def login():
     auth = oauth.OAuth()
     return redirect(auth.request_url())
 
-@app.route('/api/logout/', methods = ['POST'])
+@app.route('/api/logout', methods = ['POST'])
 def logout():
     session.pop('user', None)
     return redirect('/')

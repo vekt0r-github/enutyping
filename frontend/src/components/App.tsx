@@ -8,6 +8,7 @@ import Login from "@/components/pages/Login";
 import SongSelect from "@/components/pages/SongSelect";
 import Game from "@/components/pages/Game";
 import NotFound from "@/components/pages/NotFound";
+import UserPage from "@/components/pages/UserPage";
 
 import { get, post } from "@/utils/functions";
 import { User } from "@/utils/types";
@@ -86,12 +87,9 @@ const App = ({} : Props) => {
                 setVolume={setVolume}
               />
             }/>
-            {/* <Route path="/user/:userId" element={
-              <UserPage user={user} />
+            <Route path="/user/:userId" element={
+              <UserPage />
             }/>
-            <Route path="/account" element={
-              <Account user={user} />
-            }/> */}
             <Route path="*" element={
               <NotFound />
             }/>

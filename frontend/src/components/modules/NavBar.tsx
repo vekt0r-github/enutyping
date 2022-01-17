@@ -53,7 +53,7 @@ const NavBar = ({ handleLogout, user } : Props) => (
       Logo
       <NavBarLink as={NavLink} to="/">Home</NavBarLink>
       <NavBarLink as={NavLink} to="/play">Play</NavBarLink>
-      <NavBarLink as={NavLink} to="/account">Account</NavBarLink>
+      {user && <NavBarLink as={NavLink} to={`/user/${user.id}`}>Account</NavBarLink>}
     </div>
     <Spacer />
     <div>
