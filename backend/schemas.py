@@ -11,7 +11,8 @@ class ScoreSchema(Schema):
     id = fields.Int(dump_only=True)
     beatmap_id = fields.Int()
     score = fields.Int()
-    user = fields.Nested(UserSchema(only=("name", "id")))
+    user_id = fields.Int(load_only=True)
+    user = fields.Nested(UserSchema(only=("name", "id")), dump_only=True)
 
 score_schema = ScoreSchema()
 scores_schema = ScoreSchema(many=True)

@@ -19,7 +19,7 @@ export type LineData = {
   }[],
 };
 
-export enum Status { UNSTARTED, STARTQUEUED, PLAYING, ENDED };
+export enum Status { UNSTARTED, STARTQUEUED, PLAYING, SUBMITTING, ENDED };
 
 type Props = {
   user: User,
@@ -165,11 +165,32 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
       }, line.startTime + offset));
     });
     const endTime = lines[lines.length-1].endTime;
-    timeoutIds.push(setTimeout(endGame, endTime + offset));
+    timeoutIds.push(setTimeout(submitScore, endTime + offset));
     return () => {
       timeoutIds.forEach((id) => clearTimeout(id));
     };
   }, [status]);
+
+  useEffect(() => {
+    if (status !== Status.SUBMITTING) { return; }
+    const data = {
+      beatmap_id: beatmap.id,
+      user_id: user?.id,
+      score: gameState.score,
+    }
+    post('/api/scores', data).then((score) => {
+      console.log(score);
+      endGame();
+    });
+  }, [status]);
+
+  const submitScore = () => {
+    setGameState((state) => ({ ...state,
+      status: Status.SUBMITTING,
+      gameStartTime: undefined,
+      currLine: undefined,
+    }));
+  };
 
   const endGame = () => {
     setGameState((state) => ({ ...state,
@@ -238,6 +259,9 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
             keyCallback={keyCallback}
           />
         </> : null}
+        {status === Status.SUBMITTING ?
+          <h2>Submitting score...</h2>
+          : null}
         {status === Status.ENDED ?
           <h2>YOUR SCORE IS {score}</h2>
           : null} 
