@@ -87,7 +87,7 @@ const Overlay = styled.div`
 `;
 
 const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
-  const [gameState, setGameState] = useState<GameState>({
+  const initState = () : GameState => ({
     status: Status.UNSTARTED,
     gameStartTime: undefined, 
     currLine: undefined, // maintained via timer independent of video
@@ -95,6 +95,7 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
     misses: 0,
     score: 0,
   });
+  const [gameState, setGameState] = useState<GameState>(initState());
   const set = <K extends keyof GameState>(
     prop : K, 
     val : GameState[K] | ((oldState: GameState[K]) => GameState[K]),
@@ -179,13 +180,9 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
   };
 
   const resetGame = () => {
-    setGameState((state) => ({ ...state,
-      status: Status.UNSTARTED,
-      hits: 0,
-      misses: 0,
-    }));
+    setGameState(initState());
   };
-
+  
   const onKeyPress = (e: KeyboardEvent) => {
     if (e.key === " ") { // send signal to start game
       e.preventDefault();

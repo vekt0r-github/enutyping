@@ -96,9 +96,9 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
 
   const initState = () : State => ({
     position: [0, 0],
-    syllables: lineData.syllables.map((syllable) => ({
+    syllables: lineData.syllables.map((syllable, i, arr) => ({
       ...syllable,
-      kana: parseKana(syllable.text).map(initKanaState),
+      kana: parseKana(syllable.text, arr[i+1]?.text).map(initKanaState),
     })),
     nBuffer: false,
   });

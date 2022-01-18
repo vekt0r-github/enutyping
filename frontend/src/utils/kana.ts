@@ -57,7 +57,7 @@ const getRomanizations = (kana: string) : string[] => {
   return normals.concat(weirds);
 };
 
-const computeKanaAt = (pos: number, syllable: string) => {
+const computeKanaAt = (pos: number, syllable: string, nextSyllable?: string) => {
   let newKana: Kana = {text: "", romanizations: []};
   if (pos >= syllable.length) { return newKana; }
 
@@ -68,20 +68,22 @@ const computeKanaAt = (pos: number, syllable: string) => {
   if (smallKana.includes(syllable[pos + length])) {
     length++;
   } 
-  // console.log(length);
-  const isNextN = (toRomaji(syllable.substring(length + pos))[0] == "n");
+  // n's are doubled before あ、な、や etc., carrying across syllables, but not across lines
+  let future = syllable.substring(length + pos); // anything that starts with the next char
+  if (future === "") { future = nextSyllable ?? "a"; } // want end of line to be doubled
+  const isDoubledN = ("aeiouny".includes(toRomaji(future)[0]));
   newKana.text = syllable.substring(pos, length + pos);
   newKana.romanizations = getRomanizations(newKana.text);
-  if (syllable[pos] == "ん" && isNextN) {
+  if (syllable[pos] == "ん" && isDoubledN) {
     newKana.romanizations = ["nn"];
   }
   return newKana;
 };
 
-export const parseKana = (syllable: string) => {
+export const parseKana = (syllable: string, nextSyllable?: string) => {
   let kana = [];
   for (let pos = 0; pos < syllable.length; ) {
-    const newKana = computeKanaAt(pos, syllable);
+    const newKana = computeKanaAt(pos, syllable, nextSyllable);
     kana.push(newKana);
     pos += newKana.text.length;
   }
