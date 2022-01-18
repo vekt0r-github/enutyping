@@ -7,6 +7,7 @@ import GameLine from "@/components/modules/GameLine";
 import styled from 'styled-components';
 import '@/utils/styles.css';
 import { SubBox, Line } from '@/utils/styles';
+import { post } from '@/utils/functions';
 
 export type LineData = {
   startTime: number,
@@ -33,6 +34,7 @@ type GameState = {
   currLine?: LineData,
   hits: number,
   misses: number,
+  score: number
 };
 
 const GameContainer = styled.div`
@@ -91,6 +93,7 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
     currLine: undefined, // maintained via timer independent of video
     hits: 0,
     misses: 0,
+    score: 0,
   });
   const set = <K extends keyof GameState>(
     prop : K, 
@@ -106,7 +109,7 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
   // maybe need later but idk
   // const [duration, setDuration] = useState<number>(Infinity);
 
-  const {status, gameStartTime, currLine, hits, misses} = gameState;
+  const {status, gameStartTime, currLine, hits, misses, score} = gameState;
 
   let lines : LineData[] = [];
   (() => { // process beatmap "file"
@@ -211,12 +214,16 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
     return 100 * hitCount / (hitCount + missCount);
   })();
 
-  const keyCallback = (hit: boolean) => {
+  const keyCallback = (hit: boolean, endKana: boolean) => {
     if(hit) {
       set('hits', (oldHits) => oldHits + 1);
+      if(endKana) {
+        set('score', (oldScore) => oldScore + 10);
+      }
     }
     else {
       set('misses', (oldMisses) => oldMisses + 1);
+      set('score', (oldScore) => oldScore - 5);
     }
   }
 
@@ -239,7 +246,7 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
           />
         </> : null}
         {status === Status.ENDED ?
-          <h2>YOUR SCORE IS 727</h2>
+          <h2>YOUR SCORE IS {score}</h2>
           : null} 
       </TopHalf>
       <BottomHalf>
@@ -252,7 +259,7 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
           volume={volume}
           // setDuration={setDuration}
         />
-        <StatBox>,</StatBox>
+        <StatBox>Score: {score}</StatBox>
       </BottomHalf>
       {status === Status.UNSTARTED ? 
         <Overlay onClick={prepareStartGame}>

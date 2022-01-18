@@ -23,7 +23,7 @@ const kanaRespellings = {
   ko: ["ko", "co"],
   se: ["se", "ce"],
   fu: ["fu", "hu"],
-  nn: ["n", "nn"]
+  n: ["n", "nn"]
 };
 
 const getRomanizations = (kana: string) : string[] => {
@@ -69,7 +69,7 @@ const computeKanaAt = (pos: number, syllable: string) => {
     length++;
   } 
   // console.log(length);
-  const isNextN = (toRomaji(syllable.substring(length + pos)[0]) == "n");
+  const isNextN = (toRomaji(syllable.substring(length + pos))[0] == "n");
   newKana.text = syllable.substring(pos, length + pos);
   newKana.romanizations = getRomanizations(newKana.text);
   if (syllable[pos] == "ん" && isNextN) {

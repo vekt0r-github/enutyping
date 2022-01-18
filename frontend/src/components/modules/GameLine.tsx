@@ -18,7 +18,7 @@ type KanaState = {
 type Props = {
   gameStartTime: number,
   lineData: LineData,
-  keyCallback: (hit: boolean) => void,
+  keyCallback: (hit: boolean, endKana: boolean) => void,
 }
 
 type Position = [number, number]; // syllable index, kana index
@@ -30,6 +30,7 @@ type State = {
     text: string,
     kana: KanaState[],
   }[], 
+  nBuffer: boolean,
 }
 
 enum ActiveStatus { PAST, PRESENT, FUTURE };
@@ -99,13 +100,13 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
       ...syllable,
       kana: parseKana(syllable.text).map(initKanaState),
     })),
+    nBuffer: false,
   });
   const [state, setState] = useState<State>(initState());
   useEffect(() => setState(initState()), [lineData]);
 
-  const {position, syllables} = state;
+  const {position, syllables, nBuffer} = state;
   const getKana = (pos : Position) : KanaState | undefined => syllables[pos[0]]?.kana[pos[1]];
-
   const handleKeyPress = (e: KeyboardEvent) => {
     if (["Escape"].includes(e.key)) { return; } // GameArea is handling it
     const curKana = getKana(position);
@@ -113,24 +114,30 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
     const {kana, prefix} = curKana;
     const newPrefix = prefix + e.key;
     const filteredRomanizations = kana.romanizations.filter(s => s.substring(0, newPrefix.length) == newPrefix);
-    // console.log("fuck");
-    // console.log(romanizations);
+
+    if(e.key == "n" && nBuffer) {
+	setState((s: State) => ({ ...s, nBuffer: false }));
+	keyCallback(true, false);
+	return;
+    }
+    
     if(filteredRomanizations.length == 0) {
-      keyCallback(false);
+      keyCallback(false, false);
     }
     else {
       const newSuffix = filteredRomanizations[0].substring(newPrefix.length);
       const newKana: KanaState = {kana: kana, prefix: newPrefix, suffix: newSuffix};
-      setState(({position, syllables}) => {
+      setState(({position, syllables, nBuffer}) => {
         syllables[position[0]].kana[position[1]] = newKana; // should be safe
         if (newSuffix === "") {
           position[1]++;
           if (!getKana(position)) { position = [position[0] + 1, 0]; } // carry to next syllable
           // if getKana(position) still undefined, line is over
+	  nBuffer = (newPrefix === "n" && newKana.kana.text == "ん");
         }
-        return {position, syllables};
+        return {position, syllables, nBuffer};
       });
-      keyCallback(true);
+      keyCallback(true, newSuffix === "");
     }
   };
 
