@@ -182,7 +182,7 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
   const resetGame = () => {
     setGameState(initState());
   };
-  
+
   const onKeyPress = (e: KeyboardEvent) => {
     if (e.key === " ") { // send signal to start game
       e.preventDefault();
@@ -227,10 +227,6 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
   return (
     <GameContainer>
       <TopHalf>
-        offset: <input defaultValue='0' onChange={(e) => {
-          const intValue = parseInt(e.target.value)
-          if (!isNaN(intValue)) { setOffset(intValue); }
-        }}></input>
         <Volume
           volume={volume}
           setVolume={setVolume}
@@ -259,9 +255,17 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
         <StatBox>Score: {score}</StatBox>
       </BottomHalf>
       {status === Status.UNSTARTED ? 
-        <Overlay onClick={prepareStartGame}>
-          <Line size="1.5em">Click or press Space to play</Line>
+        <Overlay>
+          <Line size="1.5em">Press Space to play</Line>
           <Line size="1em">Press Esc to exit during a game</Line>
+          <Line size="0.5em">&nbsp;</Line>
+          <Line size="1em">Set map offset:&nbsp;
+            <input defaultValue='0' onChange={(e) => {
+              const intValue = parseInt(e.target.value)
+              if (!isNaN(intValue)) { setOffset(intValue); }
+            }}></input>
+          </Line>
+          <Line size="1em">(Put negative offset if you think syllables are late; positive if you think they're early)</Line>
         </Overlay>
         : null}
     </GameContainer>
