@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from "react";
 
-import { toRomaji } from "wanakana";
-
 import ProgressBar from "@/components/modules/ProgressBar";
 
 import { LineData } from '@/components/modules/GameArea'
+import { Kana, parseKana } from '@/utils/kana'
 
 import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
 import {} from '@/utils/styles';
+
+type KanaState = {
+  kana: Kana,
+  prefix: string, // the correct keystrokes user has typed for this kana
+  suffix: string, // one possible romaji completion of this kana after prefix
+};
 
 type Props = {
   gameStartTime: number,
@@ -16,44 +21,67 @@ type Props = {
   keyCallback: (hit: boolean) => void,
 }
 
-type Kana = {
-  length: number,
-  romanizations: string[],
-  prefix: string,
-  suffix: string
-}
+type Position = [number, number]; // syllable index, kana index
 
 type State = {
-  position: number, // in terms of kana (or letters) in joined syllables
-  curKana: Kana,
-  typedLine: string, // the correct keystrokes user has typed
+  position: Position,
+  syllables: {
+    time: number,
+    text: string,
+    kana: KanaState[],
+  }[], 
 }
+
+enum ActiveStatus { PAST, PRESENT, FUTURE };
 
 const LineContainer = styled.div`
   width: 100%;
-  background-color: white;
+  background-color: var(--clr-grey);
 `;
 
 const Timeline = styled.div`
   width: 100%;
-  height: 50px;
+  height: 60px;
+  margin: var(--s) 0;
   position: relative;
 `;
 
+const TimelineBar = styled.div`
+  width: 100%;
+  position: absolute;
+  top: 28px;
+  left: 0;
+`;
+
+const getColorOfActiveStatus = (active : ActiveStatus) => {
+  if (active === ActiveStatus.PAST) { return 'var(--clr-darkgrey)'; }
+  if (active === ActiveStatus.PRESENT) { return 'var(--clr-link)'; }
+  return 'black';
+};
+
 const LineText = styled.span<{
-  pos?: number,
-  active: number, // <0: inactive; 0: current; >0: future
+  pos?: [string, string],
+  active: ActiveStatus,
 }>`
   font-size: 18px;
-  color: ${(props) => {
-    if (props.active < 0) { return 'var(--clr-medgrey)'; }
-    if (props.active === 0) { return 'var(--clr-link)'; }
-    return 'black';
-  }};
+  color: ${(props) => getColorOfActiveStatus(props.active)};
   ${(props) => props.pos ? css`
     position: absolute;
-    left: ${props.pos * 100}%;
+    left: ${props.pos[0]};
+    top: ${props.pos[1]};
   ` : ''}
+`;
+
+const Syllable = styled(LineText)`
+  &::before {
+    width: 2px;
+    height: 16px;
+    background-color: ${(props) => getColorOfActiveStatus(props.active)};
+    position: absolute;
+    content: "";
+    left: 4px;
+    top: 22px;
+  }
 `;
 
 const LyricLine = styled.div`
@@ -61,99 +89,30 @@ const LyricLine = styled.div`
   color: black;
 `;
 
-const smallKana = ["ょ", "ゃ", "ゅ", "ぃ", "ぇ", "ぁ", "ぉ", "ぅ"];
-
-const kanaRespellings = {
-  shi: ["shi", "si", "ci"],
-  chi: ["chi", "ti"],
-  tsu: ["tsu", "tu"],
-  ji: ["ji", "zi"],
-  sha: ["sha", "sya"],
-  sho: ["sho", "syo"],
-  shu: ["shu", "syu"],
-  ja: ["ja", "jya", "zya"],
-  jo: ["jo", "jyo", "zyo"],
-  ju: ["ju", "jyu", "zyu"],
-  ka: ["ka", "ca"],
-  ku: ["ku", "cu", "qu"],
-  ko: ["ko", "co"],
-  se: ["se", "ce"],
-  fu: ["fu", "hu"],
-  nn: ["n", "nn"]
-};
-
 const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
-  const [state, setState] = useState<State>({
-    position: 0,
-    curKana: {length: 0, romanizations: [], prefix: "", suffix: ""},
-    typedLine: "",
+  const {startTime, endTime, lyric} = lineData;
+  const initKanaState = (kana : Kana) => ({ kana, prefix: "", suffix: kana.romanizations[0] });
+
+  const initState = () : State => ({
+    position: [0, 0],
+    syllables: lineData.syllables.map((syllable) => ({
+      ...syllable,
+      kana: parseKana(syllable.text).map(initKanaState),
+    })),
   });
+  const [state, setState] = useState<State>(initState());
+  useEffect(() => setState(initState()), [lineData]);
 
-  const {position, curKana, typedLine} = state;
-  const {length, romanizations, prefix, suffix} = curKana;
-  const {startTime, endTime, lyric, syllables} = lineData;
-  const line = syllables.map(s => s.text).join('');
-
-  const getRomanizations = (kana: string) : string[] => {
-    function hasKey<O>(obj: O, key: PropertyKey): key is keyof O {
-      return key in obj; // fix ts error even though this looks stupid
-    }
-    const canonical = toRomaji(kana);
-    if (kana.length == 1) {
-      if (hasKey(kanaRespellings, canonical)) {
-        return kanaRespellings[canonical];
-      }
-      return [canonical];
-    }
-
-    // small tsu case
-    if(kana[0] == "っ") {
-      const subRomanizations = getRomanizations(kana.substring(1));
-      return ([] as string[]).concat.apply([], subRomanizations.map(r => [r[0] + r, "xtu" + r, "xtsu" + r]));
-    }
-
-    // all that's left after the first 2 cases is combinations e.g. きょ
-    let normals: string[] = [];
-    if (hasKey(kanaRespellings, canonical)) {
-      normals = kanaRespellings[canonical];
-    }
-    else normals = [canonical];
-
-    let modifierRomaji: string = toRomaji(kana[1]);
-    let weirds: string[] = getRomanizations(kana[0]).map(r => r + "x" + modifierRomaji);
-
-    return normals.concat(weirds);
-  };
-
-  const computeKanaAt = (pos: number) => {
-    let newKana: Kana = {length: 1, romanizations: [], prefix: "", suffix: ""};
-    if (pos >= line.length) { return newKana; }
-
-    newKana.length = 1;
-    if (line[pos] == "っ") {
-      newKana.length++;
-    }
-    if (smallKana.includes(line[pos + newKana.length])) {
-      newKana.length++;
-    } 
-    // console.log(newKana.length);
-    const isNextN = (toRomaji(line.substring(newKana.length + pos)[0]) == "n");
-    newKana.romanizations = getRomanizations(line.substring(pos, newKana.length + pos));
-    if (line[pos] == "ん" && isNextN) {
-      newKana.romanizations = ["nn"];
-    }
-    newKana.suffix = newKana.romanizations[0];
-    newKana.prefix = "";
-    return newKana;
-  };
+  const {position, syllables} = state;
+  const getKana = (pos : Position) : KanaState | undefined => syllables[pos[0]]?.kana[pos[1]];
 
   const handleKeyPress = (e: KeyboardEvent) => {
-    if (["Escape"].includes(e.key)) {
-      return; // GameArea is handling it
-    }
-    if(line.length <= position) return;
+    if (["Escape"].includes(e.key)) { return; } // GameArea is handling it
+    const curKana = getKana(position);
+    if (!curKana) return;
+    const {kana, prefix} = curKana;
     const newPrefix = prefix + e.key;
-    const filteredRomanizations = romanizations.filter(s => s.substring(0, newPrefix.length) == newPrefix);
+    const filteredRomanizations = kana.romanizations.filter(s => s.substring(0, newPrefix.length) == newPrefix);
     // console.log("fuck");
     // console.log(romanizations);
     if(filteredRomanizations.length == 0) {
@@ -161,69 +120,86 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
     }
     else {
       const newSuffix = filteredRomanizations[0].substring(newPrefix.length);
-      if (newSuffix !== "") {
-        const newKana: Kana = {length: length, romanizations: filteredRomanizations, prefix: newPrefix, suffix: newSuffix};
-        setState((state) => ({ ...state, curKana: newKana }));
-      } else {
-        setState(({position, typedLine}) => {
-          position += length;
-          typedLine += newPrefix;
-          return {position, curKana: computeKanaAt(position), typedLine};
-        });
-      }
+      const newKana: KanaState = {kana: kana, prefix: newPrefix, suffix: newSuffix};
+      setState(({position, syllables}) => {
+        syllables[position[0]].kana[position[1]] = newKana; // should be safe
+        if (newSuffix === "") {
+          position[1]++;
+          if (!getKana(position)) { position = [position[0] + 1, 0]; } // carry to next syllable
+          // if getKana(position) still undefined, line is over
+        }
+        return {position, syllables};
+      });
       keyCallback(true);
     }
-
   };
 
   useEffect(() => {
-    setState({
-      position: 0,
-      curKana: computeKanaAt(0),
-      typedLine: "",
-    });
-  }, [lineData]);
-
-  useEffect(() => {
     document.addEventListener("keydown", handleKeyPress);
-
     return () => {
       document.removeEventListener("keydown", handleKeyPress);
     }
   }, [lineData, state]); // any change in state affects the listener
 
-  let syllableList : JSX.Element[] = [];
-  let syllablePos : number = 0;
-  syllables.forEach(({time, text}, index) => {
+  const joinKana = (kana : KanaState[]) => "".concat.apply("", kana.map(k => k.kana.text));
+  let syllableList = syllables.map(({time, text, kana}, index) => {
     let active;
-    if(syllablePos + text.length <= position) {
-      active = 1;
-    } else if(syllablePos > position) {
-      active = -1;
+    let topContent : JSX.Element | string = text;
+    let bottomContent : JSX.Element | string = 
+      "".concat.apply("", kana.map(ks => ks.prefix + ks.suffix));
+    const {PAST, PRESENT, FUTURE} = ActiveStatus;
+    if (index < position[0]) {
+      active = PAST;
+    } else if (index > position[0]) {
+      active = FUTURE;
     } else {
-      active = 0;
+      active = PRESENT;
+      const kpos = position[1];
+      topContent = (<>
+        <LineText active={PAST}>{joinKana(kana.slice(0, kpos))}</LineText>
+        <LineText active={PRESENT}>{joinKana(kana.slice(kpos, kpos+1))}</LineText>
+        <LineText active={FUTURE}>{joinKana(kana.slice(kpos+1))}</LineText>
+      </>);
+      let prefixes = ""; // this is pretty implementation dependent
+      let suffixes = ""; // and seems likely to break
+      kana.forEach(ks => {
+        prefixes += ks.prefix;
+        suffixes += ks.suffix;
+      });
+      bottomContent = (<>
+        <LineText active={PAST}>{prefixes}</LineText>
+        <LineText active={PRESENT}>{suffixes.substring(0, 1)}</LineText>
+        <LineText active={FUTURE}>{suffixes.substring(1)}</LineText>
+      </>);
     }
-    syllableList.push(
-      <LineText 
+    const timeRatio = (time - startTime) / (endTime - startTime);
+    return (
+      <Syllable 
         key={index}
-        pos={(time - startTime) / (endTime - startTime)}
+        pos={[`${timeRatio * 100}%`, '0']}
         active={active}
-      >{text}</LineText>
+      >
+        {topContent}
+        <LineText pos={['0', '40px']} active={active}>
+        {bottomContent}
+        </LineText>
+      </Syllable>
     );
-    syllablePos += text.length;
   });
 
   return (
     <LineContainer>
       <Timeline>
         {syllableList}
-        <ProgressBar
-          startTime={gameStartTime + startTime}
-          endTime={gameStartTime + endTime}
-        />
+        <TimelineBar>
+          <ProgressBar
+            startTime={gameStartTime + startTime}
+            endTime={gameStartTime + endTime}
+          />
+        </TimelineBar>
       </Timeline>
-      <LineText active={-1}>{typedLine + prefix}</LineText>
-      <LineText active={1}>{suffix + toRomaji(line.substring(position + length))}</LineText>
+      {/* <LineText active={ActiveStatus.PAST}>{typedLine + prefix}</LineText>
+      <LineText active={ActiveStatus.FUTURE}>{suffix + toRomaji(line.substring(position + length))}</LineText> */}
       <LyricLine>{lyric}</LyricLine>
     </LineContainer>
   );

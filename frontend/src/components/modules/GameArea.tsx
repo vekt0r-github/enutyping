@@ -67,6 +67,8 @@ const StatBox = styled(SubBox)`
 const Overlay = styled.div`
   width: 100%;
   height: 100%;
+  padding-bottom: calc(var(--game-height) / 3);
+  box-sizing: border-box;
   position: absolute;
   left: 0;
   top: 0;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
 import {} from '@/utils/styles';
 
@@ -17,13 +17,12 @@ type Props = {
   barStyle?: BarStyle,
 };
 
-const Container = styled.div.attrs<BarStyle>(({width, height, baseColor}) => ({
-  style: {
-    'width': width ?? '100%',
-    'height': height ?? 'var(--xs)',
-    'backgroundColor': baseColor ?? 'var(--clr-medgrey)',
-  },
-}))<BarStyle>`
+const Container = styled.div<BarStyle>`
+  ${(props) => css`
+    width: ${props.width ?? '100%'};
+    height: ${props.height ?? 'var(--xs)'};
+    background-color: ${props.baseColor ?? 'var(--clr-medgrey)'};
+  `}
   display: flex;
 `;
 
@@ -53,14 +52,12 @@ const ProgressBar = ({ startTime, endTime, barStyle }: Props) => {
   const duration = endTime - startTime;
 
   return (
-    <>
-      <Container {...barStyle}>
-        <ProgressFill 
-          progress={currTime / duration} 
-          color={barStyle ? barStyle.fillColor : undefined}
-        />
-      </Container>
-    </>
+    <Container {...barStyle}>
+      <ProgressFill 
+        progress={currTime / duration} 
+        color={barStyle ? barStyle.fillColor : undefined}
+      />
+    </Container>
   );
 }
 
