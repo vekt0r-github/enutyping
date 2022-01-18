@@ -14,7 +14,6 @@ import { MainBox, Line } from '@/utils/styles';
 type Props = {
   user: User,
   volume: number,
-  setVolume: React.Dispatch<React.SetStateAction<number>>,
 };
 
 const Sidebar = styled(MainBox)`
@@ -44,7 +43,7 @@ const PageContainer = styled.div`
   }
 `;
 
-const Game = ({ user, volume, setVolume } : Props) => {
+const Game = ({ user, volume } : Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />
   }
@@ -78,7 +77,6 @@ const Game = ({ user, volume, setVolume } : Props) => {
           user={user}
           beatmap={map}
           volume={volume}
-          setVolume={setVolume}
         />
         <Sidebar>
           <h2>Leaderboard</h2>

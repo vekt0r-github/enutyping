@@ -26,6 +26,7 @@ const Content = styled.div`
   height: calc(100% - var(--content-offset));
   position: absolute;
   top: var(--content-offset);
+  z-index: -1;
 
   /* force a default layout onto multi-component pages */
   display: flex;
@@ -66,6 +67,8 @@ const App = ({} : Props) => {
         <NavBar
           handleLogout={handleLogout}
           user={user}
+          volume={volume}
+          setVolume={setVolume}
         />
         <Content>
           <Routes>
@@ -82,14 +85,12 @@ const App = ({} : Props) => {
               <SongSelect
                 user={user}
                 volume={volume}
-                setVolume={setVolume}
               />
             }/>
             <Route path="/play/:mapId" element={
               <Game
                 user={user}
                 volume={volume}
-                setVolume={setVolume}
               />
             }/>
             <Route path="/user/:userId" element={

@@ -42,7 +42,7 @@
   --l: 24px;
 
   /* must be equal to effective navbar height */
-  --content-offset: 65px;
+  --content-offset: 72px;
   /* probably still unsafe to change these */
   --game-width: 800px;
   --game-height: 600px;
@@ -55,6 +55,11 @@ html, body, #root {
   height: 100%;
   font-family: var(--ff-body);
   background-color: var(--clr-neutral);
+}
+
+#root {
+  position: relative;
+  z-index: 0;
 }
 
 h1, h2, h3 {

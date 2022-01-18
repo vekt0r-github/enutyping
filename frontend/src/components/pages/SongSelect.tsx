@@ -13,7 +13,6 @@ import { MainBox, Link, Line } from '@/utils/styles';
 type Props = {
   user: User,
   volume: number,
-  setVolume: React.Dispatch<React.SetStateAction<number>>,
 };
 
 const SongsContainer = styled.div`
@@ -48,7 +47,7 @@ const Info = styled.div`
   min-width: 0;
 `;
 
-const SongSelect = ({ user, volume, setVolume } : Props) => {
+const SongSelect = ({ user, volume } : Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />
   }

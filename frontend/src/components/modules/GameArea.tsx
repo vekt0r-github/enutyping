@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { User, Beatmap } from "@/utils/types";
 
 import GameVideo from "@/components/modules/GameVideo";
-import Volume from "@/components/modules/Volume";
 import GameLine from "@/components/modules/GameLine";
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -25,7 +24,6 @@ type Props = {
   user: User,
   beatmap: Beatmap,
   volume: number,
-  setVolume: React.Dispatch<React.SetStateAction<number>>,
 };
 
 type GameState = {
@@ -86,7 +84,7 @@ const Overlay = styled.div`
   }
 `;
 
-const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
+const GameArea = ({ user, beatmap, volume } : Props) => {
   const initState = () : GameState => ({
     status: Status.UNSTARTED,
     gameStartTime: undefined, 
@@ -248,10 +246,6 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
   return (
     <GameContainer>
       <TopHalf>
-        <Volume
-          volume={volume}
-          setVolume={setVolume}
-        />
         {currLine && gameStartTime ? <>
           <GameLine
             gameStartTime={gameStartTime}

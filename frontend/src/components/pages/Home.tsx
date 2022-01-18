@@ -23,9 +23,9 @@ const Home = ({ user } : Props) => {
         :
         <p>You are not logged in.</p>}
       <InfoBox>
-        HOOLESU
+        Game where you Type Things
         <SubBox>
-          this page is just pretending to be the osu front page i think
+          after all this time we still have no content on the front page
         </SubBox>
       </InfoBox>
     </>
