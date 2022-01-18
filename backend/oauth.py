@@ -2,14 +2,14 @@ import os
 import requests
 # Github OAuth
 
-GITHUB_OAUTH_CLIENT_ID = os.environ.get('TODO1', "806baa3f78769475057c")
-GITHUB_OAUTH_CLIENT_SECRET = os.environ.get('TODO2', "797d30d7ace90515f776fb5874547935026d2e4c")
+GITHUB_OAUTH_CLIENT_ID = os.environ.get('OAUTH_CLIENT_ID', "806baa3f78769475057c")
+GITHUB_OAUTH_CLIENT_SECRET = os.environ.get('OAUTH_CLIENT_SECRET', "797d30d7ace90515f776fb5874547935026d2e4c")
 OAUTH_SECRET_KEY = os.environ.get("FLASK_SECRET_KEY", "supersekritsfasdfsaflksjfajlksjfsk")
 
 REQUEST_AUTH_URL = 'https://github.com/login/oauth/authorize'
 REQUEST_TOKEN_URL = 'https://github.com/login/oauth/access_token'
 
-REDIRECT_URL = os.environ.get('OAUTH_REDIRECT_URL', 'http://localhost:8000/login')
+REDIRECT_URL = os.environ.get('OAUTH_REDIRECT_URL', None)
 
 # TODO: have base_url instead of localhost
 
