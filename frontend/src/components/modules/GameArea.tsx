@@ -117,6 +117,7 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
       const obj = obj_str.split(',');
       const type = obj[0];
       const time = parseInt(obj[1]);
+      const text = obj.slice(2).join(',');
       
       if (line && ['L','E'].includes(type)) {
         line.endTime = time;
@@ -126,11 +127,10 @@ const GameArea = ({ user, beatmap, volume, setVolume } : Props) => {
         line = {
           startTime: time,
           endTime: 0, // set when line ends
-          lyric: obj[2],
+          lyric: text,
           syllables: [],
         };
       } else if (type === 'S') {
-        const text = obj[2];
         line.syllables.push({ time, text });
       }
     });
