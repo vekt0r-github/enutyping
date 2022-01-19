@@ -5,7 +5,7 @@ import Loading from "@/components/modules/Loading";
 import GameArea from "@/components/modules/GameArea";
 
 import { get } from "@/utils/functions";
-import { User, Beatmap } from "@/utils/types";
+import { User, Beatmap, LineData } from "@/utils/types";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -43,6 +43,40 @@ const PageContainer = styled.div`
   }
 `;
 
+/**
+ * process beatmap "file", mutating the object
+ * @param beatmap 
+ * @returns void
+ */
+const processBeatmap = (beatmap : Beatmap & {content: string}) => {
+  let lines : LineData[] = [];
+  if (!beatmap.content) { return null; } // idk man
+  const objects = beatmap.content.split(/\r?\n/);
+  let line : LineData;
+  objects.forEach((obj_str) => {
+    const obj = obj_str.split(',');
+    const type = obj[0];
+    const time = parseInt(obj[1]);
+    const text = obj.slice(2).join(',');
+    
+    if (line && ['L','E'].includes(type)) {
+      line.endTime = time;
+      lines.push(line);
+    }
+    if (type === 'L') {
+      line = {
+        startTime: time,
+        endTime: 0, // set when line ends
+        lyric: text,
+        syllables: [],
+      };
+    } else if (type === 'S') {
+      line.syllables.push({ time, text });
+    }
+  });
+  beatmap.lines = lines;
+};
+
 const Game = ({ user, volume } : Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />
@@ -55,6 +89,7 @@ const Game = ({ user, volume } : Props) => {
   useEffect(() => {
     get(`/api/beatmaps/${mapId}`).then((beatmap) => {
       if (beatmap && beatmap.id) {
+        processBeatmap(beatmap); // mutates
         setMap(beatmap);
       }
     });

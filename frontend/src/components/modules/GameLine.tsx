@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import ProgressBar from "@/components/modules/ProgressBar";
 
-import { LineData } from '@/components/modules/GameArea'
+import { LineData } from '@/utils/types'
 import { Kana, parseKana } from '@/utils/kana'
 
 import styled, { css } from 'styled-components';
@@ -72,9 +72,26 @@ const LineText = styled.span.attrs<LineProps>(({pos}) =>({
 }))<LineProps>`
   font-size: 18px;
   color: ${(props) => getColorOfActiveStatus(props.active)};
-  &::before {
-    background-color: ${(props) => getColorOfActiveStatus(props.active)};
-  }
+  ${(props) => {
+    switch (props.active) {
+      case ActiveStatus.PAST:
+        return css`
+          background-color: var(--clr-grey);
+          z-index: 0;
+        `;
+      case ActiveStatus.PRESENT:
+        return css`
+          background-color: var(--clr-highlight);
+          box-shadow: 2px 2px 5px #aaa;
+          z-index: 1;
+        `;
+      case ActiveStatus.FUTURE:
+        return css`
+          background-color: var(--clr-grey);
+          box-shadow: 2px 2px 5px #aaa;
+        `;
+    }
+  }}
 `;
 
 const Syllable = styled(LineText)`
@@ -85,6 +102,7 @@ const Syllable = styled(LineText)`
     content: "";
     left: 4px;
     top: 22px;
+    background-color: ${(props) => getColorOfActiveStatus(props.active)};
   }
 `;
 
@@ -108,7 +126,9 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
   const [state, setState] = useState<State>(initState());
 
   const {position, syllables, nBuffer} = state;
+  const isDone = position[0] >= syllables.length;
   const getKana = (pos : Position) : KanaState | undefined => syllables[pos[0]]?.kana[pos[1]];
+
   const handleKeyPress = (e: KeyboardEvent) => {
     if (["Escape"].includes(e.key)) { return; } // GameArea is handling it
     const curKana = getKana(position);
@@ -195,7 +215,7 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
   return (
     <LineContainer>
       <Timeline>
-        {syllableList}
+        {syllableList.reverse()}
         <TimelineBar>
           <ProgressBar
             startTime={gameStartTime + startTime}

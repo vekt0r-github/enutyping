@@ -10,13 +10,23 @@ export type Score = {
   user: User;
 }
 
+export type LineData = {
+  startTime: number,
+  endTime: number,
+  lyric: string,
+  syllables: {
+    time: number,
+    text: string,
+  }[],
+};
+
 export type Beatmap = { // example
   id: number;
   artist: string;
   title: string;
   yt_id: string;
   source: string; // created from yt_id on backend
-  content?: string;
+  lines: LineData[]; // processed content
   scores?: Score[];
 };
 

@@ -1,22 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { User, Beatmap } from "@/utils/types";
 
 import GameVideo from "@/components/modules/GameVideo";
 import GameLine from "@/components/modules/GameLine";
+
+import { post } from '@/utils/functions';
+import { User, Beatmap, LineData } from "@/utils/types";
+
 import styled from 'styled-components';
 import '@/utils/styles.css';
 import { SubBox, Line } from '@/utils/styles';
-import { post } from '@/utils/functions';
-
-export type LineData = {
-  startTime: number,
-  endTime: number,
-  lyric: string,
-  syllables: {
-    time: number,
-    text: string,
-  }[],
-};
 
 export enum Status { UNSTARTED, STARTQUEUED, PLAYING, SUBMITTING, ENDED };
 
@@ -29,7 +21,7 @@ type Props = {
 type GameState = {
   status: Status,
   gameStartTime?: number,
-  currLine?: LineData,
+  currIndex?: number,
   hits: number,
   misses: number,
   score: number
@@ -88,7 +80,7 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
   const initState = () : GameState => ({
     status: Status.UNSTARTED,
     gameStartTime: undefined, 
-    currLine: undefined, // maintained via timer independent of video
+    currIndex: undefined, // maintained via timer independent of video
     hits: 0,
     misses: 0,
     score: 0,
@@ -108,35 +100,8 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
   // maybe need later but idk
   // const [duration, setDuration] = useState<number>(Infinity);
 
-  const {status, gameStartTime, currLine, hits, misses, score} = gameState;
-
-  let lines : LineData[] = [];
-  (() => { // process beatmap "file"
-    if (!beatmap.content) { return null; } // idk man
-    const objects = beatmap.content.split(/\r?\n/);
-    let line : LineData;
-    objects.forEach((obj_str) => {
-      const obj = obj_str.split(',');
-      const type = obj[0];
-      const time = parseInt(obj[1]);
-      const text = obj.slice(2).join(',');
-      
-      if (line && ['L','E'].includes(type)) {
-        line.endTime = time;
-        lines.push(line);
-      }
-      if (type === 'L') {
-        line = {
-          startTime: time,
-          endTime: 0, // set when line ends
-          lyric: text,
-          syllables: [],
-        };
-      } else if (type === 'S') {
-        line.syllables.push({ time, text });
-      }
-    });
-  })();
+  const lines = beatmap.lines;
+  const {status, gameStartTime, currIndex, hits, misses, score} = gameState;
 
   const prepareStartGame = () => {
     if (status !== Status.UNSTARTED) { return; }
@@ -156,10 +121,10 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
     // will cancel all game actions if status changes from PLAYING
     if (status !== Status.PLAYING) { return; }
     let timeoutIds : NodeJS.Timeout[] = [];
-    lines.forEach((line) => {
+    lines.forEach((line, index) => {
       // if this loop is too slow, save original time and reference
       timeoutIds.push(setTimeout(() => {
-        set('currLine', line);
+        set('currIndex', index);
       }, line.startTime + offset));
     });
     const endTime = lines[lines.length-1].endTime;
@@ -186,7 +151,7 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
     setGameState((state) => ({ ...state,
       status: Status.SUBMITTING,
       gameStartTime: undefined,
-      currLine: undefined,
+      currIndex: undefined,
     }));
   };
 
@@ -194,7 +159,7 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
     setGameState((state) => ({ ...state,
       status: Status.ENDED,
       gameStartTime: undefined,
-      currLine: undefined,
+      currIndex: undefined,
     }));
   };
 
@@ -242,15 +207,15 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
       set('score', (oldScore) => oldScore - 5);
     }
   }
-
+  
   return (
     <GameContainer>
       <TopHalf>
-        {currLine && gameStartTime ? <>
-          <GameLine
-            key={currLine.startTime}
+        {(currIndex !== undefined) && gameStartTime ? <>
+          <GameLine // current line
+            key={currIndex}
             gameStartTime={gameStartTime}
-            lineData={currLine}
+            lineData={lines[currIndex]}
             keyCallback={keyCallback}
           />
         </> : null}
