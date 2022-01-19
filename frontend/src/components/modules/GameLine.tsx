@@ -60,24 +60,27 @@ const getColorOfActiveStatus = (active : ActiveStatus) => {
   return 'black';
 };
 
-const LineText = styled.span<{
-  pos?: [string, string],
-  active: ActiveStatus,
-}>`
+type LineProps = { pos?: [string, string], active: ActiveStatus };
+const LineText = styled.span.attrs<LineProps>(({pos}) =>({
+  style: {
+    ...(pos ? {
+      position: 'absolute',
+      left: pos[0],
+      top: pos[1],
+    } : {}),
+  },
+}))<LineProps>`
   font-size: 18px;
   color: ${(props) => getColorOfActiveStatus(props.active)};
-  ${(props) => props.pos ? css`
-    position: absolute;
-    left: ${props.pos[0]};
-    top: ${props.pos[1]};
-  ` : ''}
+  &::before {
+    background-color: ${(props) => getColorOfActiveStatus(props.active)};
+  }
 `;
 
 const Syllable = styled(LineText)`
   &::before {
     width: 2px;
     height: 16px;
-    background-color: ${(props) => getColorOfActiveStatus(props.active)};
     position: absolute;
     content: "";
     left: 4px;
