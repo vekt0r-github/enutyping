@@ -248,6 +248,7 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
       <TopHalf>
         {currLine && gameStartTime ? <>
           <GameLine
+            key={currLine.startTime}
             gameStartTime={gameStartTime}
             lineData={currLine}
             keyCallback={keyCallback}

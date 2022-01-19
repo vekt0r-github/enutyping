@@ -103,7 +103,6 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
     nBuffer: false,
   });
   const [state, setState] = useState<State>(initState());
-  useEffect(() => setState(initState()), [lineData]);
 
   const {position, syllables, nBuffer} = state;
   const getKana = (pos : Position) : KanaState | undefined => syllables[pos[0]]?.kana[pos[1]];
@@ -116,15 +115,11 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
     const filteredRomanizations = kana.romanizations.filter(s => s.substring(0, newPrefix.length) == newPrefix);
 
     if(e.key == "n" && nBuffer) {
-	setState((s: State) => ({ ...s, nBuffer: false }));
-	keyCallback(true, false);
-	return;
-    }
-    
-    if(filteredRomanizations.length == 0) {
+      setState((s: State) => ({ ...s, nBuffer: false }));
+      keyCallback(true, false);
+    } else if (filteredRomanizations.length == 0) {
       keyCallback(false, false);
-    }
-    else {
+    } else {
       const newSuffix = filteredRomanizations[0].substring(newPrefix.length);
       const newKana: KanaState = {kana: kana, prefix: newPrefix, suffix: newSuffix};
       setState(({position, syllables, nBuffer}) => {
@@ -133,7 +128,7 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
           position[1]++;
           if (!getKana(position)) { position = [position[0] + 1, 0]; } // carry to next syllable
           // if getKana(position) still undefined, line is over
-	  nBuffer = (newPrefix === "n" && newKana.kana.text == "ん");
+          nBuffer = (newPrefix === "n" && newKana.kana.text == "ん");
         }
         return {position, syllables, nBuffer};
       });
@@ -146,7 +141,7 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
     return () => {
       document.removeEventListener("keydown", handleKeyPress);
     }
-  }, [lineData, state]); // any change in state affects the listener
+  }, [state]); // any change in state affects the listener
 
   const joinKana = (kana : KanaState[]) => "".concat.apply("", kana.map(k => k.kana.text));
   let syllableList = syllables.map(({time, text, kana}, index) => {
