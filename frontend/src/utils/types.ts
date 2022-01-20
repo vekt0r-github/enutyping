@@ -3,6 +3,10 @@ export type User = { // example
   name: string;
 };
 
+export type Config = {
+	volume: number;
+};
+
 export type Score = {
   id: number;
   beatmap_id: number;

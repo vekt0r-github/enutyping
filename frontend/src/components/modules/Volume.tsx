@@ -7,7 +7,7 @@ import { Line } from '@/utils/styles';
 
 type Props = {
   volume: number,
-  setVolume: React.Dispatch<React.SetStateAction<number>>,
+  setVolume: (newVolume: number) => void,
 }
 
 const Container = styled.div`

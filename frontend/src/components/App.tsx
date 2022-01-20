@@ -11,7 +11,7 @@ import NotFound from "@/components/pages/NotFound";
 import UserPage from "@/components/pages/UserPage";
 
 import { get, post } from "@/utils/functions";
-import { User } from "@/utils/types";
+import { User, Config } from "@/utils/types";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -36,7 +36,8 @@ const Content = styled.div`
 
 const App = ({} : Props) => {
   const [user, setUser] = useState<User | null>();
-  const [volume, setVolume] = useState<number>(1.0);
+	const [config, setConfig] = useState<Config>({ volume: 1.0 });
+	const { volume } = config;
 
   useEffect(() => {
     get("/api/whoami").then((user) => {
@@ -46,7 +47,15 @@ const App = ({} : Props) => {
         setUser(null);
       }
     });
+		const localConfig: string | null = window.localStorage.getItem('ishotyping-config');
+		if(localConfig) {
+			setConfig(JSON.parse(localConfig) as Config);
+		}
   }, []);
+
+	useEffect(() => {
+		window.localStorage.setItem('ishotyping-config', JSON.stringify(config));
+	}, [config]);
 
   const handleLogin = (code: string|null, state: string|null) => {
     post("/api/login/authorize", { code, state }).then((user) => {
@@ -67,8 +76,8 @@ const App = ({} : Props) => {
         <NavBar
           handleLogout={handleLogout}
           user={user}
-          volume={volume}
-          setVolume={setVolume}
+    			volume={volume}
+          setVolume={(v: number) => { setConfig({ ...config, volume: v }); }}
         />
         <Content>
           <Routes>

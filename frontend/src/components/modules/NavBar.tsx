@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 
 import Volume from "@/components/modules/Volume";
 
-import { User } from "@/utils/types";
+import { User, Config } from "@/utils/types";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -13,7 +13,7 @@ type Props = {
   handleLogout: () => void,
   user: User | null,
   volume: number,
-  setVolume: React.Dispatch<React.SetStateAction<number>>,
+  setVolume: (newVolume: number) => void,
 }
 
 const NavContainer = styled.nav`
