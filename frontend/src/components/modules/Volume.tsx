@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 
 import styled from 'styled-components';
+import vicon from '@/public/images/volume.svg';
 import '@/utils/styles.css';
 import { Line } from '@/utils/styles';
 
@@ -149,7 +150,7 @@ const Volume = ({ volume, setVolume } : Props) => {
   return (
     <Container ref={containerRef}>
       <Icon
-        src="/images/volume.svg"
+        src={`${vicon}`}
         onClick={() => setActive(a => !a)}
       />
       <IconLabel>{sliderValue}</IconLabel>
