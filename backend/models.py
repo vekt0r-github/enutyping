@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, UnicodeText, ForeignKey, Table
+from sqlalchemy import Column, Integer, String, UnicodeText, ForeignKey
 from sqlalchemy.orm import deferred, relationship
 
 from database import Base
@@ -7,12 +7,14 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     name = Column(String(50), unique=True)
-    scores = relationship('Score', back_populates='user')
+    avatar_url = Column(String(100))
+    scores = relationship('Score', lazy="dynamic", order_by="desc(Score.id)", back_populates='user')
     beatmapsets = relationship('Beatmapset', back_populates='owner')
 
-    def __init__(self, id, name):
+    def __init__(self, id, name, avatar_url):
         self.id = id
         self.name = name
+        self.avatar_url = avatar_url
 
 class Beatmap(Base):
     __tablename__ = 'beatmaps'
@@ -75,8 +77,8 @@ def init_db():
     Base.metadata.create_all(bind=engine)
 
     objects = [
-        User(id=1234, name='ppfarmer'),
-        User(id=4321, name='songenjoyer'),
+        User(id=1234, name='ppfarmer', avatar_url='https://avatars.githubusercontent.com/u/34809632'),
+        User(id=4321, name='songenjoyer', avatar_url='https://avatars.githubusercontent.com/u/1700346'),
         Beatmapset(id=727, 
             owner_id=1234,
             artist='Nanahira', \

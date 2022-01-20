@@ -126,7 +126,13 @@ const Game = ({ user, volume } : Props) => {
           <ul>
             { map?.scores?.map((score) =>
               // XXX: hmm is this okay to be optional?
-              <li key={score.id}><Link to={`/user/${score.user?.id}`}>{score.user?.name}</Link>: {score.score}</li>
+              <li key={score.id}>
+                <Link to={`/user/${score.user?.id}`}>
+                  <img src={score.user?.avatar_url} />
+                  {score.user?.name}
+                </Link>
+                : {score.score}
+              </li>
             )}
           </ul>
         </Sidebar>

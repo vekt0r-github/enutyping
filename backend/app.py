@@ -41,11 +41,11 @@ def authorized():
     req_json = request.get_json()
     state = req_json.get('state')
     if state == oauth.OAUTH_SECRET_KEY:
-        def get_or_create_user(id, name):
+        def get_or_create_user(id, name, avatar_url):
             user = User.query.get(id)
             if user:
                 return user
-            user = User(id, name)
+            user = User(id, name, avatar_url)
             db_session.add(user)
             db_session.commit()
             return user
@@ -59,8 +59,9 @@ def authorized():
         gh_user = gh_api_response.json()
         gh_name = gh_user['login']
         gh_uid = gh_user['id']
+        gh_avatar_url = gh_user['avatar_url']
 
-        user = get_or_create_user(gh_uid, gh_name)
+        user = get_or_create_user(gh_uid, gh_name, gh_avatar_url)
         user_object = UserSchema().dump(user)
         session['user'] = user_object
         return user_object

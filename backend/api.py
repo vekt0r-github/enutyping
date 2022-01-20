@@ -5,7 +5,8 @@ from operator import itemgetter
 from sqlalchemy import func, and_
 
 from models import Beatmap, Beatmapset, Score, User
-from schemas import beatmap_schema, beatmapset_schema, beatmapsets_schema, score_schema, scores_schema, user_schema, users_schema
+from schemas import beatmap_schema, beatmapset_schema, beatmapsets_schema, \
+                    score_schema, scores_schema, scores_without_user_schema, user_schema, users_schema
 from database import db_session
 
 MAX_NUM_SCORES = 50
@@ -31,7 +32,9 @@ def get_user(user_id):
     if user is None:
         abort(404, description = 'User not found')
     user_result = user_schema.dump(user)
-    return user_result
+    scores = user.scores.limit(MAX_NUM_SCORES)
+    scores_result = scores_without_user_schema.dump(scores)
+    return {"user": user_result, "scores": scores_result}
 
 @api.route('/users/', methods=['GET'])
 def get_users():

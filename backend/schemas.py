@@ -3,6 +3,7 @@ from marshmallow import Schema, fields
 class UserSchema(Schema):
     id = fields.Int(dump_only=True)
     name = fields.Str()
+    avatar_url = fields.Str(dump_only=True)
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
@@ -12,9 +13,11 @@ class ScoreSchema(Schema):
     beatmap_id = fields.Int()
     score = fields.Int()
     user_id = fields.Int(load_only=True)
-    user = fields.Nested(UserSchema(only=("name", "id")), dump_only=True)
+    user = fields.Nested(UserSchema(only=("id", "name", "avatar_url")), dump_only=True)
 
 score_schema = ScoreSchema()
+# Nice to for account page since we know the user
+scores_without_user_schema = ScoreSchema(many=True, exclude=("user",))
 scores_schema = ScoreSchema(many=True)
 
 class BeatmapSchema(Schema):

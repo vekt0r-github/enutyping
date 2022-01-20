@@ -1,6 +1,7 @@
 export type User = { // example
   id: number;
   name: string;
+  avatar_url: string;
 };
 
 export type Config = {
@@ -11,7 +12,7 @@ export type Score = {
   id: number;
   beatmap_id: number;
   score: number;
-  user: User;
+  user?: User;
 }
 
 export type LineData = {
