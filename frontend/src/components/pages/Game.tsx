@@ -11,6 +11,7 @@ import { User, Beatmap, LineData } from "@/utils/types";
 import styled from 'styled-components';
 import '@/utils/styles.css';
 import { MainBox, Line } from '@/utils/styles';
+import { Link } from "react-router-dom";
 
 type Props = {
   user: User | null,
@@ -125,7 +126,7 @@ const Game = ({ user, volume } : Props) => {
           <ul>
             { map?.scores?.map((score) =>
               // XXX: hmm is this okay to be optional?
-              <li key={score.id}>{score.user?.name}: {score.score}</li>
+              <li key={score.id}><Link to={`/user/${score.user?.id}`}>{score.user?.name}</Link>: {score.score}</li>
             )}
           </ul>
         </Sidebar>
