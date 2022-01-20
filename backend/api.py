@@ -2,6 +2,7 @@ from flask import Blueprint, abort, request, session
 from functools import wraps
 from marshmallow import ValidationError
 from operator import itemgetter
+from sqlalchemy import func, and_
 
 from models import Beatmap, Score, User
 from schemas import beatmap_schema, beatmaps_metadata_schema, score_schema, scores_schema, user_schema, users_schema
@@ -42,7 +43,14 @@ def get_beatmap_scores(beatmap_id):
     if beatmap is None:
         abort(404, description = 'Beatmap not found')
     beatmap_result = beatmap_schema.dump(beatmap)
-    scores_result = scores_schema.dump(beatmap.scores)
+    best_scores_subquery = db_session.query(Score.user_id, func.max(Score.score).label('maxscore')) \
+                            .filter(Score.beatmap_id == beatmap_id) \
+                            .group_by(Score.user_id) \
+                            .subquery()
+    scores = db_session.query(Score).join(best_scores_subquery, and_( \
+            best_scores_subquery.c.user_id == Score.user_id,
+            best_scores_subquery.c.maxscore == Score.score)).all()
+    scores_result = scores_schema.dump(scores)
     return { **process_beatmap(beatmap_result), 'scores' : scores_result }
 
 @api.route('/beatmaps')

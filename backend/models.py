@@ -70,7 +70,10 @@ def init_db():
                          yt_id='xtfXl7TZTac', \
                          content=test_map_content),
         Score(user_id=1234, beatmap_id=727, score=727),
+        Score(user_id=1234, beatmap_id=727, score=123),
         Score(user_id=4321, beatmap_id=727, score=72727),
+        Score(user_id=4321, beatmap_id=727, score=72726),
+        Score(user_id=4321, beatmap_id=727, score=72725),
     ]
 
     db_session.bulk_save_objects(objects)
