@@ -6,6 +6,50 @@ export type User = { // example
 
 export type Config = {
 	volume: number;
+	offset: number;
+	kanaSpellings: {
+  	し: string,
+  	ち: string,
+  	つ: string,
+  	じ: string,
+  	しゃ: string,
+  	しょ: string,
+  	しゅ: string,
+　	じゃ: string,
+  	じょ: string,
+  	じゅ: string,
+  	か: string, 
+  	く: string, 
+  	こ: string, 
+  	せ: string, 
+  	ふ: string, 
+		づ: string,
+  	ん: string, 
+	};
+};
+
+export const defaultConfig: Config = {
+	volume: 1.0,
+	offset: 0,
+	kanaSpellings: {
+  	し: "shi", 
+  	ち: "chi",
+  	つ: "tsu",
+  	じ: "ji",
+  	しゃ: "sha",
+  	しょ: "sho",
+  	しゅ: "shu",
+　	じゃ: "ja",
+  	じょ: "jo",
+  	じゅ: "ju",
+  	か: "ka", 
+  	く: "ku", 
+  	こ: "ko", 
+  	せ: "se",
+  	ふ: "fu", 
+		づ: "du",
+  	ん: "n", 
+	},
 };
 
 export type Score = {

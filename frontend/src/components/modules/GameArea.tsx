@@ -4,11 +4,13 @@ import GameVideo from "@/components/modules/GameVideo";
 import GameLine from "@/components/modules/GameLine";
 
 import { post } from '@/utils/functions';
-import { User, Beatmap, LineData } from "@/utils/types";
+import { User, Beatmap } from "@/utils/types";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
 import { SubBox, Line } from '@/utils/styles';
+import { Config } from '@/utils/types';
+
 import { Navigate } from "react-router-dom";
 
 export enum Status { GOBACK, UNSTARTED, STARTQUEUED, PLAYING, SUBMITTING, ENDED };
@@ -16,7 +18,7 @@ export enum Status { GOBACK, UNSTARTED, STARTQUEUED, PLAYING, SUBMITTING, ENDED 
 type Props = {
   user: User,
   beatmap: Beatmap,
-  volume: number,
+  config: Config,
 };
 
 type GameState = {
@@ -86,7 +88,7 @@ export const Overlay = styled.div`
   }
 `;
 
-const GameArea = ({ user, beatmap, volume } : Props) => {
+const GameArea = ({ user, beatmap, config } : Props) => {
   const initState = () : GameState => ({
     status: Status.UNSTARTED,
     gameStartTime: undefined, 
@@ -95,6 +97,7 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
     misses: 0,
     score: 0,
   });
+	const { volume } = config;
   const [gameState, setGameState] = useState<GameState>(initState());
   const set = <K extends keyof GameState>(
     prop : K, 
@@ -105,6 +108,7 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
     }))
   };
   const [offset, setOffset] = useState<number>(0);
+	const totalOffset = offset + config.offset;
 
   // from iframe API; in seconds, rounded? maybe
   // maybe need later but idk
@@ -122,7 +126,7 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
     if (status !== Status.STARTQUEUED) { return; }
     setGameState((state) => ({ ...state,
       status: Status.PLAYING,
-      gameStartTime: new Date().getTime() + offset,
+      gameStartTime: new Date().getTime() + totalOffset,
     }));
   };
 
@@ -135,10 +139,10 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
       // if this loop is too slow, save original time and reference
       timeoutIds.push(setTimeout(() => {
         set('currIndex', index);
-      }, line.startTime + offset));
+      }, line.startTime + totalOffset));
     });
     const endTime = lines[lines.length-1].endTime;
-    timeoutIds.push(setTimeout(submitScore, endTime + offset));
+    timeoutIds.push(setTimeout(submitScore, endTime + totalOffset));
     return () => {
       timeoutIds.forEach((id) => clearTimeout(id));
     };
@@ -231,6 +235,7 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
             gameStartTime={gameStartTime}
             lineData={lines[currIndex]}
             keyCallback={keyCallback}
+						config={config}
           />
           <LyricLine>{lines[currIndex].lyric}</LyricLine>
         </> : null}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import ProgressBar from "@/components/modules/ProgressBar";
 
-import { LineData } from '@/utils/types'
+import { Config, LineData } from '@/utils/types'
 import { Kana, parseKana } from '@/utils/kana'
 
 import styled, { css } from 'styled-components';
@@ -19,6 +19,7 @@ type Props = {
   gameStartTime: number,
   lineData: LineData,
   keyCallback: (hit: boolean, endKana: boolean) => void,
+	config: Config,
 }
 
 type Position = [number, number]; // syllable index, kana index
@@ -121,7 +122,7 @@ const Tick = styled.div<{active?: ActiveStatus}>`
   };
 `;
 
-const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
+const GameLine = ({ gameStartTime, lineData, keyCallback, config } : Props) => {
   const {startTime, endTime, lyric} = lineData;
   const initKanaState = (kana : Kana) => ({ kana, prefix: "", suffix: kana.romanizations[0] });
 
@@ -129,7 +130,7 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
     position: [0, 0],
     syllables: lineData.syllables.map((syllable, i, arr) => ({
       ...syllable,
-      kana: parseKana(syllable.text, arr[i+1]?.text).map(initKanaState),
+      kana: parseKana(syllable.text, config, arr[i+1]?.text).map(initKanaState),
     })),
     nBuffer: false,
   });

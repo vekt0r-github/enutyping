@@ -10,9 +10,10 @@ import DiffSelect from "@/components/pages/DiffSelect";
 import Game from "@/components/pages/Game";
 import NotFound from "@/components/pages/NotFound";
 import UserPage from "@/components/pages/UserPage";
+import SettingsPage from "@/components/pages/Settings";
 
 import { get, post } from "@/utils/functions";
-import { User, Config } from "@/utils/types";
+import { User, Config, defaultConfig } from "@/utils/types";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -37,8 +38,8 @@ const Content = styled.div`
 
 const App = ({} : Props) => {
   const [user, setUser] = useState<User | null>();
-	const [config, setConfig] = useState<Config>({ volume: 1.0 });
-	const { volume } = config;
+	const [config, setConfig] = useState<Config>(defaultConfig);
+	const { volume, offset, kanaSpellings } = config;
 
   useEffect(() => {
     get("/api/whoami").then((user) => {
@@ -50,7 +51,7 @@ const App = ({} : Props) => {
     });
 		const localConfig: string | null = window.localStorage.getItem('ishotyping-config');
 		if(localConfig) {
-			setConfig(JSON.parse(localConfig) as Config);
+			setConfig({ ...config, ...JSON.parse(localConfig) });
 		}
   }, []);
 
@@ -105,12 +106,19 @@ const App = ({} : Props) => {
             <Route path="/play/:mapsetId/:mapId" element={
               <Game
                 user={user}
-                volume={volume}
+                config={config}
               />
             }/>
             <Route path="/user/:userId" element={
               <UserPage />
             }/>
+	          <Route path="/settings" element={
+              <SettingsPage
+								user={user}
+								initConfig={config}
+								setGlobalConfig={setConfig}
+							/>
+            }/>	
             <Route path="*" element={
               <NotFound />
             }/>

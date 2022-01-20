@@ -6,7 +6,7 @@ import GameArea from "@/components/modules/GameArea";
 import NotFound from "@/components/pages/NotFound";
 
 import { get } from "@/utils/functions";
-import { User, Beatmap, LineData } from "@/utils/types";
+import { User, Config, Beatmap, LineData } from "@/utils/types";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -15,7 +15,7 @@ import { Link } from "react-router-dom";
 
 type Props = {
   user: User | null,
-  volume: number,
+  config: Config,
 };
 
 export const Sidebar = styled(MainBox)`
@@ -79,7 +79,7 @@ const processBeatmap = (beatmap : Beatmap & {content: string}) => {
   beatmap.lines = lines;
 };
 
-const Game = ({ user, volume } : Props) => {
+const Game = ({ user, config } : Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />
   }
@@ -117,7 +117,7 @@ const Game = ({ user, volume } : Props) => {
         <GameArea
           user={user}
           beatmap={map}
-          volume={volume}
+          config={config}
         />
         <Sidebar>
           <h2>Leaderboard</h2>
