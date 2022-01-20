@@ -35,7 +35,7 @@ const Content = styled.div`
 `;
 
 const App = ({} : Props) => {
-  const [user, setUser] = useState<User>();
+  const [user, setUser] = useState<User | null>();
   const [volume, setVolume] = useState<number>(1.0);
 
   useEffect(() => {
@@ -87,7 +87,7 @@ const App = ({} : Props) => {
                 volume={volume}
               />
             }/>
-            <Route path="/play/:mapId" element={
+            <Route path="/play/:mapsetId/:mapId" element={
               <Game
                 user={user}
                 volume={volume}

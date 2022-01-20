@@ -4,14 +4,14 @@ import { Navigate } from "react-router-dom";
 import YTThumbnail from "@/components/modules/YTThumbnail";
 
 import { get, post } from "@/utils/functions";
-import { User, Beatmap } from "@/utils/types";
+import { User, Beatmapset } from "@/utils/types";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
 import { MainBox, Link, Line } from '@/utils/styles';
 
 type Props = {
-  user: User,
+  user: User | null,
   volume: number,
 };
 
@@ -52,13 +52,14 @@ const SongSelect = ({ user, volume } : Props) => {
     return <Navigate to='/login' replace={true} />
   }
 
-  const [maps, setMaps] = useState<Beatmap[]>();
+  const [mapsets, setMapsets] = useState<Beatmapset[]>();
   
   useEffect(() => {
-    get("/api/beatmaps").then((res) => {
-      const beatmaps = res.beatmaps;
-      if (beatmaps && beatmaps.length) {
-        setMaps(beatmaps);
+    get("/api/beatmapsets").then((res) => {
+      console.log(res)
+      const beatmapsets = res.beatmapsets;
+      if (beatmapsets && beatmapsets.length) {
+        setMapsets(beatmapsets);
       }
     });
   }, []);
@@ -67,17 +68,22 @@ const SongSelect = ({ user, volume } : Props) => {
     <>
       <h1>Song Select</h1>
       <SongsContainer>
-        {maps?.map((map) => 
-          <SongBox as={Link} to={`/play/${map.id}`} key={map.id}>
-            <YTThumbnail yt_id={map.yt_id} width={120} height={90} />
-            <Info>
-              <Line size='1.25em' as='h2'>{map.title}</Line>
-              <Line size='1em'>by {map.artist}</Line>
-              <Line size='0.8em'>mapped by Erik Demaine</Line>
-              <Line size='0.8em'>727 thumbs up</Line>
-            </Info>
-          </SongBox>
-        )}
+        {mapsets?.map((mapset) => {
+          const {artist, title, artist_original, title_original, yt_id, preview_point, owner, beatmaps} = mapset;
+          // TODO: display info about diffs
+          console.log(mapset)
+          return (
+            <SongBox as={Link} to={`/play/${mapset.id}/${beatmaps[0].id}`} key={mapset.id}>
+              <YTThumbnail yt_id={yt_id} width={120} height={90} />
+              <Info>
+                <Line size='1.25em' as='h2'>{title}</Line>
+                <Line size='1em'>by {artist}</Line>
+                <Line size='0.8em'>mapped by {owner.name}</Line>
+                <Line size='0.8em'>{beatmaps.length} diffs</Line>
+              </Info>
+            </SongBox>
+          );
+        })}
       </SongsContainer>
     </>
   );

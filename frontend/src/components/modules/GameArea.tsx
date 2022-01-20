@@ -239,7 +239,7 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
       <BottomHalf>
         <StatBox>Acc: {acc.toFixed(2)}</StatBox>
         <GameVideo
-          yt_id={beatmap.yt_id}
+          yt_id={beatmap.beatmapset.yt_id}
           status={status}
           gameStartTime={gameStartTime}
           startGame={startGame}

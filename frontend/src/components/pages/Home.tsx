@@ -7,7 +7,7 @@ import '@/utils/styles.css';
 import { MainBox, SubBox } from '@/utils/styles';
 
 type Props = {
-  user: User,
+  user: User | null,
 };
 
 const InfoBox = styled(MainBox)`

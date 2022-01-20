@@ -4,8 +4,8 @@ from marshmallow import ValidationError
 from operator import itemgetter
 from sqlalchemy import func, and_
 
-from models import Beatmap, Score, User
-from schemas import beatmap_schema, beatmaps_metadata_schema, score_schema, scores_schema, user_schema, users_schema
+from models import Beatmap, Beatmapset, Score, User
+from schemas import beatmap_schema, beatmapset_schema, beatmapsets_schema, score_schema, scores_schema, user_schema, users_schema
 from database import db_session
 
 MAX_NUM_SCORES = 50
@@ -21,9 +21,9 @@ def login_required(f):
         return f(*args, **kwds)
     return wrapper
 
-def process_beatmap(beatmap):
-    source = f"https://www.youtube.com/watch?v={beatmap['yt_id']}"
-    return { **beatmap, 'source' : source }
+def process_beatmapset(beatmapset):
+    source = f"https://www.youtube.com/watch?v={beatmapset['yt_id']}"
+    return { **beatmapset, 'source' : source }
 
 @api.route('/users/<int:user_id>', methods=['GET'])
 def get_user(user_id):
@@ -40,7 +40,7 @@ def get_users():
     return { 'users': res }
 
 @api.route('/beatmaps/<int:beatmap_id>', methods=['GET'])
-def get_beatmap_scores(beatmap_id):
+def get_beatmap_with_set_and_scores(beatmap_id):
     beatmap = Beatmap.query.get(beatmap_id)
     if beatmap is None:
         abort(404, description = 'Beatmap not found')
@@ -54,15 +54,25 @@ def get_beatmap_scores(beatmap_id):
             best_scores_subquery.c.maxscore == Score.score)) \
             .order_by(Score.score.desc()).limit(MAX_NUM_SCORES).all()
     scores_result = scores_schema.dump(scores)
-    return { **process_beatmap(beatmap_result), 'scores' : scores_result }
+    beatmapset_result = beatmapset_schema.dump(beatmap.beatmapset)
+    return { **beatmap_result, 'scores' : scores_result, 'beatmapset' : beatmapset_result }
 
-@api.route('/beatmaps')
-def get_beatmap_list():
+@api.route('/beatmapsets/<int:beatmapset_id>', methods=['GET'])
+def get_beatmapset_with_diffs_and_scores(beatmapset_id):
+    beatmapset = Beatmapset.query.get(beatmapset_id)
+    if beatmapset is None:
+        abort(404, description = 'Beatmapset not found')
+    beatmapset_result = beatmapset_schema.dump(beatmapset)
+    beatmaps_result = beatmap_schema.dump(beatmapset.beatmaps)
+    return { **process_beatmapset(beatmapset_result), 'beatmaps': beatmaps_result }
+
+@api.route('/beatmapsets')
+def get_beatmapset_list():
     search_query = request.args.get('search', '')
-    title_result = Beatmap.query.filter(Beatmap.title.ilike('%' + search_query + '%')).all()
+    title_result = Beatmapset.query.filter(Beatmapset.title.ilike('%' + search_query + '%')).all()
     # https://softwareengineering.stackexchange.com/questions/286293/whats-the-best-way-to-return-an-array-as-a-response-in-a-restful-api
-    beatmap_results = beatmaps_metadata_schema.dump(title_result)
-    return { 'beatmaps': list(map(process_beatmap, beatmap_results)) }
+    results = beatmapsets_schema.dump(title_result)
+    return { 'beatmapsets': list(map(process_beatmapset, results)) }
 
 @api.route('/scores', methods=['POST'])
 @login_required

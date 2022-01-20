@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, UnicodeText, ForeignKey
+from sqlalchemy import Column, Integer, String, UnicodeText, ForeignKey, Table
 from sqlalchemy.orm import deferred, relationship
 
 from database import Base
@@ -8,6 +8,7 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(50), unique=True)
     scores = relationship('Score', back_populates='user')
+    beatmapsets = relationship('Beatmapset', back_populates='owner')
 
     def __init__(self, id, name):
         self.id = id
@@ -16,17 +17,40 @@ class User(Base):
 class Beatmap(Base):
     __tablename__ = 'beatmaps'
     id = Column(Integer, primary_key=True)
-    artist = Column(String(50))
-    title = Column(String(50))
-    yt_id = Column(String(100))
-    content = deferred(Column(UnicodeText))
+    beatmapset_id = Column(Integer, ForeignKey('beatmapsets.id'))
     scores = relationship('Score', back_populates='beatmap')
+    content = deferred(Column(UnicodeText))
 
-    def __init__(self, artist, title, yt_id, content, id = None):
+    beatmapset = relationship('Beatmapset', back_populates='beatmaps')
+
+    def __init__(self, beatmapset_id, content, id = None):
+        self.beatmapset_id = beatmapset_id
+        self.content = content
+        self.id = id
+
+class Beatmapset(Base):
+    __tablename__ = 'beatmapsets'
+    id = Column(Integer, primary_key=True)
+    owner_id = Column(Integer, ForeignKey('users.id'))
+    artist = Column(String(100))
+    title = Column(String(100))
+    artist_original = Column(String(100))
+    title_original = Column(String(100))
+    yt_id = Column(String(69))
+    preview_point = Column(Integer)
+
+    owner = relationship('User', back_populates='beatmapsets')
+    beatmaps = relationship('Beatmap', back_populates='beatmapset')
+
+    def __init__(self, owner_id, artist, title, artist_original, title_original, 
+                 yt_id, preview_point, id = None):
+        self.owner_id = owner_id
         self.artist = artist
         self.title = title
+        self.artist_original = artist_original
+        self.title_original = title_original
         self.yt_id = yt_id
-        self.content = content
+        self.preview_point = preview_point
         self.id = id
 
 class Score(Base):
@@ -53,22 +77,50 @@ def init_db():
     objects = [
         User(id=1234, name='ppfarmer'),
         User(id=4321, name='songenjoyer'),
-        Beatmap(id=727, artist='Nanahira', \
-                        title='Nanahira singing from the window to a fucking van', \
-                        yt_id='9USxPiJzdv0', \
-                        content=content),
-        Beatmap(id=1337, artist='Nekomata Okayu', \
-                         title='flos', \
-                         yt_id='4muYzftomAE', \
-                         content=flos_content),
-        Beatmap(id=272, artist='YOASOBI', \
-                         title='Yoru ni Kakeru', \
-                         yt_id='xtfXl7TZTac', \
-                         content=yorunicontent),
-        Beatmap(id=2727, artist='idk', \
-                         title='dev map', \
-                         yt_id='xtfXl7TZTac', \
-                         content=test_map_content),
+        Beatmapset(id=727, 
+            owner_id=1234,
+            artist='Nanahira', \
+            title='Nanahira singing from the window to a fucking van', \
+            artist_original='ななひら', \
+            title_original='Nanahira singing from the window to a fucking van', \
+            yt_id='9USxPiJzdv0', \
+            preview_point=0),
+        Beatmap(id=727, \
+            beatmapset_id=727, \
+            content=content),
+        Beatmapset(id=1337, 
+            owner_id=4321,
+            artist='Nekomata Okayu', \
+            title='flos', \
+            artist_original='猫又おかゆ', \
+            title_original='flos', \
+            yt_id='4muYzftomAE', \
+            preview_point=0),
+        Beatmap(id=1337, \
+            beatmapset_id=1337, \
+            content=flos_content),
+        Beatmapset(id=272, 
+            owner_id=4321,
+            artist='YOASOBI', \
+            title='Yoru ni Kakeru', \
+            artist_original='YOASOBI', \
+            title_original='夜に駆ける', \
+            yt_id='xtfXl7TZTac', \
+            preview_point=0),
+        Beatmap(id=272, \
+            beatmapset_id=272, \
+            content=yorunicontent),
+        Beatmapset(id=2727, 
+            owner_id=1234,
+            artist='idk', \
+            title='dev map', \
+            artist_original='idk', \
+            title_original='dev map', \
+            yt_id='xtfXl7TZTac', \
+            preview_point=0),
+        Beatmap(id=2727, \
+            beatmapset_id=2727, \
+            content=test_map_content),
         Score(user_id=1234, beatmap_id=727, score=727),
         Score(user_id=1234, beatmap_id=727, score=123),
         Score(user_id=4321, beatmap_id=727, score=72727),

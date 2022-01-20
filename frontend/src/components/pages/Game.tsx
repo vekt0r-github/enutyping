@@ -3,6 +3,7 @@ import { Navigate, useParams } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
 import GameArea from "@/components/modules/GameArea";
+import NotFound from "@/components/pages/NotFound";
 
 import { get } from "@/utils/functions";
 import { User, Beatmap, LineData } from "@/utils/types";
@@ -12,7 +13,7 @@ import '@/utils/styles.css';
 import { MainBox, Line } from '@/utils/styles';
 
 type Props = {
-  user: User,
+  user: User | null,
   volume: number,
 };
 
@@ -82,31 +83,37 @@ const Game = ({ user, volume } : Props) => {
     return <Navigate to='/login' replace={true} />
   }
 
-  const { mapId } = useParams();
-
-  const [map, setMap] = useState<Beatmap>();
+  const { mapId, mapsetId } = useParams();
   
   useEffect(() => {
+    console.log("HSOLEU")
     get(`/api/beatmaps/${mapId}`).then((beatmap) => {
-      if (beatmap && beatmap.id) {
-        processBeatmap(beatmap); // mutates
-        setMap(beatmap);
+      console.log(beatmap)
+      if (!beatmap || !beatmap.id || beatmap.beatmapset.id !== mapsetId) {
+        setMap(null); // map not found or param is wrong
       }
+      processBeatmap(beatmap); // mutates
+      setMap(beatmap);
     });
   }, []);
 
-  if (!map) { return <Loading />; }
+  const [map, setMap] = useState<Beatmap | null>();
+  if (map === undefined) { return <Loading />; }
+  if (map === null) { return <NotFound />; }
+  const {beatmapset, diffname, lines, scores} = map;
+  const {artist, title, artist_original, title_original, yt_id, source, preview_point, owner, beatmaps} = beatmapset;
   
   return (
     <>
-      <h1>{map.artist} - {map.title}</h1>
+      <h1>{artist} - {title}</h1>
       <PageContainer>
         <Sidebar>
           <h2>Map info and stats etc.</h2>
-          <Line>Title: {map.title}</Line>
-          <Line>Artist: {map.artist}</Line>
-          <Line>ID: {map.id}</Line>
-          <Line>Source: {map.source}</Line>
+          <Line>Title: {title}</Line>
+          <Line>Artist: {artist}</Line>
+          <Line>Map ID: {map.id}</Line>
+          <Line>Set ID: {beatmapset.id}</Line>
+          <Line>Source: {source}</Line>
         </Sidebar>
         <GameArea
           user={user}

@@ -1,7 +1,7 @@
 export type User = { // example
   id: number;
   name: string;
-} | null;
+};
 
 export type Score = {
   id: number;
@@ -20,13 +20,28 @@ export type LineData = {
   }[],
 };
 
-export type Beatmap = { // example
+type BeatmapMetadata = {
   id: number;
-  artist: string;
-  title: string;
-  yt_id: string;
-  source: string; // created from yt_id on backend
+  diffname: string;
+}
+
+export type Beatmap = {
+  id: number;
+  beatmapset: Beatmapset;
+  diffname: string;
   lines: LineData[]; // processed content
   scores?: Score[];
 };
 
+export type Beatmapset = { // example
+  id: number;
+  artist: string;
+  title: string;
+  artist_original: string;
+  title_original: string;
+  yt_id: string;
+  source: string; // created from yt_id on backend
+  preview_point: number;
+  owner: User;
+  beatmaps: Beatmap[] | BeatmapMetadata[];
+}

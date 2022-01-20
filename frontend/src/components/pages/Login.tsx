@@ -5,7 +5,7 @@ import { User } from "@/utils/types";
 
 type Props = {
   handleLogin: (code: string|null, state: string|null) => void,
-  user: User,
+  user: User | null,
 }
 
 const Login = ({ handleLogin, user } : Props) => {

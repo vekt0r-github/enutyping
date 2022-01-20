@@ -11,7 +11,7 @@ import { Link, Spacer, Line } from '@/utils/styles';
 
 type Props = {
   handleLogout: () => void,
-  user: User,
+  user: User | null,
   volume: number,
   setVolume: React.Dispatch<React.SetStateAction<number>>,
 }
