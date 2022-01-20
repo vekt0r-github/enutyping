@@ -26,11 +26,17 @@ const kanaRespellings = {
   n: ["n", "nn"]
 };
 
+const wanakanaOptions = {
+	customRomajiMapping: {
+		づ: "du",
+	},
+}
+
 const getRomanizations = (kana: string) : string[] => {
   function hasKey<O>(obj: O, key: PropertyKey): key is keyof O {
     return key in obj; // fix ts error even though this looks stupid
   }
-  const canonical = toRomaji(kana);
+  const canonical = toRomaji(kana, wanakanaOptions);
   if (kana.length == 1) {
     if (hasKey(kanaRespellings, canonical)) {
       return kanaRespellings[canonical];
@@ -51,7 +57,7 @@ const getRomanizations = (kana: string) : string[] => {
   }
   else normals = [canonical];
 
-  let modifierRomaji: string = toRomaji(kana[1]);
+  let modifierRomaji: string = toRomaji(kana[1], wanakanaOptions);
   let weirds: string[] = getRomanizations(kana[0]).map(r => r + "x" + modifierRomaji);
 
   return normals.concat(weirds);
@@ -71,7 +77,7 @@ const computeKanaAt = (pos: number, syllable: string, nextSyllable?: string) => 
   // n's are doubled before あ、な、や etc., carrying across syllables, but not across lines
   let future = syllable.substring(length + pos); // anything that starts with the next char
   if (future === "") { future = nextSyllable ?? "a"; } // want end of line to be doubled
-  const isDoubledN = ("aeiouny".includes(toRomaji(future)[0]));
+  const isDoubledN = ("aeiouny".includes(toRomaji(future, wanakanaOptions)[0]));
   newKana.text = syllable.substring(pos, length + pos);
   newKana.romanizations = getRomanizations(newKana.text);
   if (syllable[pos] == "ん" && isDoubledN) {
