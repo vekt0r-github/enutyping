@@ -8,6 +8,8 @@ from models import Beatmap, Score, User
 from schemas import beatmap_schema, beatmaps_metadata_schema, score_schema, scores_schema, user_schema, users_schema
 from database import db_session
 
+MAX_NUM_SCORES = 50
+
 api = Blueprint('api', __name__)
 
 def login_required(f):
@@ -48,8 +50,9 @@ def get_beatmap_scores(beatmap_id):
                             .group_by(Score.user_id) \
                             .subquery()
     scores = db_session.query(Score).join(best_scores_subquery, and_( \
-            best_scores_subquery.c.user_id == Score.user_id,
-            best_scores_subquery.c.maxscore == Score.score)).all()
+            best_scores_subquery.c.user_id == Score.user_id, \
+            best_scores_subquery.c.maxscore == Score.score)) \
+            .order_by(Score.score.desc()).limit(MAX_NUM_SCORES).all()
     scores_result = scores_schema.dump(scores)
     return { **process_beatmap(beatmap_result), 'scores' : scores_result }
 
