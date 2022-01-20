@@ -65,7 +65,7 @@ const Syllable = styled.span.attrs<SyllableProps>(({pos}) =>({
     } : {}),
   },
 }))<SyllableProps>`
-  font-size: 18px;
+  font-size: 1.125em;
 `;
 
 const SyllableTopText = styled.span`

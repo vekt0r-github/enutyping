@@ -48,7 +48,7 @@ const TopHalf = styled.div`
 `;
 
 const LyricLine = styled.div`
-  font-size: 24px;
+  font-size: 1.5em;
   color: black;
   width: 100%;
   text-align: center;
