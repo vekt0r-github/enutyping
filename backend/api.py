@@ -36,9 +36,10 @@ def get_user(user_id):
     scores_result = scores_without_user_schema.dump(scores)
     return {"user": user_result, "scores": scores_result}
 
-@api.route('/users/', methods=['GET'])
+@api.route('/users', methods=['GET'])
 def get_users():
-    users = User.query.all()
+    search_query = request.args.get('search', '')
+    users = User.query.filter(User.name.ilike(f'%{search_query}%')).all()
     res = users_schema.dump(users)
     return { 'users': res }
 
