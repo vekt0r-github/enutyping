@@ -36,12 +36,12 @@
   --ff-body: "Noto Sans";
 
   --tt-short: 0.0727s;
-  --tt-long: 0.2908s;
+  --tt-long: 0.2181s;
 
-  --xs: 4px;
-  --s: 8px;
-  --m: 16px;
-  --l: 24px;
+  --xs: 0.25em;
+  --s: 0.5em;
+  --m: 1em;
+  --l: 1.5em;
 
   /* must be equal to effective navbar height */
   --content-offset: 72px;

@@ -30,10 +30,11 @@ const NavHalf = styled.div`
 `;
 
 const NavBarLink = styled(Link)`
-  font-size: 24px; /* text is empirically 33px */
+  font-size: 1.5em; /* text is empirically 33px */
   padding: calc((var(--content-offset) - 33px) / 2) var(--m);
   height: 100%;
   box-sizing: border-box;
+  transition: var(--tt-short);
   &.active {
     background-color: var(--clr-primary-dim);
     color: white;

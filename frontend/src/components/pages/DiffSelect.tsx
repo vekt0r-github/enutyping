@@ -20,7 +20,7 @@ type Props = {
 };
 
 const Overlay = styled(GameOverlay)`
-  padding: 0;
+  padding: var(--m) 0;
   justify-content: flex-start;
   & > ${Line} {
     font-style: normal;
@@ -36,7 +36,7 @@ const DiffsContainer = styled.div`
 const Diff = styled(MainBox)`
   color: black;
   transition: var(--tt-short);
-  padding: var(--m);
+  padding: var(--m) var(--l);
   margin: var(--m);
   border-radius: var(--m);
   &:hover, &:focus {
@@ -109,7 +109,7 @@ const DiffSelect = ({ user } : Props) => {
             <StatBox />
           </BottomHalf>
           <Overlay>
-            <Line as="h2" size="1.5em" margin="1em 0">Select Difficulty:</Line>
+            <Line as="h2" size="1.5em" margin="1.5em 0">Select Difficulty:</Line>
             <DiffsContainer>
               {beatmaps.map((map) => 
                 <Diff as={Link} to={`/play/${mapset.id}/${map.id}`}>

@@ -58,7 +58,7 @@ def get_beatmap_with_set_and_scores(beatmap_id):
             .order_by(Score.score.desc()).limit(MAX_NUM_SCORES).all()
     scores_result = scores_schema.dump(scores)
     beatmapset_result = beatmapset_schema.dump(beatmap.beatmapset)
-    return { **beatmap_result, 'scores' : scores_result, 'beatmapset' : beatmapset_result }
+    return { **beatmap_result, 'scores' : scores_result, 'beatmapset' : process_beatmapset(beatmapset_result) }
 
 @api.route('/beatmapsets/<int:beatmapset_id>', methods=['GET'])
 def get_beatmapset_with_diffs_and_scores(beatmapset_id):
