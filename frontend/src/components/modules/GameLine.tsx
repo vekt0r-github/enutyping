@@ -37,7 +37,8 @@ enum ActiveStatus { PAST, PRESENT, FUTURE };
 
 const LineContainer = styled.div`
   width: 100%;
-  background-color: var(--clr-grey);
+  height: 80px;
+  /* background-color: var(--clr-grey); */
 `;
 
 const Timeline = styled.div`
@@ -54,14 +55,8 @@ const TimelineBar = styled.div`
   left: 0;
 `;
 
-const getColorOfActiveStatus = (active : ActiveStatus) => {
-  if (active === ActiveStatus.PAST) { return 'var(--clr-darkgrey)'; }
-  if (active === ActiveStatus.PRESENT) { return 'var(--clr-link)'; }
-  return 'black';
-};
-
-type LineProps = { pos?: [string, string], active: ActiveStatus };
-const LineText = styled.span.attrs<LineProps>(({pos}) =>({
+type SyllableProps = { pos?: [string, string] };
+const Syllable = styled.span.attrs<SyllableProps>(({pos}) =>({
   style: {
     ...(pos ? {
       position: 'absolute',
@@ -69,46 +64,61 @@ const LineText = styled.span.attrs<LineProps>(({pos}) =>({
       top: pos[1],
     } : {}),
   },
-}))<LineProps>`
+}))<SyllableProps>`
   font-size: 18px;
-  color: ${(props) => getColorOfActiveStatus(props.active)};
+`;
+
+const SyllableTopText = styled.span`
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: fit-content;
+  white-space: nowrap;
+`;
+
+const SyllableBottomText = styled(SyllableTopText)`
+  top: 40px;
+`;
+
+const CharText = styled.span<{active: ActiveStatus}>`
   ${(props) => {
     switch (props.active) {
       case ActiveStatus.PAST:
         return css`
-          background-color: var(--clr-grey);
-          z-index: 0;
+          color: var(--clr-medgrey);
+          opacity: 0.5;
+          background-color: transparent;
+          z-index: 1;
         `;
       case ActiveStatus.PRESENT:
         return css`
+          color: var(--clr-link);
           background-color: var(--clr-highlight);
           box-shadow: 2px 2px 5px #aaa;
-          z-index: 1;
+          z-index: 3;
         `;
       case ActiveStatus.FUTURE:
         return css`
+          color: black;
           background-color: var(--clr-grey);
           box-shadow: 2px 2px 5px #aaa;
+          z-index: 2;
         `;
     }
   }}
 `;
 
-const Syllable = styled(LineText)`
-  &::before {
-    width: 2px;
-    height: 16px;
-    position: absolute;
-    content: "";
-    left: 4px;
-    top: 22px;
-    background-color: ${(props) => getColorOfActiveStatus(props.active)};
-  }
-`;
-
-const LyricLine = styled.div`
-  font-size: 24px;
-  color: black;
+const Tick = styled.div<{active?: ActiveStatus}>`
+  width: 2px;
+  height: 16px;
+  position: absolute;
+  content: "";
+  left: 4px;
+  top: 22px;
+  z-index: 1;
+  background-color: ${(props) => 
+    props.active === ActiveStatus.PAST ? 'var(--clr-darkgrey)' : 'black'
+  };
 `;
 
 const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
@@ -126,7 +136,6 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
   const [state, setState] = useState<State>(initState());
 
   const {position, syllables, nBuffer} = state;
-  const isDone = position[0] >= syllables.length;
   const getKana = (pos : Position) : KanaState | undefined => syllables[pos[0]]?.kana[pos[1]];
 
   const handleKeyPress = (e: KeyboardEvent) => {
@@ -169,21 +178,23 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
   const joinKana = (kana : KanaState[]) => "".concat.apply("", kana.map(k => k.kana.text));
   let syllableList = syllables.map(({time, text, kana}, index) => {
     let active;
-    let topContent : JSX.Element | string = text;
-    let bottomContent : JSX.Element | string = 
-      "".concat.apply("", kana.map(ks => ks.prefix + ks.suffix));
+    let topContent : JSX.Element;
+    let bottomContent : JSX.Element;
     const {PAST, PRESENT, FUTURE} = ActiveStatus;
-    if (index < position[0]) {
-      active = PAST;
-    } else if (index > position[0]) {
-      active = FUTURE;
+    if (index !== position[0]) {
+      active = (index < position[0]) ? PAST : FUTURE;
+      topContent = <CharText active={active}>{text}</CharText> 
+      bottomContent =
+        <CharText active={active}>
+          {"".concat.apply("", kana.map(ks => ks.prefix + ks.suffix))}
+        </CharText> 
     } else {
       active = PRESENT;
       const kpos = position[1];
       topContent = (<>
-        <LineText active={PAST}>{joinKana(kana.slice(0, kpos))}</LineText>
-        <LineText active={PRESENT}>{joinKana(kana.slice(kpos, kpos+1))}</LineText>
-        <LineText active={FUTURE}>{joinKana(kana.slice(kpos+1))}</LineText>
+        <CharText active={PAST}>{joinKana(kana.slice(0, kpos))}</CharText>
+        <CharText active={PRESENT}>{joinKana(kana.slice(kpos, kpos+1))}</CharText>
+        <CharText active={FUTURE}>{joinKana(kana.slice(kpos+1))}</CharText>
       </>);
       let prefixes = ""; // this is pretty implementation dependent
       let suffixes = ""; // and seems likely to break
@@ -192,9 +203,9 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
         suffixes += ks.suffix;
       });
       bottomContent = (<>
-        <LineText active={PAST}>{prefixes}</LineText>
-        <LineText active={PRESENT}>{suffixes.substring(0, 1)}</LineText>
-        <LineText active={FUTURE}>{suffixes.substring(1)}</LineText>
+        <CharText active={PAST}>{prefixes}</CharText>
+        <CharText active={PRESENT}>{suffixes.substring(0, 1)}</CharText>
+        <CharText active={FUTURE}>{suffixes.substring(1)}</CharText>
       </>);
     }
     const timeRatio = (time - startTime) / (endTime - startTime);
@@ -202,12 +213,10 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
       <Syllable 
         key={index}
         pos={[`${timeRatio * 100}%`, '0']}
-        active={active}
       >
-        {topContent}
-        <LineText pos={['0', '40px']} active={active}>
-        {bottomContent}
-        </LineText>
+        <SyllableTopText>{topContent}</SyllableTopText>
+        <Tick active={active}/>
+        <SyllableBottomText>{bottomContent}</SyllableBottomText>
       </Syllable>
     );
   });
@@ -223,9 +232,6 @@ const GameLine = ({ gameStartTime, lineData, keyCallback } : Props) => {
           />
         </TimelineBar>
       </Timeline>
-      {/* <LineText active={ActiveStatus.PAST}>{typedLine + prefix}</LineText>
-      <LineText active={ActiveStatus.FUTURE}>{suffix + toRomaji(line.substring(position + length))}</LineText> */}
-      <LyricLine>{lyric}</LyricLine>
     </LineContainer>
   );
 }

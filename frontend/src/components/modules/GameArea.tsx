@@ -41,12 +41,21 @@ const GameContainer = styled.div`
 const TopHalf = styled.div`
   width: 100%;
   height: 50%;
+  position: absolute;
+  left: 0;
+  top: 0;
 `;
 
-const BottomHalf = styled.div`
-  display: flex;
+const LyricLine = styled.div`
+  font-size: 24px;
+  color: black;
   width: 100%;
-  height: 50%;
+  text-align: center;
+`;
+
+const BottomHalf = styled(TopHalf)`
+  top: 50%;
+  display: flex;
 `;
 
 const StatBox = styled(SubBox)`
@@ -218,6 +227,7 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
             lineData={lines[currIndex]}
             keyCallback={keyCallback}
           />
+          <LyricLine>{lines[currIndex].lyric}</LyricLine>
         </> : null}
         {status === Status.SUBMITTING ?
           <h2>Submitting score...</h2>
