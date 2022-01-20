@@ -9,8 +9,9 @@ import { User, Beatmap, LineData } from "@/utils/types";
 import styled from 'styled-components';
 import '@/utils/styles.css';
 import { SubBox, Line } from '@/utils/styles';
+import { Navigate } from "react-router-dom";
 
-export enum Status { UNSTARTED, STARTQUEUED, PLAYING, SUBMITTING, ENDED };
+export enum Status { GOBACK, UNSTARTED, STARTQUEUED, PLAYING, SUBMITTING, ENDED };
 
 type Props = {
   user: User,
@@ -27,7 +28,7 @@ type GameState = {
   score: number
 };
 
-const GameContainer = styled.div`
+export const GameContainer = styled.div`
   width: var(--game-width);
   height: var(--game-height);
   min-width: var(--game-width);
@@ -53,19 +54,19 @@ const LyricLine = styled.div`
   text-align: center;
 `;
 
-const BottomHalf = styled(TopHalf)`
+export const BottomHalf = styled(TopHalf)`
   top: 50%;
   display: flex;
 `;
 
-const StatBox = styled(SubBox)`
+export const StatBox = styled(SubBox)`
   flex-basis: 0;
   flex-grow: 1;
   height: auto;
   margin: var(--s);
 `;
 
-const Overlay = styled.div`
+export const Overlay = styled.div`
   width: 100%;
   height: 100%;
   padding-bottom: calc(var(--game-height) / 3);
@@ -151,7 +152,6 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
       score: gameState.score,
     }
     post('/api/scores', data).then((score) => {
-      console.log(score);
       endGame();
     });
   }, [status]);
@@ -185,6 +185,7 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
     if (e.key === "Escape") {
       if (status === Status.PLAYING) { endGame(); } 
       if (status === Status.ENDED) { resetGame(); } 
+      if (status === Status.UNSTARTED) { set('status', Status.GOBACK); } 
     }
   };
   
@@ -216,6 +217,10 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
       set('score', (oldScore) => oldScore - 5);
     }
   }
+
+  if (status === Status.GOBACK) {
+    return <Navigate to={`/play/${beatmap.beatmapset.id}`} replace={true} />;
+  }
   
   return (
     <GameContainer>
@@ -244,7 +249,6 @@ const GameArea = ({ user, beatmap, volume } : Props) => {
           gameStartTime={gameStartTime}
           startGame={startGame}
           volume={volume}
-          // setDuration={setDuration}
         />
         <StatBox>Score: {score}</StatBox>
       </BottomHalf>

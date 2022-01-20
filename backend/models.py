@@ -20,13 +20,15 @@ class Beatmap(Base):
     __tablename__ = 'beatmaps'
     id = Column(Integer, primary_key=True)
     beatmapset_id = Column(Integer, ForeignKey('beatmapsets.id'))
+    diffname = Column(String(50))
     scores = relationship('Score', back_populates='beatmap')
     content = deferred(Column(UnicodeText))
 
     beatmapset = relationship('Beatmapset', back_populates='beatmaps')
 
-    def __init__(self, beatmapset_id, content, id = None):
+    def __init__(self, beatmapset_id, diffname, content, id = None):
         self.beatmapset_id = beatmapset_id
+        self.diffname = diffname
         self.content = content
         self.id = id
 
@@ -89,6 +91,7 @@ def init_db():
             preview_point=0),
         Beatmap(id=727, \
             beatmapset_id=727, \
+            diffname="sampai_'s ear damage", \
             content=content),
         Beatmapset(id=1337, 
             owner_id=4321,
@@ -100,6 +103,7 @@ def init_db():
             preview_point=0),
         Beatmap(id=1337, \
             beatmapset_id=1337, \
+            diffname="Lythrum", \
             content=flos_content),
         Beatmapset(id=272, 
             owner_id=4321,
@@ -111,17 +115,11 @@ def init_db():
             preview_point=0),
         Beatmap(id=272, \
             beatmapset_id=272, \
+            diffname="夜にこｃｋ", \
             content=yorunicontent),
-        Beatmapset(id=2727, 
-            owner_id=1234,
-            artist='idk', \
-            title='dev map', \
-            artist_original='idk', \
-            title_original='dev map', \
-            yt_id='xtfXl7TZTac', \
-            preview_point=0),
         Beatmap(id=2727, \
-            beatmapset_id=2727, \
+            beatmapset_id=272, \
+            diffname="dev map ん～", \
             content=test_map_content),
         Score(user_id=1234, beatmap_id=727, score=727),
         Score(user_id=1234, beatmap_id=727, score=123),
@@ -134,7 +132,7 @@ def init_db():
     db_session.commit()
 
 
-test_map_content = '''L,0,きんいろモザイク　きんいろなんです　深夜　んなってっしゃじょん
+test_map_content = '''L,0,きんいろモザイク　きんいろなんです　深夜づ　んなってっしゃじょん
 S,500,きんいろもざいく
 S,5000,きん
 S,6000,いろ

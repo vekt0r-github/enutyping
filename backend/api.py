@@ -5,7 +5,7 @@ from operator import itemgetter
 from sqlalchemy import func, and_
 
 from models import Beatmap, Beatmapset, Score, User
-from schemas import beatmap_schema, beatmapset_schema, beatmapsets_schema, \
+from schemas import beatmap_schema, beatmaps_schema, beatmapset_schema, beatmapsets_schema, \
                     score_schema, scores_schema, scores_without_user_schema, user_schema, users_schema
 from database import db_session
 
@@ -66,7 +66,7 @@ def get_beatmapset_with_diffs_and_scores(beatmapset_id):
     if beatmapset is None:
         abort(404, description = 'Beatmapset not found')
     beatmapset_result = beatmapset_schema.dump(beatmapset)
-    beatmaps_result = beatmap_schema.dump(beatmapset.beatmaps)
+    beatmaps_result = beatmaps_schema.dump(beatmapset.beatmaps)
     return { **process_beatmapset(beatmapset_result), 'beatmaps': beatmaps_result }
 
 @api.route('/beatmapsets')

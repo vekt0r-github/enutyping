@@ -27,6 +27,7 @@ class BeatmapSchema(Schema):
     content = fields.Str()
 
 beatmap_schema = BeatmapSchema()
+beatmaps_schema = BeatmapSchema(many=True)
 
 class BeatmapsetSchema(Schema):
     id = fields.Int(dump_only=True)

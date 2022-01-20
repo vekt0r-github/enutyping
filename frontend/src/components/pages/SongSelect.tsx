@@ -8,7 +8,7 @@ import { User, Beatmapset } from "@/utils/types";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Link, Line } from '@/utils/styles';
+import { MainBox, SubBox, Link, Line } from '@/utils/styles';
 
 type Props = {
   user: User | null,
@@ -16,29 +16,63 @@ type Props = {
 };
 
 const SongsContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+  display: grid;
+  @media (min-width: 760px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
   justify-content: center;
   max-width: 1000px;
   margin: 0 var(--s);
+`;
+
+const HoverContainer = styled(MainBox)`
+  background-color: var(--clr-primary-light);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  padding-top: calc(90px + 2*var(--s));
+  box-sizing: border-box;
+  display: flex;
+  z-index: -1;
+  animation: fadeIn 0.2908s;
+  @keyframes fadeIn {
+    from {
+      background-color: var(--clr-primary);
+      opacity: 0;
+      height: 90px;
+    }
+  }
+`;
+
+const Diff = styled(SubBox)`
+  display: block;
+  width: 100%;
+  padding: 1px var(--s);
+  & + & { margin-top: var(--xs); }
+  box-sizing: border-box;
+  color: black;
+  transition: 0.0727s;
+  &:hover {
+    background-color: var(--clr-secondary-light);
+    color: black;
+  }
 `;
 
 const SongBox = styled(MainBox)`
   height: 90px;
   max-width: 480px;
   min-width: 360px;
-  flex-basis: 360px;
-  flex-grow: 1;
-  flex-shrink: 0;
   margin: var(--s);
   box-sizing: content-box;
   display: flex;
   color: black;
-  transition: 0.1454s;
-  &:hover {
+  position: relative;
+  & > ${HoverContainer} { display: none; }
+  &:hover, &:focus {
     color: black;
-    background-color: var(--clr-primary-light);
+    & > ${HoverContainer} { display: block; }
+    z-index: 1;
   }
 `;
 
@@ -56,7 +90,6 @@ const SongSelect = ({ user, volume } : Props) => {
   
   useEffect(() => {
     get("/api/beatmapsets").then((res) => {
-      console.log(res)
       const beatmapsets = res.beatmapsets;
       if (beatmapsets && beatmapsets.length) {
         setMapsets(beatmapsets);
@@ -70,17 +103,26 @@ const SongSelect = ({ user, volume } : Props) => {
       <SongsContainer>
         {mapsets?.map((mapset) => {
           const {artist, title, artist_original, title_original, yt_id, preview_point, owner, beatmaps} = mapset;
-          // TODO: display info about diffs
-          console.log(mapset)
           return (
-            <SongBox as={Link} to={`/play/${mapset.id}/${beatmaps[0].id}`} key={mapset.id}>
+            <SongBox 
+              as={Link} 
+              to={`/play/${mapset.id}`} 
+              key={mapset.id}
+            >
               <YTThumbnail yt_id={yt_id} width={120} height={90} />
               <Info>
                 <Line size='1.25em' as='h2'>{title}</Line>
                 <Line size='1em'>by {artist}</Line>
                 <Line size='0.8em'>mapped by {owner.name}</Line>
-                <Line size='0.8em'>{beatmaps.length} diffs</Line>
+                <Line size='0.8em'>{beatmaps.length} difficult{beatmaps.length !== 1 ? 'ies' : 'y'}</Line>
               </Info>
+              <HoverContainer>
+                {beatmaps.map((map) => 
+                  <Diff as={Link} to={`/play/${mapset.id}/${map.id}`}>
+                    {map.diffname}
+                  </Diff>
+                )}
+              </HoverContainer>
             </SongBox>
           );
         })}

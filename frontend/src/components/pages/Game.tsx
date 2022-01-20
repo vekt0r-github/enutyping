@@ -18,7 +18,7 @@ type Props = {
   volume: number,
 };
 
-const Sidebar = styled(MainBox)`
+export const Sidebar = styled(MainBox)`
   min-width: 300px;
   max-width: 400px;
   height: var(--game-height);
@@ -29,7 +29,7 @@ const Sidebar = styled(MainBox)`
   margin: 0 var(--s);
 `;
 
-const PageContainer = styled.div`
+export const PageContainer = styled.div`
   width: 100%;
   min-width: var(--game-width);
   display: flex;
@@ -87,9 +87,7 @@ const Game = ({ user, volume } : Props) => {
   const { mapId, mapsetId } = useParams();
   
   useEffect(() => {
-    console.log("HSOLEU")
     get(`/api/beatmaps/${mapId}`).then((beatmap) => {
-      console.log(beatmap)
       if (!beatmap || !beatmap.id || beatmap.beatmapset.id !== mapsetId) {
         setMap(null); // map not found or param is wrong
       }
@@ -106,7 +104,7 @@ const Game = ({ user, volume } : Props) => {
   
   return (
     <>
-      <h1>{artist} - {title}</h1>
+      <h1>{artist} - {title} [{diffname}]</h1>
       <PageContainer>
         <Sidebar>
           <h2>Map info and stats etc.</h2>

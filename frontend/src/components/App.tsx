@@ -6,6 +6,7 @@ import NavBar from "@/components/modules/NavBar";
 import Home from "@/components/pages/Home";
 import Login from "@/components/pages/Login";
 import SongSelect from "@/components/pages/SongSelect";
+import DiffSelect from "@/components/pages/DiffSelect";
 import Game from "@/components/pages/Game";
 import NotFound from "@/components/pages/NotFound";
 import UserPage from "@/components/pages/UserPage";
@@ -94,6 +95,11 @@ const App = ({} : Props) => {
               <SongSelect
                 user={user}
                 volume={volume}
+              />
+            }/>
+            <Route path="/play/:mapsetId" element={
+              <DiffSelect
+                user={user}
               />
             }/>
             <Route path="/play/:mapsetId/:mapId" element={
