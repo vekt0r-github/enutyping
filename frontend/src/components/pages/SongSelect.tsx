@@ -35,7 +35,7 @@ const HoverContainer = styled(MainBox)`
   box-sizing: border-box;
   display: flex;
   z-index: -1;
-  animation: fadeIn 0.2908s;
+  animation: fadeIn var(--tt-long);
   @keyframes fadeIn {
     from {
       background-color: var(--clr-primary);
@@ -52,7 +52,7 @@ const Diff = styled(SubBox)`
   & + & { margin-top: var(--xs); }
   box-sizing: border-box;
   color: black;
-  transition: 0.0727s;
+  transition: var(--tt-short);
   &:hover {
     background-color: var(--clr-secondary-light);
     color: black;

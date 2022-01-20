@@ -35,7 +35,7 @@ const DiffsContainer = styled.div`
 
 const Diff = styled(MainBox)`
   color: black;
-  transition: 0.0727s;
+  transition: var(--tt-short);
   padding: var(--m);
   margin: var(--m);
   border-radius: var(--m);

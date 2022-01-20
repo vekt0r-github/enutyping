@@ -10,19 +10,6 @@ type Props = {
   setVolume: (newVolume: number) => void,
 }
 
-const Container = styled.div`
-  --slider-width: 8px;
-  --slider-height: 200px;
-  --thumb-size: 24px;
-  --label-height: 30px;
-  --container-width: 50px;
-  --container-height: 220px;
-  width: var(--container-width);
-  height: var(--container-width);
-  position: relative;
-  z-index: 0;
-`;
-
 const Icon = styled.img`
   width: var(--container-width);
   height: var(--container-width);
@@ -43,6 +30,8 @@ const IconLabel = styled(Line)`
   left: 11px;
   top: 19px;
   z-index: 1;
+  pointer-events: none;
+  user-select: none;
 `;
 
 const SliderLabel = styled(Line)`
@@ -51,6 +40,8 @@ const SliderLabel = styled(Line)`
   height: var(--label-height);
   font-size: 1.25em;
   padding-top: 6px;
+  pointer-events: none;
+  user-select: none;
 `;
 
 const SliderOuterContainer = styled.div`
@@ -62,6 +53,8 @@ const SliderOuterContainer = styled.div`
   background-color: var(--clr-secondary-light);
   border: 2px solid var(--clr-secondary-dim);
   border-radius: var(--s);
+  animation: fadeIn var(--tt-short);
+  @keyframes fadeIn { from { opacity: 0; } };
 `;
 
 const SliderContainer = styled.div`
@@ -114,64 +107,52 @@ const SliderFill = styled.div<{value: number}>`
   background-color: var(--clr-primary);
 `;
 
+const Container = styled.div`
+  --slider-width: 8px;
+  --slider-height: 200px;
+  --thumb-size: 24px;
+  --label-height: 30px;
+  --container-width: 50px;
+  --container-height: 220px;
+  width: var(--container-width);
+  height: var(--container-width);
+  position: relative;
+  z-index: 0;
+  & > ${SliderOuterContainer} { display: none; }
+  &:hover > ${SliderOuterContainer},
+  &:focus > ${SliderOuterContainer} { display: block; }
+`;
+
 const Volume = ({ volume, setVolume } : Props) => {
-  const [active, setActive] = useState<boolean>(false);
   const handleVolumeChange = (e : React.ChangeEvent<HTMLInputElement>) => {
     const vol = parseInt(e.target.value) / 100;
     setVolume(vol);
   }
 
-  const containerRef = useRef<HTMLDivElement>(null);
-
   const sliderValue = Math.round(volume * 100);
 
-  const handleUnfocus = (e : FocusEvent) => {
-    const container = containerRef.current;
-    if (!container) { return; }
-    if (container.contains(e.relatedTarget as Node) || !document.hasFocus()) { return; }
-    setActive(false);
-  };
-  const handleClickOutside = (e : MouseEvent) => {
-    const container = containerRef.current;
-    if (!container) { return; }
-    if (container.contains(e.target as Node)) { return; }
-    setActive(false);
-  };
-
-  useEffect(() => {
-    document.addEventListener('click', handleClickOutside);
-    document.addEventListener('focusout', handleUnfocus);
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-      document.removeEventListener('focusout', handleUnfocus);
-    };
-  }, []);
-
   return (
-    <Container ref={containerRef}>
+    <Container tabIndex={0}>
       <Icon
         src={`${vicon}`}
-        onClick={() => setActive(a => !a)}
       />
       <IconLabel>{sliderValue}</IconLabel>
-      {active ?
-        <SliderOuterContainer>
-          <SliderLabel as="label" htmlFor="slider-container">{sliderValue}</SliderLabel>
-          <SliderContainer id="slider-container">
-            <SliderBody />
-            <SliderFill
-              value={sliderValue}
-            />
-            <Slider
-              type="range" 
-              min={0} 
-              max={100}
-              value={sliderValue}
-              onChange={handleVolumeChange} 
-            />
-          </SliderContainer>
-        </SliderOuterContainer>
-        : null}
+      <SliderOuterContainer>
+        <SliderLabel as="label" htmlFor="slider-container">{sliderValue}</SliderLabel>
+        <SliderContainer id="slider-container">
+          <SliderBody />
+          <SliderFill
+            value={sliderValue}
+          />
+          <Slider
+            type="range" 
+            min={0} 
+            max={100}
+            value={sliderValue}
+            onChange={handleVolumeChange} 
+          />
+        </SliderContainer>
+      </SliderOuterContainer>
     </Container>
   );
 }
