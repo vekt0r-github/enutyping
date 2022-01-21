@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 
 import ProgressBar from "@/components/modules/ProgressBar";
 
-import { Config, LineData } from '@/utils/types'
-import { Kana, parseKana } from '@/utils/kana'
+import { Config, Kana, LineData } from '@/utils/types'
+import { parseKana } from '@/utils/kana'
 
 import styled, { css } from 'styled-components';
 import '@/utils/styles.css';

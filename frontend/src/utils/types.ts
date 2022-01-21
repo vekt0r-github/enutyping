@@ -61,13 +61,20 @@ export type Score = {
   user?: User;
 }
 
+export type Kana = {
+  text: string,
+  romanizations: string[],
+};
+
 export type LineData = {
   startTime: number,
   endTime: number,
   lyric: string,
+	kpm: number,
   syllables: {
     time: number,
     text: string,
+		kana: Kana[], 
   }[],
 };
 
@@ -81,6 +88,7 @@ export type Beatmap = {
   beatmapset: Beatmapset;
   diffname: string;
   lines: LineData[]; // processed content
+	kpm: number;
   scores?: Score[];
 };
 

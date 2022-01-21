@@ -5,6 +5,7 @@ import GameLine from "@/components/modules/GameLine";
 
 import { post } from '@/utils/functions';
 import { User, Beatmap } from "@/utils/types";
+import { computeLineKana} from '@/utils/beatmaputils';
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -27,6 +28,8 @@ type GameState = {
   currIndex?: number,
   hits: number,
   misses: number,
+	kanaHits: number,
+	totalKana: number,
   score: number
 };
 
@@ -100,6 +103,8 @@ const GameArea = ({ user, beatmap, config } : Props) => {
     currIndex: undefined, // maintained via timer independent of video
     hits: 0,
     misses: 0,
+		kanaHits: 0,
+		totalKana: 0,
     score: 0,
   });
 	const { volume } = config;
@@ -120,7 +125,7 @@ const GameArea = ({ user, beatmap, config } : Props) => {
   // const [duration, setDuration] = useState<number>(Infinity);
 
   const lines = beatmap.lines;
-  const {status, gameStartTime, currIndex, hits, misses, score} = gameState;
+  const {status, gameStartTime, currIndex, hits, misses, kanaHits, totalKana, score} = gameState;
 
   const prepareStartGame = () => {
     if (status !== Status.UNSTARTED) { return; }
@@ -143,6 +148,7 @@ const GameArea = ({ user, beatmap, config } : Props) => {
     lines.forEach((line, index) => {
       // if this loop is too slow, save original time and reference
       timeoutIds.push(setTimeout(() => {
+				set('totalKana', (oldTotalKana) => oldTotalKana + computeLineKana(line));
         set('currIndex', index);
       }, line.startTime + totalOffset));
     });
@@ -206,19 +212,22 @@ const GameArea = ({ user, beatmap, config } : Props) => {
     }
   }, [status]); // may eventually depend on other things
 
-  const acc = (() => {
-    const hitCount = hits;
-    const missCount = misses;
+  const acc = ((hitCount: number, missCount: number) => {
     if (hitCount + missCount == 0) {
       return 100;
     }
     return 100 * hitCount / (hitCount + missCount);
-  })();
+  });	
+
+	const keyAcc = acc(hits, misses);
+	const kanaAcc = acc(kanaHits, totalKana - kanaHits);
+	
 
   const keyCallback = (hit: boolean, endKana: boolean) => {
     if(hit) {
       set('hits', (oldHits) => oldHits + 1);
       if(endKana) {
+				set('kanaHits', (oldHits) => oldHits + 1);
         set('score', (oldScore) => oldScore + 10);
       }
     }
@@ -253,7 +262,11 @@ const GameArea = ({ user, beatmap, config } : Props) => {
           : null} 
       </TopHalf>
       <BottomHalf>
-        <StatBox>Acc: {acc.toFixed(2)}</StatBox>
+        <StatBox>
+					<p>Keypress Acc: {keyAcc.toFixed(2)}</p>
+					<p>Kana Acc: {kanaAcc.toFixed(2)}</p>
+					<p>Score: {score}</p>
+				</StatBox>
         <GameVideo
           yt_id={beatmap.beatmapset.yt_id}
           status={status}
@@ -261,7 +274,10 @@ const GameArea = ({ user, beatmap, config } : Props) => {
           startGame={startGame}
           volume={volume}
         />
-        <StatBox>Score: {score}</StatBox>
+        <StatBox>
+					<p>Beatmap KPM: {Math.round(beatmap.kpm)}</p>
+					<p>Line KPM: {(status === Status.PLAYING && (currIndex !== undefined)) ? (Math.round(lines[currIndex].kpm)) : "N/A"}</p>
+				</StatBox>
       </BottomHalf>
       {status === Status.UNSTARTED ? 
         <Overlay>

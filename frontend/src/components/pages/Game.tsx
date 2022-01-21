@@ -7,6 +7,8 @@ import NotFound from "@/components/pages/NotFound";
 
 import { get } from "@/utils/functions";
 import { User, Config, Beatmap, LineData } from "@/utils/types";
+import { computeBeatmapKPM, computeLineKPM } from '@/utils/beatmaputils';
+import { parseKana } from '@/utils/kana';
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -50,7 +52,7 @@ export const PageContainer = styled.div`
  * @param beatmap 
  * @returns void
  */
-const processBeatmap = (beatmap : Beatmap & {content: string}) => {
+const processBeatmap = (beatmap : Beatmap & {content: string}, config: Config) => {
   let lines : LineData[] = [];
   if (!beatmap.content) { return null; } // idk man
   const objects = beatmap.content.split(/\r?\n/);
@@ -63,6 +65,7 @@ const processBeatmap = (beatmap : Beatmap & {content: string}) => {
     
     if (line && ['L','E'].includes(type)) {
       line.endTime = time;
+			line.kpm = computeLineKPM(line);
       lines.push(line);
     }
     if (type === 'L') {
@@ -70,13 +73,16 @@ const processBeatmap = (beatmap : Beatmap & {content: string}) => {
         startTime: time,
         endTime: 0, // set when line ends
         lyric: text,
+				kpm: 0,
         syllables: [],
       };
     } else if (type === 'S') {
-      line.syllables.push({ time, text });
+			const kana = parseKana(text, config);
+      line.syllables.push({ time, text, kana });
     }
   });
   beatmap.lines = lines;
+	beatmap.kpm = computeBeatmapKPM(beatmap);
 };
 
 const Game = ({ user, config } : Props) => {
@@ -87,7 +93,7 @@ const Game = ({ user, config } : Props) => {
       if (!beatmap || !beatmap.id || beatmap.beatmapset.id !== mapsetId) {
         setMap(null); // map not found or param is wrong
       }
-      processBeatmap(beatmap); // mutates
+      processBeatmap(beatmap, config); // mutates
       setMap(beatmap);
     });
   }, []);

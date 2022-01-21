@@ -1,10 +1,5 @@
 import { toRomaji } from "wanakana";
-import { Config } from "@/utils/types";
-
-export type Kana = {
-  text: string,
-  romanizations: string[],
-};
+import { Config, Kana } from "@/utils/types";
 
 const smallKana = ["ょ", "ゃ", "ゅ", "ぃ", "ぇ", "ぁ", "ぉ", "ぅ"];
 
@@ -32,7 +27,6 @@ const getRomanizations = (kana: string, config: Config) : string[] => {
   function hasKey<O>(obj: O, key: PropertyKey): key is keyof O {
     return key in obj; // fix ts error even though this looks stupid
   }
-
 	const wanakanaOptions = { customRomajiMapping: config.kanaSpellings };
 
   const canonical = toRomaji(kana, wanakanaOptions);
@@ -89,11 +83,37 @@ const computeKanaAt = (pos: number, config: Config, syllable: string, nextSyllab
 };
 
 export const parseKana = (syllable: string, config: Config, nextSyllable?: string) => {
-  let kana = [];
+  let kana: Kana[] = [];
   for (let pos = 0; pos < syllable.length; ) {
     const newKana = computeKanaAt(pos, config, syllable, nextSyllable);
     kana.push(newKana);
     pos += newKana.text.length;
   }
   return kana;
+}
+
+const minKeypressOptions = { // TODO: someone please pass this into the toRomaji call below i was too weak to make it happen
+	customRomajiMapping: {
+  	し: "si", 
+  	ち: "ti",
+  	つ: "tu",
+  	じ: "ji",
+  	しゃ: "sha",
+  	しょ: "sho",
+  	しゅ: "shu",
+　	じゃ: "ja",
+  	じょ: "jo",
+  	じゅ: "ju",
+  	か: "ka", 
+  	く: "ku", 
+  	こ: "ko", 
+  	せ: "se",
+  	ふ: "fu", 
+		づ: "du",
+  	ん: "n", 
+	},
+}
+export const computeMinKeypresses = (syllable: string) => {
+	const ans = toRomaji(syllable, minKeypressOptions).length;
+	return ans;
 }
