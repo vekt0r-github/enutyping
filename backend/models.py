@@ -5,7 +5,8 @@ from database import Base
 
 class User(Base):
     __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
+    # https://stackoverflow.com/questions/23157411/using-text-as-a-primary-key-in-sqlite-table-bad
+    id = Column(String(69), primary_key=True)
     name = Column(String(50), unique=True)
     avatar_url = Column(String(100))
     scores = relationship('Score', lazy="dynamic", order_by="desc(Score.id)", back_populates='user')
@@ -35,7 +36,7 @@ class Beatmap(Base):
 class Beatmapset(Base):
     __tablename__ = 'beatmapsets'
     id = Column(Integer, primary_key=True)
-    owner_id = Column(Integer, ForeignKey('users.id'))
+    owner_id = Column(String(69), ForeignKey('users.id'))
     artist = Column(String(100))
     title = Column(String(100))
     artist_original = Column(String(100))
@@ -60,7 +61,7 @@ class Beatmapset(Base):
 class Score(Base):
     __tablename__ = 'scores'
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(String(69), ForeignKey('users.id'))
     beatmap_id = Column(Integer, ForeignKey('beatmaps.id'))
     score = Column(Integer)
 

@@ -3,8 +3,9 @@
 1. Create a venv if you haven't already with `python -m venv env`. Skip if you already have one created.
 2. Go into your venv with `source env/bin/activate`.
 3. Install packages with `pip install -r requirements.txt`.
-4. Run `python models.py`, so it can initialize a database with some dummy variables
-5. Remember to `deactivate` if you are in this virtual environment but working on something else.
+4. Set environment variables in a file `.env`. Format should be in `.env.example`.
+5. Run `python models.py`, so it can initialize a database with some dummy variables
+6. Remember to `deactivate` if you are in this virtual environment but working on something else.
 
 # Running locally
 

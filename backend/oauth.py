@@ -1,28 +1,44 @@
+from flask import Blueprint, redirect, request, session
 import os 
 import requests
 
+from models import User
+from schemas import UserSchema
+from database import db_session
+
 # Github OAuth
-GITHUB_OAUTH_CLIENT_ID = os.environ.get('GITHUB_OAUTH_CLIENT_ID', "806baa3f78769475057c")
-GITHUB_OAUTH_CLIENT_SECRET = os.environ.get('GITHUB_OAUTH_CLIENT_SECRET', "797d30d7ace90515f776fb5874547935026d2e4c")
-GITHUB_REDIRECT_URL = os.environ.get('GITHUB_OAUTH_REDIRECT_URL', None)
+GITHUB_OAUTH_CLIENT_ID = os.environ.get('GITHUB_OAUTH_CLIENT_ID')
+GITHUB_OAUTH_CLIENT_SECRET = os.environ.get('GITHUB_OAUTH_CLIENT_SECRET')
+GITHUB_OAUTH_REDIRECT_URL = os.environ.get('GITHUB_OAUTH_REDIRECT_URL')
 GITHUB_REQUEST_AUTH_URL = 'https://github.com/login/oauth/authorize'
 GITHUB_REQUEST_TOKEN_URL = 'https://github.com/login/oauth/access_token'
+GITHUB_API_URL = 'https://api.github.com/user'
+
+# osu! OAuth
+OSU_OAUTH_CLIENT_ID = os.environ.get('OSU_OAUTH_CLIENT_ID')
+OSU_OAUTH_CLIENT_SECRET = os.environ.get('OSU_OAUTH_CLIENT_SECRET')
+OSU_OAUTH_REDIRECT_URL = os.environ.get('OSU_OAUTH_REDIRECT_URL')
+OSU_REQUEST_AUTH_URL = 'https://osu.ppy.sh/oauth/authorize'
+OSU_REQUEST_TOKEN_URL = 'https://osu.ppy.sh/oauth/token'
+OSU_API_URL = 'https://osu.ppy.sh/api/v2/me'
 
 OAUTH_SECRET_KEY = os.environ.get("FLASK_SECRET_KEY", "supersekritsfasdfsaflksjfajlksjfsk")
 
 class OAuth():
-    def __init__(self, client_id, client_secret, secret_key, auth_url, token_url, redirect_uri):
+    def __init__(self, client_id, client_secret, secret_key, auth_url, token_url, redirect_uri, api_url):
         self.client_id = client_id
         self.client_secret = client_secret
         self.secret_key = secret_key
         self.auth_url = auth_url
         self.token_url = token_url
         self.redirect_uri = redirect_uri
+        self.api_url = api_url
 
     def request_url(self):
         params = {
             'client_id': self.client_id,
             'state': self.secret_key,
+            'response_type': 'code',
         }
         if self.redirect_uri: params['redirect_uri'] = self.redirect_uri
         p = requests.Request('GET', self.auth_url, params = params).prepare()
@@ -33,6 +49,8 @@ class OAuth():
             'client_id': self.client_id,
             'client_secret': self.client_secret,
             'code': code,
+            'grant_type': 'authorization_code',
+            'redirect_uri': self.redirect_uri,
         }
         headers = {
             'Accept': 'application/json'
@@ -40,9 +58,77 @@ class OAuth():
         res = requests.post(self.token_url, headers = headers, data = data)
         return res.json()
 
+def construct_oauth_blueprint(provider, oauth, get_user_func):
+    bp = Blueprint(provider, __name__)
+
+    @bp.route('/request', methods = ['GET'])
+    def login():
+        url = oauth.request_url()
+        if not url:
+            return "No valid URL!", 500
+        return redirect(url)
+
+    @bp.route('/authorize', methods = ['POST'])
+    def authorized():
+        req_json = request.get_json()
+        if not req_json:
+            return "No input!", 400
+        state = req_json.get('state')
+        if state == oauth.secret_key:
+            def get_or_create_user(id, name, avatar_url):
+                user = User.query.get(id)
+                if user:
+                    return user
+                user = User(id, name, avatar_url)
+                db_session.add(user)
+                db_session.commit()
+                return user
+
+            code = req_json.get('code')
+            auth_response = oauth.authorize(code)
+            access_token = auth_response['access_token']
+            user_res = get_user_func(oauth, access_token)
+
+            user = get_or_create_user(user_res['uid'], user_res['name'], user_res['avatar_url'])
+            user_object = UserSchema().dump(user)
+            session['user'] = user_object
+            return user_object
+        else:
+            return redirect('/api/unauthorized/')
+
+    return bp
+
+def github_user_func(oauth, token):
+    api_response = requests.get(oauth.api_url, headers = { 'Authorization': f'token {token}' })
+    user = api_response.json()
+    name = user['login'] + '_github'
+    uid = str(user['id']) + 'github'
+    avatar_url = user['avatar_url']
+    return { 'name': name, 'uid': uid, 'avatar_url': avatar_url }
+
+def osu_user_func(oauth, token):
+    api_response = requests.get(oauth.api_url, headers = { 'Authorization': f'Bearer {token}' })
+    user = api_response.json()
+    name = user['username'] + '_osu'
+    uid = str(user['id']) + 'osu'
+    avatar_url = user['avatar_url']
+    return { 'name': name, 'uid': uid, 'avatar_url': avatar_url }
+
 github_oauth = OAuth(GITHUB_OAUTH_CLIENT_ID, \
                      GITHUB_OAUTH_CLIENT_SECRET, \
                      OAUTH_SECRET_KEY, \
                      GITHUB_REQUEST_AUTH_URL, \
                      GITHUB_REQUEST_TOKEN_URL, \
-                     GITHUB_REDIRECT_URL)
+                     GITHUB_OAUTH_REDIRECT_URL, \
+                     GITHUB_API_URL)
+
+osu_oauth = OAuth(OSU_OAUTH_CLIENT_ID, \
+                  OSU_OAUTH_CLIENT_SECRET, \
+                  OAUTH_SECRET_KEY, \
+                  OSU_REQUEST_AUTH_URL, \
+                  OSU_REQUEST_TOKEN_URL, \
+                  OSU_OAUTH_REDIRECT_URL, \
+                  OSU_API_URL)
+
+github_blueprint = construct_oauth_blueprint("github", github_oauth, github_user_func)
+osu_blueprint = construct_oauth_blueprint("osu", osu_oauth, osu_user_func)

@@ -37,9 +37,18 @@ const Login = ({ handleLogin, user } : Props) => {
         <p>Loading...</p>
       ): (
         <p>Login options:&nbsp;
-          <a href="/api/login/github/request">
-            Log in with GitHub
-          </a>
+          <ul>
+            <li>
+              <a href="/api/login/github/request">
+                Log in with GitHub
+              </a>
+            </li>
+            <li>
+              <a href="/api/login/osu/request">
+                Log in with osu!
+              </a>
+            </li>
+          </ul>
         </p>
       )}
     </>

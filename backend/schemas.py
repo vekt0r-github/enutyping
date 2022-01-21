@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields
 
 class UserSchema(Schema):
-    id = fields.Int(dump_only=True)
+    id = fields.Str(dump_only=True)
     name = fields.Str()
     avatar_url = fields.Str(dump_only=True)
 
@@ -12,7 +12,7 @@ class ScoreSchema(Schema):
     id = fields.Int(dump_only=True)
     beatmap_id = fields.Int()
     score = fields.Int()
-    user_id = fields.Int(load_only=True)
+    user_id = fields.Str(load_only=True)
     user = fields.Nested(UserSchema(only=("id", "name", "avatar_url")), dump_only=True)
 
 score_schema = ScoreSchema()

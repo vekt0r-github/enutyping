@@ -26,7 +26,7 @@ def process_beatmapset(beatmapset):
     source = f"https://www.youtube.com/watch?v={beatmapset['yt_id']}"
     return { **beatmapset, 'source' : source }
 
-@api.route('/users/<int:user_id>', methods=['GET'])
+@api.route('/users/<user_id>', methods=['GET'])
 def get_user(user_id):
     user = User.query.get(user_id)
     if user is None:
