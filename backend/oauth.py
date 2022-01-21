@@ -112,27 +112,26 @@ def construct_oauth_blueprint(provider, oauth, get_user_func):
 def github_user_func(oauth, token):
     api_response = requests.get(oauth.api_url, headers = { 'Authorization': f'token {token}' })
     user = api_response.json()
-    name = user['login'] + '_github'
+    name = user['login']
     uid = str(user['id']) + 'github'
     avatar_url = user['avatar_url']
-    return { 'name': name, 'uid': uid, 'avatar_url': avatar_url }
+    return { 'name': f'{name}_{uid}', 'uid': uid, 'avatar_url': avatar_url }
 
 def osu_user_func(oauth, token):
     api_response = requests.get(oauth.api_url, headers = { 'Authorization': f'Bearer {token}' })
     user = api_response.json()
-    name = user['username'] + '_osu'
+    name = user['username']
     uid = str(user['id']) + 'osu'
     avatar_url = user['avatar_url']
-    return { 'name': name, 'uid': uid, 'avatar_url': avatar_url }
+    return { 'name': f'{name}_{uid}', 'uid': uid, 'avatar_url': avatar_url }
 
 def google_user_func(oauth, token):
     api_response = requests.get(oauth.api_url, headers = { 'Authorization': f'Bearer {token}' })
     user = api_response.json()
-    print(user)
-    name = user['name'] + '_google'
+    name = user['given_name']
     uid = str(user['id']) + 'google'
     avatar_url = user['picture']
-    return { 'name': name, 'uid': uid, 'avatar_url': avatar_url }
+    return { 'name': f'{name}_{uid}', 'uid': uid, 'avatar_url': avatar_url }
 
 github_oauth = OAuth(GITHUB_OAUTH_CLIENT_ID, \
                      GITHUB_OAUTH_CLIENT_SECRET, \
