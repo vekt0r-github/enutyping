@@ -4,7 +4,7 @@ import { Navigate } from "react-router-dom";
 import YTThumbnail from "@/components/modules/YTThumbnail";
 
 import { get, post } from "@/utils/functions";
-import { User, Beatmapset } from "@/utils/types";
+import { User, Config, Beatmapset } from "@/utils/types";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -12,7 +12,7 @@ import { MainBox, SubBox, Link, Line } from '@/utils/styles';
 
 type Props = {
   user: User | null,
-  volume: number,
+  config: Config,
 };
 
 const SongsContainer = styled.div`
@@ -81,7 +81,7 @@ const Info = styled.div`
   min-width: 0;
 `;
 
-const SongSelect = ({ user, volume } : Props) => {
+const SongSelect = ({ user, config } : Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />
   }
@@ -111,8 +111,8 @@ const SongSelect = ({ user, volume } : Props) => {
             >
               <YTThumbnail yt_id={yt_id} width={120} height={90} />
               <Info>
-                <Line size='1.25em' as='h2'>{title}</Line>
-                <Line size='1em'>by {artist}</Line>
+                <Line size='1.25em' as='h2'>{config.localizeMetadata ? title : title_original}</Line>
+                <Line size='1em'>by {config.localizeMetadata ? artist : artist_original}</Line>
                 <Line size='0.8em'>mapped by {owner.name}</Line>
                 <Line size='0.8em'>{beatmaps.length} difficult{beatmaps.length !== 1 ? 'ies' : 'y'}</Line>
               </Info>

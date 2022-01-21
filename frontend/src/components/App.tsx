@@ -95,7 +95,7 @@ const App = ({} : Props) => {
             <Route path="/play" element={
               <SongSelect
                 user={user}
-                volume={volume}
+                config={config}
               />
             }/>
             <Route path="/play/:mapsetId" element={

@@ -10,10 +10,15 @@ import { MainBox, SubBox } from "@/utils/styles";
 const CategoryBox = styled(MainBox)`
 	display: flex;
 	flex-direction: row;
-	justify-content: center;
+	justify-content: left;
 	align-items: center;
 	margin: 30px;
-	max-width: 100%;
+	max-width: 80%;
+	min-width: 80%;
+`;
+
+const CategoryTitle = styled.div`
+	min-width: 20%;
 `;
 
 const SettingContainer = styled.div`
@@ -58,7 +63,7 @@ const settingsPage = ({ user, initConfig, setGlobalConfig }: Props) => {
 		setGlobalConfig(config);
 	}, [config]);
   
-	const generateKanaOptions = (() => {
+	const kanaOptions = (() => {
 
 		let kanaSelect: JSX.Element[] = [];
 		let key: keyof typeof kanaRespellings;
@@ -85,7 +90,23 @@ const settingsPage = ({ user, initConfig, setGlobalConfig }: Props) => {
 		<>
 			<h1>Settings</h1>
 			<CategoryBox>
-				<h2>Gameplay</h2>
+				<CategoryTitle>
+					<h2>General</h2>
+				</CategoryTitle>
+				<SettingBox>
+					<SettingTitle>Metadata Localization: </SettingTitle>
+					<select name={"localization"} value={config.localizeMetadata ? "true" : "false"} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+						setConfig({ ...config, localizeMetadata: (e.target.value ==="true") });
+					}}>
+						<option value={"true"}>Display all song metadata in their Romanized versions (i.e. with the English alphabet)</option>
+						<option value={"false"}>Display all song metadata in their original languages</option>
+					</select>
+				</SettingBox>
+			</CategoryBox>
+			<CategoryBox>
+				<CategoryTitle>
+					<h2>Gameplay</h2>
+				</CategoryTitle>
 				<SettingContainer>
 					<SettingBox>
 						<SettingTitle>Global Offset: </SettingTitle>
@@ -96,7 +117,7 @@ const settingsPage = ({ user, initConfig, setGlobalConfig }: Props) => {
 						<SettingTitle>Kana Input:</SettingTitle>
 						<p>For each of the following kana, choose how you want it to be romanized:</p>
 						<KanaContainer>
-							{generateKanaOptions}
+							{kanaOptions}
 						</KanaContainer>
 					</SettingBox>
 				</SettingContainer>

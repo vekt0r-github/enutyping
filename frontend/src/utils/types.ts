@@ -7,6 +7,7 @@ export type User = { // example
 export type Config = {
 	volume: number;
 	offset: number;
+	localizeMetadata: boolean;
 	kanaSpellings: {
   	し: string,
   	ち: string,
@@ -31,6 +32,7 @@ export type Config = {
 export const defaultConfig: Config = {
 	volume: 1.0,
 	offset: 0,
+	localizeMetadata: true,
 	kanaSpellings: {
   	し: "shi", 
   	ち: "chi",
