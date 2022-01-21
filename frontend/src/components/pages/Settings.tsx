@@ -127,6 +127,16 @@ const settingsPage = ({ user, initConfig, setGlobalConfig }: Props) => {
               {kanaOptions}
             </KanaContainer>
           </SettingBox>
+					<SettingBox>
+          <SettingTitle>Polygraphic Kana Input:</SettingTitle>
+						<select name={"polygraphs"} value={config.typePolygraphs ? "true" : "false"} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+							setConfig({ ...config, typePolygraphs: (e.target.value === "true") });
+						}}>
+							<option value={"true"}>Enable individual typing of polygraphs</option>
+							<option value={"false"}>Disable individual typing of polygraphs</option>
+						</select>
+            <p>Choose whether you want to be able to type polygraphic kana such as しゃ and っぷ by typing each kana individually. For example, with this setting turned on, you can type しゃ as "sha" or "shixya".</p>
+          </SettingBox>
         </SettingContainer>
       </CategoryBox>
     </>

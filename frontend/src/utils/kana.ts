@@ -40,7 +40,8 @@ const getRomanizations = (kana: string, config: Config) : string[] => {
   // small tsu case
   if (kana[0] == "っ") {
     const subRomanizations = getRomanizations(kana.substring(1), config);
-    return ([] as string[]).concat.apply([], subRomanizations.map(r => [r[0] + r, "xtu" + r, "xtsu" + r]));
+		if(config.typePolygraphs) return ([] as string[]).concat.apply([], subRomanizations.map(r => [r[0] + r, "xtu" + r, "xtsu" + r]));
+		else return subRomanizations.map(r => r[0] + r);
   }
 
   // all that's left after the first 2 cases is combinations e.g. きょ
@@ -53,7 +54,8 @@ const getRomanizations = (kana: string, config: Config) : string[] => {
   let modifierRomaji: string = toRomaji(kana[1], wanakanaOptions);
   let weirds: string[] = getRomanizations(kana[0], config).map(r => r + "x" + modifierRomaji);
 
-  return normals.concat(weirds);
+  if(config.typePolygraphs) return normals.concat(weirds);
+	else return normals;
 };
 
 const computeKanaAt = (pos: number, config: Config, syllable: string, nextSyllable?: string) => {

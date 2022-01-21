@@ -8,6 +8,7 @@ export type Config = {
   volume: number;
   offset: number;
   localizeMetadata: boolean;
+	typePolygraphs: boolean;
   kanaSpellings: {
     し: string,
     ち: string,
@@ -33,6 +34,7 @@ export const defaultConfig: Config = {
   volume: 1.0,
   offset: 0,
   localizeMetadata: true,
+	typePolygraphs: true,
   kanaSpellings: {
     し: "shi", 
     ち: "chi",
