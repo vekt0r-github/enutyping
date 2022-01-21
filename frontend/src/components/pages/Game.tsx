@@ -11,7 +11,7 @@ import { getArtist, getTitle, processBeatmap } from '@/utils/beatmaputils';
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Line, Link } from '@/utils/styles';
+import { MainBox, Line, Link, SubBox } from '@/utils/styles';
 
 type Props = {
   user: User | null,
@@ -43,6 +43,24 @@ export const PageContainer = styled.div`
       margin-top: var(--s);
     }
   }
+`;
+
+const LBContainer = styled.div`
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+`;
+
+const LBEntry = styled(SubBox)`
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	min-width: 80%;
+`;
+
+const UserAvatar = styled.img`
+	width:30px;
 `;
 
 const Game = ({ user, config } : Props) => {
@@ -87,18 +105,20 @@ const Game = ({ user, config } : Props) => {
         />
         <Sidebar>
           <h2>Leaderboard</h2>
-          <ul>
-            { map?.scores?.map((score) =>
-              // XXX: hmm is this okay to be optional?
-              <li key={score.id}>
-                <Link to={`/user/${score.user?.id}`}>
-                  <img src={score.user?.avatar_url} />
-                  {score.user?.name}
-                </Link>
-                : {score.score}
-              </li>
-            )}
-          </ul>
+					<LBContainer>
+						{ map?.scores?.map((score) =>
+							// XXX: hmm is this okay to be optional?
+							<LBEntry key={score.id}>
+								<Link to={`/user/${score.user?.id}`}>
+									<UserAvatar src={score.user?.avatar_url} />
+								</Link>
+								<Link to={`/user/${score.user?.id}`}>
+									{score.user?.name + ":"}
+								</Link>
+								{score.score}
+							</LBEntry>
+						)}
+					</LBContainer>
         </Sidebar>
       </PageContainer>
     </>
