@@ -1,22 +1,23 @@
 import React, { useEffect, useState }  from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams, useLocation } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
 import NotFound from "@/components/pages/NotFound";
-import GameVideo from "@/components/modules/GameVideo";
+import YTThumbnail from "@/components/modules/YTThumbnail";
 
 import { get } from "@/utils/functions";
-import { User, Beatmapset } from "@/utils/types";
+import { Config, Beatmapset } from "@/utils/types";
+import { getArtist, getTitle } from "@/utils/beatmaputils"
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
 import { MainBox, Line, Link } from '@/utils/styles';
 
 import { Sidebar, PageContainer } from "@/components/pages/Game";
-import { Status, GameContainer, BottomHalf, StatBox, Overlay as GameOverlay } from "@/components/modules/GameArea";
+import { GameContainer, BottomHalf, StatBox, Overlay as GameOverlay } from "@/components/modules/GameAreaDisplay";
 
 type Props = {
-  user: User | null,
+  config: Config,
 };
 
 const Overlay = styled(GameOverlay)`
@@ -45,10 +46,17 @@ const Diff = styled(MainBox)`
   }
 `;
 
-const DiffSelect = ({ user } : Props) => {
+const Thumbnail = styled(YTThumbnail)`
+  position: absolute;
+  z-index: 1;
+`;
+
+const DiffSelect = ({ config } : Props) => {
   const [goback, setGoback] = useState<boolean>(false);
 
   const { mapsetId } = useParams();
+  const { pathname } = useLocation();
+  const base = pathname.split("/").filter(s => s)[0];
   
   useEffect(() => {
     get(`/api/beatmapsets/${mapsetId}`).then((beatmapset) => {
@@ -70,20 +78,21 @@ const DiffSelect = ({ user } : Props) => {
     return () => {
       document.removeEventListener("keydown", onKeyPress);
     }
-  }, [status]); // may eventually depend on other things
+  }, []); // may eventually depend on other things
 
   const [mapset, setMapset] = useState<Beatmapset | null>();
   if (mapset === undefined) { return <Loading />; }
   if (mapset === null) { return <NotFound />; }
-  const {artist, title, artist_original, title_original, yt_id, source, preview_point, owner, beatmaps} = mapset;
+  const {yt_id, source, preview_point, owner, beatmaps} = mapset;
+  const [artist, title] = [getArtist(mapset, config), getTitle(mapset, config)];
   
   if (goback) {
-    return <Navigate to={`/play`} replace={true} />;
+    return <Navigate to={`/${base}`} replace={true} />;
   }
   
   return (
     <>
-      <h1>{artist} - {title}</h1>
+      <h1>{(base === "edit") && "Editing: "}{artist} - {title}</h1>
       <PageContainer>
         <Sidebar>
           <h2>Map info and stats etc.</h2>
@@ -96,19 +105,14 @@ const DiffSelect = ({ user } : Props) => {
         <GameContainer>
           <BottomHalf>
             <StatBox />
-            <GameVideo
-              yt_id={mapset.yt_id}
-              status={Status.UNSTARTED}
-              startGame={() => {}}
-              volume={0}
-            />
+            <Thumbnail yt_id={yt_id} width={400} height={300} />
             <StatBox />
           </BottomHalf>
           <Overlay>
             <Line as="h2" size="1.5em" margin="1.5em 0">Select Difficulty:</Line>
             <DiffsContainer>
               {beatmaps.map((map) => 
-                <Diff as={Link} to={`/play/${mapset.id}/${map.id}`} key={map.id}>
+                <Diff as={Link} to={`/${base}/${mapset.id}/${map.id}`} key={map.id}>
                   {map.diffname}
                 </Diff>
               )}

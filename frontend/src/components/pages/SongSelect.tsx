@@ -2,8 +2,8 @@ import React, { useEffect, useState }  from "react";
 
 import MapsetList from "@/components/modules/MapsetList";
 
-import { get, post } from "@/utils/functions";
-import { User, Config, Beatmapset } from "@/utils/types";
+import { get } from "@/utils/functions";
+import { Config, Beatmapset } from "@/utils/types";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -28,7 +28,11 @@ const SongSelect = ({ config } : Props) => {
   return (
     <>
       <h1>Song Select</h1>
-      {mapsets ? <MapsetList mapsets={mapsets} config={config} /> : null}
+      {mapsets ? <MapsetList 
+        mapsets={mapsets} 
+        config={config} 
+        link={(mapsetId, mapId) => `/play/${mapsetId}/${mapId??''}`} 
+      /> : null}
     </>
   );
 }

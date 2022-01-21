@@ -16,7 +16,7 @@ type KanaState = {
 };
 
 type Props = {
-  gameStartTime: number,
+  currTime: number,
   lineData: LineData,
   keyCallback: (hit: boolean, endKana: boolean) => void,
 	config: Config,
@@ -122,7 +122,7 @@ const Tick = styled.div<{active?: ActiveStatus}>`
   };
 `;
 
-const GameLine = ({ gameStartTime, lineData, keyCallback, config } : Props) => {
+const GameLine = ({ currTime, lineData, keyCallback, config } : Props) => {
   const {startTime, endTime, lyric} = lineData;
   const initKanaState = (kana : Kana) => ({ kana, prefix: "", suffix: kana.romanizations[0] });
 
@@ -228,8 +228,7 @@ const GameLine = ({ gameStartTime, lineData, keyCallback, config } : Props) => {
         {syllableList.reverse()}
         <TimelineBar>
           <ProgressBar
-            startTime={gameStartTime + startTime}
-            endTime={gameStartTime + endTime}
+            progress={(currTime - startTime) / (endTime - startTime)}
           />
         </TimelineBar>
       </Timeline>

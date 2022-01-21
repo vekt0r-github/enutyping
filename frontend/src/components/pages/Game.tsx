@@ -6,14 +6,12 @@ import GameArea from "@/components/modules/GameArea";
 import NotFound from "@/components/pages/NotFound";
 
 import { get } from "@/utils/functions";
-import { User, Config, Beatmap, LineData } from "@/utils/types";
-import { computeBeatmapKPM, computeLineKPM } from '@/utils/beatmaputils';
-import { parseKana } from '@/utils/kana';
+import { User, Config, Beatmap } from "@/utils/types";
+import { getArtist, getTitle, processBeatmap } from '@/utils/beatmaputils';
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Line } from '@/utils/styles';
-import { Link } from "react-router-dom";
+import { MainBox, Line, Link } from '@/utils/styles';
 
 type Props = {
   user: User | null,
@@ -47,54 +45,17 @@ export const PageContainer = styled.div`
   }
 `;
 
-/**
- * process beatmap "file", mutating the object
- * @param beatmap 
- * @returns void
- */
-const processBeatmap = (beatmap : Beatmap & {content: string}, config: Config) => {
-  let lines : LineData[] = [];
-  if (!beatmap.content) { return null; } // idk man
-  const objects = beatmap.content.split(/\r?\n/);
-  let line : LineData;
-  objects.forEach((obj_str) => {
-    const obj = obj_str.split(',');
-    const type = obj[0];
-    const time = parseInt(obj[1]);
-    const text = obj.slice(2).join(',');
-    
-    if (line && ['L','E'].includes(type)) {
-      line.endTime = time;
-			line.kpm = computeLineKPM(line);
-      lines.push(line);
-    }
-    if (type === 'L') {
-      line = {
-        startTime: time,
-        endTime: 0, // set when line ends
-        lyric: text,
-				kpm: 0,
-        syllables: [],
-      };
-    } else if (type === 'S') {
-			const kana = parseKana(text, config);
-      line.syllables.push({ time, text, kana });
-    }
-  });
-  beatmap.lines = lines;
-	beatmap.kpm = computeBeatmapKPM(beatmap);
-};
-
 const Game = ({ user, config } : Props) => {
   const { mapId, mapsetId } = useParams();
   
   useEffect(() => {
     get(`/api/beatmaps/${mapId}`).then((beatmap) => {
-      if (!beatmap || !beatmap.id || beatmap.beatmapset.id !== mapsetId) {
+      if (!beatmap || (beatmap.id === undefined) || beatmap.beatmapset.id != mapsetId) {
         setMap(null); // map not found or param is wrong
+      } else {
+        processBeatmap(beatmap, config); // mutates
+        setMap(beatmap);
       }
-      processBeatmap(beatmap, config); // mutates
-      setMap(beatmap);
     });
   }, []);
 
@@ -102,7 +63,8 @@ const Game = ({ user, config } : Props) => {
   if (map === undefined) { return <Loading />; }
   if (map === null) { return <NotFound />; }
   const {beatmapset, diffname, lines, scores} = map;
-  const {artist, title, artist_original, title_original, yt_id, source, preview_point, owner, beatmaps} = beatmapset;
+  const {yt_id, source, preview_point, owner, beatmaps} = beatmapset;
+  const [artist, title] = [getArtist(beatmapset, config), getTitle(beatmapset, config)];
   
   return (
     <>

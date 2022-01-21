@@ -11,23 +11,33 @@ import {} from '@/utils/styles';
 type Props = {
   yt_id: string,
   status: Status,
-  gameStartTime?: number,
+  currTime?: number,
   startGame: () => void,
   volume: number,
   // setDuration: React.Dispatch<React.SetStateAction<number>>,
 }
 
-const GameVideo = ({ yt_id, status, gameStartTime, startGame, volume } : Props) => {
+const GameVideo = ({ yt_id, status, currTime, startGame, volume } : Props) => {
   if (!yt_id) { return null; }
 
   const [player, setPlayer] = useState<YT.Player>();
   const [playing, setPlaying] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!player || gameStartTime) { return; }
+    if (!player || !currTime) { return; }
+    if ([Status.PAUSED, Status.SEEKING].includes(status)) {
+      // only seek when manually changed in editor
+      player.seekTo(currTime / 1000, true);
+    }
+  }, [currTime]);
+
+  useEffect(() => {
+    if (!player) { return; }
     if (status === Status.UNSTARTED) {
       player.stopVideo();
-    } else if (status === Status.STARTQUEUED) {
+    } else if (status === Status.PAUSED) {
+      player.pauseVideo();
+    } else if ([Status.STARTQUEUED, Status.PLAYING].includes(status)) {
       player.playVideo();
     }
   }, [player, status]);
@@ -39,7 +49,7 @@ const GameVideo = ({ yt_id, status, gameStartTime, startGame, volume } : Props) 
   const onStateChange = (e : YT.OnStateChangeEvent) => {
     const playing = e.data === 1;
     setPlaying(playing);
-    if (playing && status === Status.STARTQUEUED && !gameStartTime) { 
+    if (playing && status === Status.STARTQUEUED) { 
       // playing and should be playing and didn't start game
       startGame();
     }

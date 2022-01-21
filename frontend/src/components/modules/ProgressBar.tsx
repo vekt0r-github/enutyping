@@ -12,8 +12,7 @@ type BarStyle = {
 }
 
 type Props = {
-  startTime: number,
-  endTime: number,
+  progress: number, // between 0 and 1
   barStyle?: BarStyle,
 };
 
@@ -36,25 +35,11 @@ const ProgressFill = styled.div.attrs<FillProps>(({progress, color}) => ({
   height: 100%;
 `;
 
-const ProgressBar = ({ startTime, endTime, barStyle }: Props) => {
-  const [currTime, setCurrTime] = useState<number>();
-  
-  useEffect(() => {
-    if (!startTime) { return; }
-    const intervalId = setInterval(() => {
-      if (startTime) { setCurrTime(new Date().getTime() - startTime); }
-    }, 50);
-    return () => { clearInterval(intervalId); }
-  }, [startTime]);
-
-  if (!startTime || !currTime) { return null; }
-
-  const duration = endTime - startTime;
-
+const ProgressBar = ({ progress, barStyle }: Props) => {
   return (
     <Container {...barStyle}>
       <ProgressFill 
-        progress={currTime / duration} 
+        progress={progress} 
         color={barStyle ? barStyle.fillColor : undefined}
       />
     </Container>

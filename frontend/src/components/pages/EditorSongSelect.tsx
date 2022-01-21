@@ -23,7 +23,7 @@ const EditorSongSelect = ({ user, config } : Props) => {
   const [mapsets, setMapsets] = useState<Beatmapset[]>();
   
   useEffect(() => {
-    get("/api/beatmapsets/my").then((res) => {
+    get("/api/beatmapsets").then((res) => {
       // this route shouldn't exist yet
       const beatmapsets = res.beatmapsets;
       if (beatmapsets && beatmapsets.length) {
@@ -35,7 +35,11 @@ const EditorSongSelect = ({ user, config } : Props) => {
   return (
     <>
       <h1>My Beatmapsets</h1>
-      {mapsets ? <MapsetList mapsets={mapsets} config={config} /> : null}
+      {mapsets ? <MapsetList 
+        mapsets={mapsets}
+        config={config} 
+        link={(mapsetId, mapId) => `/edit/${mapsetId}/${mapId??''}`}
+      /> : null}
     </>
   );
 }

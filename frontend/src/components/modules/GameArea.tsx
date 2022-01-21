@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from "react";
+import { Navigate } from "react-router-dom";
 
-import GameVideo from "@/components/modules/GameVideo";
-import GameLine from "@/components/modules/GameLine";
+import GameAreaDisplay from "@/components/modules/GameAreaDisplay";
 
 import { post } from '@/utils/functions';
-import { User, Beatmap } from "@/utils/types";
-import { computeLineKana} from '@/utils/beatmaputils';
+import { User, Beatmap, LineData, Config } from "@/utils/types";
+import { computeLineKana, timeToLineIndex } from '@/utils/beatmaputils';
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { SubBox, Line } from '@/utils/styles';
-import { Config } from '@/utils/types';
+import {} from '@/utils/styles';
 
-import { Navigate } from "react-router-dom";
-
-export enum Status { GOBACK, UNSTARTED, STARTQUEUED, PLAYING, SUBMITTING, ENDED };
+export enum Status { 
+  UNSTARTED, STARTQUEUED, PLAYING, SUBMITTING, ENDED,
+  GOBACK, // if esc is pressed
+  PAUSED, SEEKING, // only for editor
+};
 
 type Props = {
   user: User | null,
@@ -22,10 +23,9 @@ type Props = {
   config: Config,
 };
 
-type GameState = {
+export type GameState = {
   status: Status,
-  gameStartTime?: number,
-  currIndex?: number,
+  currTime?: number,
   hits: number,
   misses: number,
 	kanaHits: number,
@@ -33,81 +33,16 @@ type GameState = {
   score: number
 };
 
-export const GameContainer = styled.div`
-  width: var(--game-width);
-  height: var(--game-height);
-  min-width: var(--game-width);
-  min-height: var(--game-height);
-  margin: var(--s);
-  padding: 0;
-  background-color: var(--clr-primary-light);
-  position: relative;
-`;
-
-const TopHalf = styled.div`
-  width: 100%;
-  height: 50%;
-  position: absolute;
-  left: 0;
-  top: 0;
-`;
-
-const LyricLine = styled.div`
-  font-size: 1.5em;
-  color: black;
-  width: 100%;
-  text-align: center;
-`;
-
-export const BottomHalf = styled(TopHalf)`
-  top: 50%;
-  display: flex;
-`;
-
-export const StatBox = styled(SubBox)`
-  flex-basis: 0;
-  flex-grow: 1;
-  height: auto;
-  margin: var(--s);
-`;
-
-export const Overlay = styled.div`
-  width: 100%;
-  height: 100%;
-  padding-bottom: calc(var(--game-height) / 3);
-  box-sizing: border-box;
-  position: absolute;
-  left: 0;
-  top: 0;
-  background-color: #0006;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  & ${Line} {
-    width: 100%;
-    text-align: center;
-    font-style: italic;
-  }
-`;
-
-const Warning = styled.div`
-  background-color: var(--clr-warn);
-  padding: var(--s) 0;
-`;
-
 const GameArea = ({ user, beatmap, config } : Props) => {
   const initState = () : GameState => ({
     status: Status.UNSTARTED,
-    gameStartTime: undefined, 
-    currIndex: undefined, // maintained via timer independent of video
+    currTime: undefined, // maintained via timer independent of video
     hits: 0,
     misses: 0,
 		kanaHits: 0,
 		totalKana: 0,
     score: 0,
   });
-	const { volume } = config;
   const [gameState, setGameState] = useState<GameState>(initState());
   const set = <K extends keyof GameState>(
     prop : K, 
@@ -124,8 +59,9 @@ const GameArea = ({ user, beatmap, config } : Props) => {
   // maybe need later but idk
   // const [duration, setDuration] = useState<number>(Infinity);
 
-  const lines = beatmap.lines;
-  const {status, gameStartTime, currIndex, hits, misses, kanaHits, totalKana, score} = gameState;
+  const lines = beatmap.lines as LineData[];
+  const {status, currTime, hits, misses, kanaHits, totalKana, score} = gameState;
+  const currIndex = (currTime !== undefined) ? timeToLineIndex(lines, currTime) : undefined;
 
   const prepareStartGame = () => {
     if (status !== Status.UNSTARTED) { return; }
@@ -139,38 +75,6 @@ const GameArea = ({ user, beatmap, config } : Props) => {
       gameStartTime: new Date().getTime() + totalOffset,
     }));
   };
-
-  useEffect(() => {
-    // start game-- status must change to PLAYING
-    // will cancel all game actions if status changes from PLAYING
-    if (status !== Status.PLAYING) { return; }
-    let timeoutIds : NodeJS.Timeout[] = [];
-    lines.forEach((line, index) => {
-      // if this loop is too slow, save original time and reference
-      timeoutIds.push(setTimeout(() => {
-				set('totalKana', (oldTotalKana) => oldTotalKana + computeLineKana(line));
-        set('currIndex', index);
-      }, line.startTime + totalOffset));
-    });
-    const endTime = lines[lines.length-1].endTime;
-    timeoutIds.push(setTimeout(submitScore, endTime + totalOffset));
-    return () => {
-      timeoutIds.forEach((id) => clearTimeout(id));
-    };
-  }, [status]);
-
-  useEffect(() => {
-    if (status !== Status.SUBMITTING) { return; }
-    if (!user) { endGame(); return; }
-    const data = {
-      beatmap_id: beatmap.id,
-      user_id: user?.id,
-      score: gameState.score,
-    }
-    post('/api/scores', data).then((score) => {
-      endGame();
-    });
-  }, [status]);
 
   const submitScore = () => {
     setGameState((state) => ({ ...state,
@@ -204,6 +108,41 @@ const GameArea = ({ user, beatmap, config } : Props) => {
       if (status === Status.UNSTARTED) { set('status', Status.GOBACK); } 
     }
   };
+
+  useEffect(() => {
+    // start game-- status must change to PLAYING
+    // will cancel all game actions if status changes from PLAYING
+    if (status !== Status.PLAYING) { return; }
+    const gameStartTime = new Date().getTime();
+    const intervalId = setInterval(() => {
+      set('currTime', new Date().getTime() - gameStartTime);
+    }, 50);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [status]);
+
+  useEffect(() => {
+    if (currIndex === undefined) { return; }
+    if (currIndex === lines.length) {
+      submitScore();
+    } else if (currIndex > 0) {
+      set('totalKana', (oldTotalKana) => oldTotalKana + computeLineKana(lines[currIndex]));
+    }
+  }, [currIndex]);
+
+  useEffect(() => {
+    if (status !== Status.SUBMITTING) { return; }
+    if (!user) { endGame(); return; }
+    const data = {
+      beatmap_id: beatmap.id,
+      user_id: user?.id,
+      score: gameState.score,
+    }
+    post('/api/scores', data).then((score) => {
+      endGame();
+    });
+  }, [status]);
   
   useEffect(() => {
     document.addEventListener("keydown", onKeyPress);
@@ -211,17 +150,6 @@ const GameArea = ({ user, beatmap, config } : Props) => {
       document.removeEventListener("keydown", onKeyPress);
     }
   }, [status]); // may eventually depend on other things
-
-  const acc = ((hitCount: number, missCount: number) => {
-    if (hitCount + missCount == 0) {
-      return 100;
-    }
-    return 100 * hitCount / (hitCount + missCount);
-  });	
-
-	const keyAcc = acc(hits, misses);
-	const kanaAcc = acc(kanaHits, totalKana - kanaHits);
-	
 
   const keyCallback = (hit: boolean, endKana: boolean) => {
     if(hit) {
@@ -242,64 +170,15 @@ const GameArea = ({ user, beatmap, config } : Props) => {
   }
   
   return (
-    <GameContainer>
-      <TopHalf>
-        {(currIndex !== undefined) && gameStartTime ? <>
-          <GameLine // current line
-            key={currIndex}
-            gameStartTime={gameStartTime}
-            lineData={lines[currIndex]}
-            keyCallback={keyCallback}
-						config={config}
-          />
-          <LyricLine>{lines[currIndex].lyric}</LyricLine>
-        </> : null}
-        {status === Status.SUBMITTING ?
-          <h2>Submitting score...</h2>
-          : null}
-        {status === Status.ENDED ?
-          <h2>YOUR SCORE IS {score}</h2>
-          : null} 
-      </TopHalf>
-      <BottomHalf>
-        <StatBox>
-					<p>Keypress Acc: {keyAcc.toFixed(2)}</p>
-					<p>Kana Acc: {kanaAcc.toFixed(2)}</p>
-					<p>Score: {score}</p>
-				</StatBox>
-        <GameVideo
-          yt_id={beatmap.beatmapset.yt_id}
-          status={status}
-          gameStartTime={gameStartTime}
-          startGame={startGame}
-          volume={volume}
-        />
-        <StatBox>
-					<p>Beatmap KPM: {Math.round(beatmap.kpm)}</p>
-					<p>Line KPM: {(status === Status.PLAYING && (currIndex !== undefined)) ? (Math.round(lines[currIndex].kpm)) : "N/A"}</p>
-				</StatBox>
-      </BottomHalf>
-      {status === Status.UNSTARTED ? 
-        <Overlay>
-          {!user && <>
-            <Warning>
-              <Line size="1.5em">Warning: You are not logged in, and your score will not be submitted.</Line>
-            </Warning>
-            <Line size="0.5em">&nbsp;</Line>
-          </>}
-          <Line size="1.5em">Press Space to play</Line>
-          <Line size="1em">Press Esc to exit during a game</Line>
-          <Line size="0.5em">&nbsp;</Line>
-          <Line size="1em">Set map offset:&nbsp;
-            <input defaultValue='0' onChange={(e) => {
-              const intValue = parseInt(e.target.value)
-              if (!isNaN(intValue)) { setOffset(intValue); }
-            }}></input>
-          </Line>
-          <Line size="1em">(Put negative offset if you think syllables are late; positive if you think they're early)</Line>
-        </Overlay>
-        : null}
-    </GameContainer>
+    <GameAreaDisplay 
+      user={user}
+      beatmap={beatmap}
+      gameState={gameState}
+      keyCallback={keyCallback}
+      setOffset={setOffset}
+      startGame={startGame}
+      config={config}
+    />
   );
 }
 

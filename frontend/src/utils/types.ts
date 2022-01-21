@@ -87,8 +87,9 @@ export type Beatmap = {
   id: number;
   beatmapset: Beatmapset;
   diffname: string;
-  lines: LineData[]; // processed content
-	kpm: number;
+	content?: string;
+  lines?: LineData[]; // processed content
+	kpm?: number;
   scores?: Score[];
 };
 
@@ -99,7 +100,7 @@ export type Beatmapset = { // example
   artist_original: string;
   title_original: string;
   yt_id: string;
-  source: string; // created from yt_id on backend
+  source?: string; // created from yt_id on backend
   preview_point: number;
   owner: User;
   beatmaps: Beatmap[] | BeatmapMetadata[];
