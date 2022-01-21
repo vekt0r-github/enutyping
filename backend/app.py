@@ -5,7 +5,7 @@ from database import db_session
 
 # Blueprints
 from api import api
-from oauth import github_blueprint, osu_blueprint
+from oauth import github_blueprint, osu_blueprint, google_blueprint
 
 app = Flask(__name__, static_folder="../frontend/build", static_url_path='/static/')
 
@@ -13,6 +13,7 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "supersekritsfasdfsaflksjfaj
 app.register_blueprint(api, url_prefix='/api')
 app.register_blueprint(github_blueprint, url_prefix='/api/login/github')
 app.register_blueprint(osu_blueprint, url_prefix='/api/login/osu')
+app.register_blueprint(google_blueprint, url_prefix='/api/login/google')
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):

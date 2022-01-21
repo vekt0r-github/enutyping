@@ -22,10 +22,19 @@ OSU_REQUEST_AUTH_URL = 'https://osu.ppy.sh/oauth/authorize'
 OSU_REQUEST_TOKEN_URL = 'https://osu.ppy.sh/oauth/token'
 OSU_API_URL = 'https://osu.ppy.sh/api/v2/me'
 
+# Google OAuth
+GOOGLE_OAUTH_CLIENT_ID = os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
+GOOGLE_OAUTH_CLIENT_SECRET = os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET')
+GOOGLE_OAUTH_REDIRECT_URL = os.environ.get('GOOGLE_OAUTH_REDIRECT_URL')
+GOOGLE_REQUEST_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
+GOOGLE_SCOPE = 'https://www.googleapis.com/auth/userinfo.profile'
+GOOGLE_REQUEST_TOKEN_URL = 'https://oauth2.googleapis.com/token'
+GOOGLE_API_URL = 'https://www.googleapis.com/userinfo/v2/me'
+
 OAUTH_SECRET_KEY = os.environ.get("FLASK_SECRET_KEY", "supersekritsfasdfsaflksjfajlksjfsk")
 
 class OAuth():
-    def __init__(self, client_id, client_secret, secret_key, auth_url, token_url, redirect_uri, api_url):
+    def __init__(self, client_id, client_secret, secret_key, auth_url, token_url, redirect_uri, api_url, scope):
         self.client_id = client_id
         self.client_secret = client_secret
         self.secret_key = secret_key
@@ -33,6 +42,7 @@ class OAuth():
         self.token_url = token_url
         self.redirect_uri = redirect_uri
         self.api_url = api_url
+        self.scope = scope
 
     def request_url(self):
         params = {
@@ -41,6 +51,7 @@ class OAuth():
             'response_type': 'code',
         }
         if self.redirect_uri: params['redirect_uri'] = self.redirect_uri
+        if self.scope: params['scope'] = self.scope
         p = requests.Request('GET', self.auth_url, params = params).prepare()
         return p.url
     
@@ -114,13 +125,23 @@ def osu_user_func(oauth, token):
     avatar_url = user['avatar_url']
     return { 'name': name, 'uid': uid, 'avatar_url': avatar_url }
 
+def google_user_func(oauth, token):
+    api_response = requests.get(oauth.api_url, headers = { 'Authorization': f'Bearer {token}' })
+    user = api_response.json()
+    print(user)
+    name = user['name'] + '_google'
+    uid = str(user['id']) + 'google'
+    avatar_url = user['picture']
+    return { 'name': name, 'uid': uid, 'avatar_url': avatar_url }
+
 github_oauth = OAuth(GITHUB_OAUTH_CLIENT_ID, \
                      GITHUB_OAUTH_CLIENT_SECRET, \
                      OAUTH_SECRET_KEY, \
                      GITHUB_REQUEST_AUTH_URL, \
                      GITHUB_REQUEST_TOKEN_URL, \
                      GITHUB_OAUTH_REDIRECT_URL, \
-                     GITHUB_API_URL)
+                     GITHUB_API_URL, \
+                     None)
 
 osu_oauth = OAuth(OSU_OAUTH_CLIENT_ID, \
                   OSU_OAUTH_CLIENT_SECRET, \
@@ -128,7 +149,18 @@ osu_oauth = OAuth(OSU_OAUTH_CLIENT_ID, \
                   OSU_REQUEST_AUTH_URL, \
                   OSU_REQUEST_TOKEN_URL, \
                   OSU_OAUTH_REDIRECT_URL, \
-                  OSU_API_URL)
+                  OSU_API_URL, \
+                  None)
+
+google_oauth = OAuth(GOOGLE_OAUTH_CLIENT_ID, \
+                     GOOGLE_OAUTH_CLIENT_SECRET, \
+                     OAUTH_SECRET_KEY, \
+                     GOOGLE_REQUEST_AUTH_URL, \
+                     GOOGLE_REQUEST_TOKEN_URL, \
+                     GOOGLE_OAUTH_REDIRECT_URL, \
+                     GOOGLE_API_URL, \
+                     GOOGLE_SCOPE)
 
 github_blueprint = construct_oauth_blueprint("github", github_oauth, github_user_func)
 osu_blueprint = construct_oauth_blueprint("osu", osu_oauth, osu_user_func)
+google_blueprint = construct_oauth_blueprint("google", google_oauth, google_user_func)

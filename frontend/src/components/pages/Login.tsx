@@ -18,7 +18,7 @@ const Login = ({ handleLogin, user } : Props) => {
     const url = window.location.href;
     
     // We redirected back successfully with an access token
-    if (url.includes("?code=") && !isLoading && oauthprovider) {
+    if (url.includes("code=") && !isLoading && oauthprovider) {
       setIsLoading(true);
       const code = searchParams.get('code')
       const state = searchParams.get('state')
@@ -46,6 +46,11 @@ const Login = ({ handleLogin, user } : Props) => {
             <li>
               <a href="/api/login/osu/request">
                 Log in with osu!
+              </a>
+            </li>
+            <li>
+              <a href="/api/login/google/request">
+                Log in with Google
               </a>
             </li>
           </ul>
