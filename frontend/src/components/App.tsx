@@ -59,8 +59,8 @@ const App = ({} : Props) => {
 		window.localStorage.setItem('ishotyping-config', JSON.stringify(config));
 	}, [config]);
 
-  const handleLogin = (code: string|null, state: string|null) => {
-    post("/api/login/authorize", { code, state }).then((user) => {
+  const handleLogin = (code: string|null, state: string|null, oauthprovider: string) => {
+    post(`/api/login/${oauthprovider}/authorize`, { code, state }).then((user) => {
       setUser(user);
     });
   };
@@ -87,11 +87,18 @@ const App = ({} : Props) => {
               <Home user={user} />
             }/>
             <Route path="/login" element={
-              <Login 
+              <Login
                 handleLogin={handleLogin}
                 user={user}
-              />
-            }/>
+              />}>
+              {/* This gets the oauth provider for right auth */}
+              <Route path=":oauthprovider" element={
+                <Login
+                  handleLogin={handleLogin}
+                  user={user}
+                />
+              }/>
+            </Route>
             <Route path="/play" element={
               <SongSelect
                 user={user}

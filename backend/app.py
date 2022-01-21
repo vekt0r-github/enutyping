@@ -1,17 +1,17 @@
 import os
-import requests
-from flask import Flask, redirect, request, url_for, session
+from flask import Flask, redirect, session
 
-import oauth
 from database import db_session
-from models import User
-from schemas import UserSchema
+
+# Blueprints
 from api import api
+from github import github
 
 app = Flask(__name__, static_folder="../frontend/build", static_url_path='/static/')
 
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "supersekritsfasdfsaflksjfajlksjfsk")
 app.register_blueprint(api, url_prefix='/api')
+app.register_blueprint(github, url_prefix='/api/login/github')
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
@@ -22,11 +22,6 @@ def shutdown_session(exception=None):
 def index(path):
     return app.send_static_file('index.html')
 
-@app.route('/api/login/', methods = ['GET'])
-def login():
-    auth = oauth.OAuth()
-    return redirect(auth.request_url())
-
 @app.route('/api/logout', methods = ['POST'])
 def logout():
     session.pop('user', None)
@@ -36,38 +31,6 @@ def logout():
 def unauthorized():
     return 'wtf are you doing here?'
 
-@app.route('/api/login/authorize', methods = ['POST'])
-def authorized():
-    req_json = request.get_json()
-    state = req_json.get('state')
-    if state == oauth.OAUTH_SECRET_KEY:
-        def get_or_create_user(id, name, avatar_url):
-            user = User.query.get(id)
-            if user:
-                return user
-            user = User(id, name, avatar_url)
-            db_session.add(user)
-            db_session.commit()
-            return user
-
-        auth = oauth.OAuth()
-
-        code = req_json.get('code')
-        auth_response = auth.authorize(code)
-        access_token = auth_response['access_token']
-        gh_api_response = requests.get('https://api.github.com/user', headers = { 'Authorization': f'token {access_token}' })
-        gh_user = gh_api_response.json()
-        gh_name = gh_user['login']
-        gh_uid = gh_user['id']
-        gh_avatar_url = gh_user['avatar_url']
-
-        user = get_or_create_user(gh_uid, gh_name, gh_avatar_url)
-        user_object = UserSchema().dump(user)
-        session['user'] = user_object
-        return user_object
-    else:
-        return redirect('/api/unauthorized/')
-
 @app.route('/api/whoami', methods = ['GET'])
 def whoami():
     user = session.get('user')
@@ -75,4 +38,3 @@ def whoami():
         # Not logged in
         return {}
     return user
-

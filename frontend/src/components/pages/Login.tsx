@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Navigate, useSearchParams } from "react-router-dom";
+import { Navigate, useParams, useSearchParams } from "react-router-dom";
 
 import { User } from "@/utils/types";
 
 type Props = {
-  handleLogin: (code: string|null, state: string|null) => void,
+  handleLogin: (code: string|null, state: string|null, oauthprovider: string) => void,
   user: User | null,
 }
 
@@ -12,15 +12,17 @@ const Login = ({ handleLogin, user } : Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchParams, _] = useSearchParams();
 
+  const { oauthprovider } = useParams();
+
   useEffect(() => {
     const url = window.location.href;
     
     // We redirected back successfully with an access token
-    if (url.includes("?code=") && !isLoading) {
+    if (url.includes("?code=") && !isLoading && oauthprovider) {
       setIsLoading(true);
       const code = searchParams.get('code')
       const state = searchParams.get('state')
-      handleLogin(code, state);
+      handleLogin(code, state, oauthprovider);
     }
   }, [isLoading, user]);
 
@@ -35,7 +37,7 @@ const Login = ({ handleLogin, user } : Props) => {
         <p>Loading...</p>
       ): (
         <p>Login options:&nbsp;
-          <a href="/api/login">
+          <a href="/api/login/github/request">
             Log in with GitHub
           </a>
         </p>

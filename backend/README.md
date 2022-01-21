@@ -16,10 +16,10 @@
 
 1. Be sure to run `npm run build` in frontend to build our React app.
 2. Set the following environment variables to your desired values:
-  - `export OAUTH_CLIENT_ID=foo`
-  - `export OAUTH_CLIENT_SECRET=bar`
+  - `export GITHUB_OAUTH_CLIENT_ID=foo`
+  - `export GITHUB_OAUTH_CLIENT_SECRET=bar`
 3. Optional environment variables:
-  - Custom redirect url: `OAUTH_REDIRECT_URL`
+  - Custom redirect url: `GITHUB_OAUTH_REDIRECT_URL`
 4. Run using gunicorn
   - `gunicorn wsgi:app`
 5. Serve behind reverse proxy if you want :)
