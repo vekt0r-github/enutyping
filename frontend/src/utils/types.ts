@@ -5,53 +5,53 @@ export type User = { // example
 };
 
 export type Config = {
-	volume: number;
-	offset: number;
-	localizeMetadata: boolean;
-	kanaSpellings: {
-  	し: string,
-  	ち: string,
-  	つ: string,
-  	じ: string,
-  	しゃ: string,
-  	しょ: string,
-  	しゅ: string,
-　	じゃ: string,
-  	じょ: string,
-  	じゅ: string,
-  	か: string, 
-  	く: string, 
-  	こ: string, 
-  	せ: string, 
-  	ふ: string, 
-		づ: string,
-  	ん: string, 
-	};
+  volume: number;
+  offset: number;
+  localizeMetadata: boolean;
+  kanaSpellings: {
+    し: string,
+    ち: string,
+    つ: string,
+    じ: string,
+    しゃ: string,
+    しょ: string,
+    しゅ: string,
+    じゃ: string,
+    じょ: string,
+    じゅ: string,
+    か: string, 
+    く: string, 
+    こ: string, 
+    せ: string, 
+    ふ: string, 
+    づ: string,
+    ん: string, 
+  };
 };
 
 export const defaultConfig: Config = {
-	volume: 1.0,
-	offset: 0,
-	localizeMetadata: true,
-	kanaSpellings: {
-  	し: "shi", 
-  	ち: "chi",
-  	つ: "tsu",
-  	じ: "ji",
-  	しゃ: "sha",
-  	しょ: "sho",
-  	しゅ: "shu",
-　	じゃ: "ja",
-  	じょ: "jo",
-  	じゅ: "ju",
-  	か: "ka", 
-  	く: "ku", 
-  	こ: "ko", 
-  	せ: "se",
-  	ふ: "fu", 
-		づ: "du",
-  	ん: "n", 
-	},
+  volume: 1.0,
+  offset: 0,
+  localizeMetadata: true,
+  kanaSpellings: {
+    し: "shi", 
+    ち: "chi",
+    つ: "tsu",
+    じ: "ji",
+    しゃ: "sha",
+    しょ: "sho",
+    しゅ: "shu",
+    じゃ: "ja",
+    じょ: "jo",
+    じゅ: "ju",
+    か: "ka", 
+    く: "ku", 
+    こ: "ko", 
+    せ: "se",
+    ふ: "fu", 
+    づ: "du",
+    ん: "n", 
+  },
 };
 
 export type Score = {
@@ -70,11 +70,11 @@ export type LineData = {
   startTime: number,
   endTime: number,
   lyric: string,
-	kpm: number,
+  kpm: number,
   syllables: {
     time: number,
     text: string,
-		kana: Kana[], 
+    kana: Kana[], 
   }[],
 };
 
@@ -87,9 +87,9 @@ export type Beatmap = {
   id: number;
   beatmapset: Beatmapset;
   diffname: string;
-	content?: string;
+  content?: string;
   lines?: LineData[]; // processed content
-	kpm?: number;
+  kpm?: number;
   scores?: Score[];
 };
 

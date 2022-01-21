@@ -19,7 +19,7 @@ type Props = {
   currTime: number,
   lineData: LineData,
   keyCallback: (hit: boolean, endKana: boolean) => void,
-	config: Config,
+  config: Config,
 }
 
 type Position = [number, number]; // syllable index, kana index

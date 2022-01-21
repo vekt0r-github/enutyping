@@ -85,10 +85,10 @@ const Warning = styled.div`
 `;
 
 const GameAreaDisplay = ({ user, beatmap, gameState, keyCallback, startGame, config } : Props) => {
-	const { volume } = config;
+  const { volume } = config;
 
   const [offset, setOffset] = useState<number>(0);
-	const totalOffset = offset + config.offset;
+  const totalOffset = offset + config.offset;
 
   const lines = beatmap.lines as LineData[];
   const {status, currTime, hits, misses, kanaHits, totalKana, score} = gameState;
@@ -99,10 +99,10 @@ const GameAreaDisplay = ({ user, beatmap, gameState, keyCallback, startGame, con
       return 100;
     }
     return 100 * hitCount / (hitCount + missCount);
-  });	
+  });  
 
-	const keyAcc = acc(hits, misses);
-	const kanaAcc = acc(kanaHits, totalKana - kanaHits);
+  const keyAcc = acc(hits, misses);
+  const kanaAcc = acc(kanaHits, totalKana - kanaHits);
 
   if (status === Status.GOBACK) {
     return <Navigate to={`/play/${beatmap.beatmapset.id}`} replace={true} />;
@@ -119,7 +119,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, keyCallback, startGame, con
             currTime={currTime}
             lineData={lines[currIndex]}
             keyCallback={keyCallback}
-						config={config}
+            config={config}
           />
           <LyricLine>{lines[currIndex].lyric}</LyricLine>
         </> : null}
@@ -132,10 +132,10 @@ const GameAreaDisplay = ({ user, beatmap, gameState, keyCallback, startGame, con
       </TopHalf>
       <BottomHalf>
         <StatBox>
-					<p>Keypress Acc: {keyAcc.toFixed(2)}</p>
-					<p>Kana Acc: {kanaAcc.toFixed(2)}</p>
-					<p>Score: {score}</p>
-				</StatBox>
+          <p>Keypress Acc: {keyAcc.toFixed(2)}</p>
+          <p>Kana Acc: {kanaAcc.toFixed(2)}</p>
+          <p>Score: {score}</p>
+        </StatBox>
         <GameVideo
           yt_id={beatmap.beatmapset.yt_id}
           status={status}
@@ -144,9 +144,9 @@ const GameAreaDisplay = ({ user, beatmap, gameState, keyCallback, startGame, con
           volume={volume}
         />
         <StatBox>
-					<p>Beatmap KPM: {Math.round(beatmap.kpm ?? 0)}</p>
-					<p>Line KPM: {isPlaying ? (Math.round(lines[currIndex].kpm)) : "N/A"}</p>
-				</StatBox>
+          <p>Beatmap KPM: {Math.round(beatmap.kpm ?? 0)}</p>
+          <p>Line KPM: {isPlaying ? (Math.round(lines[currIndex].kpm)) : "N/A"}</p>
+        </StatBox>
       </BottomHalf>
       {status === Status.UNSTARTED ? 
         <Overlay>

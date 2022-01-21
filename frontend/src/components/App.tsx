@@ -40,8 +40,8 @@ const Content = styled.div`
 
 const App = ({} : Props) => {
   const [user, setUser] = useState<User | null>();
-	const [config, setConfig] = useState<Config>(defaultConfig);
-	const { volume, offset, kanaSpellings } = config;
+  const [config, setConfig] = useState<Config>(defaultConfig);
+  const { volume, offset, kanaSpellings } = config;
 
   useEffect(() => {
     get("/api/whoami").then((user) => {
@@ -51,15 +51,15 @@ const App = ({} : Props) => {
         setUser(null);
       }
     });
-		const localConfig: string | null = window.localStorage.getItem('ishotyping-config');
-		if(localConfig) {
-			setConfig({ ...config, ...JSON.parse(localConfig) });
-		}
+    const localConfig: string | null = window.localStorage.getItem('ishotyping-config');
+    if(localConfig) {
+      setConfig({ ...config, ...JSON.parse(localConfig) });
+    }
   }, []);
 
-	useEffect(() => {
-		window.localStorage.setItem('ishotyping-config', JSON.stringify(config));
-	}, [config]);
+  useEffect(() => {
+    window.localStorage.setItem('ishotyping-config', JSON.stringify(config));
+  }, [config]);
 
   const handleLogin = (code: string|null, state: string|null, oauthprovider: string) => {
     post(`/api/login/${oauthprovider}/authorize`, { code, state }).then((user) => {
@@ -80,7 +80,7 @@ const App = ({} : Props) => {
         <NavBar
           handleLogout={handleLogout}
           user={user}
-    			volume={volume}
+          volume={volume}
           setVolume={(v: number) => { setConfig({ ...config, volume: v }); }}
         />
         <Content>
@@ -137,13 +137,13 @@ const App = ({} : Props) => {
             <Route path="/user/:userId" element={
               <UserPage />
             }/>
-	          <Route path="/settings" element={
+            <Route path="/settings" element={
               <SettingsPage
-								user={user}
-								initConfig={config}
-								setGlobalConfig={setConfig}
-							/>
-            }/>	
+                user={user}
+                initConfig={config}
+                setGlobalConfig={setConfig}
+              />
+            }/>  
             <Route path="*" element={
               <NotFound />
             }/>

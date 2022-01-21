@@ -21,7 +21,7 @@ export const processBeatmap = (beatmap : Beatmap, config: Config) => {
     
     if (line && ['L','E'].includes(type)) {
       line.endTime = time;
-			line.kpm = computeLineKPM(line);
+      line.kpm = computeLineKPM(line);
       lines.push(line);
     }
     if (type === 'L') {
@@ -29,16 +29,16 @@ export const processBeatmap = (beatmap : Beatmap, config: Config) => {
         startTime: time,
         endTime: 0, // set when line ends
         lyric: text,
-				kpm: 0,
+        kpm: 0,
         syllables: [],
       };
     } else if (type === 'S') {
-			const kana = parseKana(text, config);
+      const kana = parseKana(text, config);
       line.syllables.push({ time, text, kana });
     }
   });
   beatmap.lines = lines;
-	beatmap.kpm = computeBeatmapKPM(beatmap);
+  beatmap.kpm = computeBeatmapKPM(beatmap);
 };
 
 export const getArtist = (mapset: Beatmapset, config: Config) => 
@@ -56,30 +56,30 @@ export const timeToLineIndex = (lines: LineData[], time: number) => {
 }
 
 const computeLineKeypresses = (line: LineData) => {
-	let keypresses: number = 0;
-	line.syllables.forEach(({ text }) => { keypresses += computeMinKeypresses(text) });
-	return keypresses;
+  let keypresses: number = 0;
+  line.syllables.forEach(({ text }) => { keypresses += computeMinKeypresses(text) });
+  return keypresses;
 }
 
 export const computeLineKPM = (line: LineData) => {
-	const lineTime = (line.endTime - line.startTime) / MS_IN_MINUTE;
-	return computeLineKeypresses(line) / lineTime;
+  const lineTime = (line.endTime - line.startTime) / MS_IN_MINUTE;
+  return computeLineKeypresses(line) / lineTime;
 };
 
 export const computeBeatmapKPM = (map: Beatmap) => {
-	let keypresses: number = 0;
-	let drainTime: number = 0;
-	map.lines?.forEach((line: LineData) => {
-		keypresses += computeLineKeypresses(line);
-		drainTime += (line.endTime - line.startTime) / MS_IN_MINUTE;
-	});
-	return drainTime ? keypresses / drainTime : 0;
+  let keypresses: number = 0;
+  let drainTime: number = 0;
+  map.lines?.forEach((line: LineData) => {
+    keypresses += computeLineKeypresses(line);
+    drainTime += (line.endTime - line.startTime) / MS_IN_MINUTE;
+  });
+  return drainTime ? keypresses / drainTime : 0;
 };
 
 export const computeLineKana = (line: LineData) => {
-	let totalKana: number = 0;
-	line.syllables.forEach(({ text }) => {totalKana += parseKana(text, defaultConfig).length});  
-	return totalKana;
+  let totalKana: number = 0;
+  line.syllables.forEach(({ text }) => {totalKana += parseKana(text, defaultConfig).length});  
+  return totalKana;
 }
 
 

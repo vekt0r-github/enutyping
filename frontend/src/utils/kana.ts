@@ -19,7 +19,7 @@ export const kanaRespellings = {
   こ: ["ko", "co"],
   せ: ["se", "ce"],
   ふ: ["fu", "hu"],
-	づ: ["du"],
+  づ: ["du"],
   ん: ["n", "nn"],
 };
 
@@ -27,7 +27,7 @@ const getRomanizations = (kana: string, config: Config) : string[] => {
   function hasKey<O>(obj: O, key: PropertyKey): key is keyof O {
     return key in obj; // fix ts error even though this looks stupid
   }
-	const wanakanaOptions = { customRomajiMapping: config.kanaSpellings };
+  const wanakanaOptions = { customRomajiMapping: config.kanaSpellings };
 
   const canonical = toRomaji(kana, wanakanaOptions);
   if (kana.length == 1) {
@@ -57,8 +57,7 @@ const getRomanizations = (kana: string, config: Config) : string[] => {
 };
 
 const computeKanaAt = (pos: number, config: Config, syllable: string, nextSyllable?: string) => {
-
-	const wanakanaOptions = { customRomajiMapping: config.kanaSpellings };
+  const wanakanaOptions = { customRomajiMapping: config.kanaSpellings };
 
   let newKana: Kana = {text: "", romanizations: []};
   if (pos >= syllable.length) { return newKana; }
@@ -93,27 +92,27 @@ export const parseKana = (syllable: string, config: Config, nextSyllable?: strin
 }
 
 const minKeypressOptions = { // TODO: someone please pass this into the toRomaji call below i was too weak to make it happen
-	customRomajiMapping: {
-  	し: "si", 
-  	ち: "ti",
-  	つ: "tu",
-  	じ: "ji",
-  	しゃ: "sha",
-  	しょ: "sho",
-  	しゅ: "shu",
-　	じゃ: "ja",
-  	じょ: "jo",
-  	じゅ: "ju",
-  	か: "ka", 
-  	く: "ku", 
-  	こ: "ko", 
-  	せ: "se",
-  	ふ: "fu", 
-		づ: "du",
-  	ん: "n", 
-	},
+  customRomajiMapping: {
+    し: "si", 
+    ち: "ti",
+    つ: "tu",
+    じ: "ji",
+    しゃ: "sha",
+    しょ: "sho",
+    しゅ: "shu",
+    じゃ: "ja",
+    じょ: "jo",
+    じゅ: "ju",
+    か: "ka", 
+    く: "ku", 
+    こ: "ko", 
+    せ: "se",
+    ふ: "fu", 
+    づ: "du",
+    ん: "n", 
+  },
 }
 export const computeMinKeypresses = (syllable: string) => {
-	const ans = toRomaji(syllable, minKeypressOptions).length;
-	return ans;
+  const ans = toRomaji(syllable, minKeypressOptions).length;
+  return ans;
 }

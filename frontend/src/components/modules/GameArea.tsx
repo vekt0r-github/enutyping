@@ -30,8 +30,8 @@ export type GameState = {
   currTime?: number,
   hits: number,
   misses: number,
-	kanaHits: number,
-	totalKana: number,
+  kanaHits: number,
+  totalKana: number,
   score: number
 };
 
@@ -42,8 +42,8 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
     currTime: undefined, // maintained via timer independent of video
     hits: 0,
     misses: 0,
-		kanaHits: 0,
-		totalKana: 0,
+    kanaHits: 0,
+    totalKana: 0,
     score: 0,
   });
   const [gameState, setGameState] = useState<GameState>(initState());
@@ -153,7 +153,7 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
     if(hit) {
       set('hits', (oldHits) => oldHits + 1);
       if(endKana) {
-				set('kanaHits', (oldHits) => oldHits + 1);
+        set('kanaHits', (oldHits) => oldHits + 1);
         set('score', (oldScore) => oldScore + 10);
       }
     }
