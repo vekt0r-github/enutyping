@@ -16,7 +16,7 @@ type Props = {
   user: User | null,
   beatmap: Beatmap,
   gameState: GameState,
-  keyCallback: (hit: boolean, endKana: boolean) => void,
+  keyCallback: (hit: number, miss: number, endKana: boolean) => void,
   startGame: (offset: number) => void,
   config: Config,
 };
@@ -103,6 +103,8 @@ const GameAreaDisplay = ({ user, beatmap, gameState, keyCallback, startGame, con
 
   const keyAcc = acc(hits, misses);
   const kanaAcc = acc(kanaHits, totalKana - kanaHits);
+	
+	const KPM = currTime ? (Math.round(hits * 60000 / currTime)) : 0;
 
   if (status === Status.GOBACK) {
     return <Navigate to={`/play/${beatmap.beatmapset.id}`} replace={true} />;
@@ -135,6 +137,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, keyCallback, startGame, con
           <p>Keypress Acc: {keyAcc.toFixed(2)}</p>
           <p>Kana Acc: {kanaAcc.toFixed(2)}</p>
           <p>Score: {score}</p>
+					<p>KPM: {KPM}</p>
         </StatBox>
         <GameVideo
           yt_id={beatmap.beatmapset.yt_id}

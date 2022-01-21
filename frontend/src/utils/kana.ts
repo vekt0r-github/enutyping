@@ -93,7 +93,7 @@ export const parseKana = (syllable: string, config: Config, nextSyllable?: strin
   return kana;
 }
 
-const minKeypressOptions = { // TODO: someone please pass this into the toRomaji call below i was too weak to make it happen
+const minKeypressOptions = { // idk what's going on here tbh, TODO ig
   customRomajiMapping: {
     し: "si", 
     ち: "ti",
@@ -115,6 +115,6 @@ const minKeypressOptions = { // TODO: someone please pass this into the toRomaji
   },
 }
 export const computeMinKeypresses = (syllable: string) => {
-  const ans = toRomaji(syllable, minKeypressOptions).length;
-  return ans;
+  const ans = toRomaji(syllable);
+  return ans.length;
 }

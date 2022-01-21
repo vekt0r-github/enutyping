@@ -123,7 +123,7 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
     if (currIndex === undefined) { return; }
     if (currIndex === lines.length) {
       submitScore();
-    } else if (currIndex > 0) {
+    } else if (currIndex >= 0) {
       set('totalKana', (oldTotalKana) => oldTotalKana + computeLineKana(lines[currIndex]));
     }
   }, [currIndex]);
@@ -149,18 +149,11 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
     }
   }, [status]); // may eventually depend on other things
 
-  const keyCallback = (hit: boolean, endKana: boolean) => {
-    if(hit) {
-      set('hits', (oldHits) => oldHits + 1);
-      if(endKana) {
-        set('kanaHits', (oldHits) => oldHits + 1);
-        set('score', (oldScore) => oldScore + 10);
-      }
-    }
-    else {
-      set('misses', (oldMisses) => oldMisses + 1);
-      set('score', (oldScore) => oldScore - 5);
-    }
+  const keyCallback = (hit: number, miss: number, endKana: boolean) => {
+		set('hits', (oldHits) => oldHits + hit);
+		set('misses', (oldMisses) => oldMisses + miss);
+		set('kanaHits', (oldKanaHits) => oldKanaHits + (endKana ? 1 : 0));
+		set('score', (oldScore) => oldScore + 10 * hit - 5 * miss);
   }
 
   if (status === Status.GOBACK) {

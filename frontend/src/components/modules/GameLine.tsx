@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import ProgressBar from "@/components/modules/ProgressBar";
 
 import { Config, Kana, LineData } from '@/utils/types'
-import { parseKana } from '@/utils/kana'
+import { parseKana, computeMinKeypresses } from '@/utils/kana'
 
 import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
@@ -13,12 +13,13 @@ type KanaState = {
   kana: Kana,
   prefix: string, // the correct keystrokes user has typed for this kana
   suffix: string, // one possible romaji completion of this kana after prefix
+	minKeypresses: number, // fewest keystrokes to type this kana
 };
 
 type Props = {
   currTime: number,
   lineData: LineData,
-  keyCallback: (hit: boolean, endKana: boolean) => void,
+  keyCallback: (hits: number, misses: number, endKana: boolean) => void,
   config: Config,
 }
 
@@ -124,7 +125,7 @@ const Tick = styled.div<{active?: ActiveStatus}>`
 
 const GameLine = ({ currTime, lineData, keyCallback, config } : Props) => {
   const {startTime, endTime, lyric} = lineData;
-  const initKanaState = (kana : Kana) => ({ kana, prefix: "", suffix: kana.romanizations[0] });
+  const initKanaState = (kana : Kana) => ({ kana, prefix: "", suffix: kana.romanizations[0], minKeypresses: computeMinKeypresses(kana.text) });
 
   const initState = () : State => ({
     position: [0, 0],
@@ -143,18 +144,17 @@ const GameLine = ({ currTime, lineData, keyCallback, config } : Props) => {
     if (["Escape"].includes(e.key)) { return; } // GameArea is handling it
     const curKana = getKana(position);
     if (!curKana) return;
-    const {kana, prefix} = curKana;
+    const {kana, prefix, minKeypresses} = curKana;
     const newPrefix = prefix + e.key;
     const filteredRomanizations = kana.romanizations.filter(s => s.substring(0, newPrefix.length) == newPrefix);
 
     if(e.key == "n" && nBuffer) {
       setState((s: State) => ({ ...s, nBuffer: false }));
-      keyCallback(true, false);
     } else if (filteredRomanizations.length == 0) {
-      keyCallback(false, false);
+      keyCallback(0, 1, false);
     } else {
       const newSuffix = filteredRomanizations[0].substring(newPrefix.length);
-      const newKana: KanaState = {kana: kana, prefix: newPrefix, suffix: newSuffix};
+      const newKana: KanaState = {kana: kana, prefix: newPrefix, suffix: newSuffix, minKeypresses: minKeypresses};
       setState(({position, syllables, nBuffer}) => {
         syllables[position[0]].kana[position[1]] = newKana; // should be safe
         if (newSuffix === "") {
@@ -165,7 +165,7 @@ const GameLine = ({ currTime, lineData, keyCallback, config } : Props) => {
         }
         return {position, syllables, nBuffer};
       });
-      keyCallback(true, newSuffix === "");
+      keyCallback((newPrefix.length <= minKeypresses) ? 1 : 0, 0, newSuffix === "");
     }
   };
 
