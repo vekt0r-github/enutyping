@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Navigate } from "react-router-dom";
 
 import GameAreaDisplay from "@/components/modules/GameAreaDisplay";
@@ -21,10 +21,12 @@ type Props = {
   user: User | null,
   beatmap: Beatmap,
   config: Config,
+  afterGameEnd: () => void,
 };
 
 export type GameState = {
   status: Status,
+  offset: number,
   currTime?: number,
   hits: number,
   misses: number,
@@ -33,9 +35,10 @@ export type GameState = {
   score: number
 };
 
-const GameArea = ({ user, beatmap, config } : Props) => {
+const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
   const initState = () : GameState => ({
     status: Status.UNSTARTED,
+    offset: 0,
     currTime: undefined, // maintained via timer independent of video
     hits: 0,
     misses: 0,
@@ -52,15 +55,13 @@ const GameArea = ({ user, beatmap, config } : Props) => {
       [prop]: typeof val === "function" ? val(state[prop]) : val,
     }))
   };
-  const [offset, setOffset] = useState<number>(0);
-	const totalOffset = offset + config.offset;
 
   // from iframe API; in seconds, rounded? maybe
   // maybe need later but idk
   // const [duration, setDuration] = useState<number>(Infinity);
 
   const lines = beatmap.lines as LineData[];
-  const {status, currTime, hits, misses, kanaHits, totalKana, score} = gameState;
+  const {status, offset, currTime, hits, misses, kanaHits, totalKana, score} = gameState;
   const currIndex = (currTime !== undefined) ? timeToLineIndex(lines, currTime) : undefined;
 
   const prepareStartGame = () => {
@@ -68,27 +69,23 @@ const GameArea = ({ user, beatmap, config } : Props) => {
     set('status', Status.STARTQUEUED);
   }
 
-  const startGame = () => {
+  const startGame = (offset: number) => {
     if (status !== Status.STARTQUEUED) { return; }
     setGameState((state) => ({ ...state,
       status: Status.PLAYING,
-      gameStartTime: new Date().getTime() + totalOffset,
+      offset: offset,
     }));
   };
 
   const submitScore = () => {
     setGameState((state) => ({ ...state,
       status: Status.SUBMITTING,
-      gameStartTime: undefined,
-      currIndex: undefined,
     }));
   };
 
   const endGame = () => {
     setGameState((state) => ({ ...state,
       status: Status.ENDED,
-      gameStartTime: undefined,
-      currIndex: undefined,
     }));
   };
 
@@ -113,7 +110,7 @@ const GameArea = ({ user, beatmap, config } : Props) => {
     // start game-- status must change to PLAYING
     // will cancel all game actions if status changes from PLAYING
     if (status !== Status.PLAYING) { return; }
-    const gameStartTime = new Date().getTime();
+    const gameStartTime = new Date().getTime() + offset;
     const intervalId = setInterval(() => {
       set('currTime', new Date().getTime() - gameStartTime);
     }, 50);
@@ -140,6 +137,7 @@ const GameArea = ({ user, beatmap, config } : Props) => {
       score: gameState.score,
     }
     post('/api/scores', data).then((score) => {
+      afterGameEnd();
       endGame();
     });
   }, [status]);
@@ -170,12 +168,11 @@ const GameArea = ({ user, beatmap, config } : Props) => {
   }
   
   return (
-    <GameAreaDisplay 
+    <GameAreaDisplay
       user={user}
       beatmap={beatmap}
       gameState={gameState}
       keyCallback={keyCallback}
-      setOffset={setOffset}
       startGame={startGame}
       config={config}
     />

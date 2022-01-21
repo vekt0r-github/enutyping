@@ -110,7 +110,14 @@ const settingsPage = ({ user, initConfig, setGlobalConfig }: Props) => {
 				<SettingContainer>
 					<SettingBox>
 						<SettingTitle>Global Offset: </SettingTitle>
-						<input type="number" value={config.offset} onChange={(e: React.ChangeEvent<HTMLInputElement>) => {setConfig({ ...config, offset: parseInt(e.target.value)});}}/>
+						<input
+							type="number"
+							defaultValue={config.offset} 
+							onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+								const offset = parseInt(e.target.value);
+								if (!isNaN(offset)) { setConfig({ ...config, offset: offset }); }
+							}}
+						/>
 						<p>If you feel that every map you play is consistently late or early, use this to apply an offset to every map automatically.</p>
 					</SettingBox>
 					<SettingBox>

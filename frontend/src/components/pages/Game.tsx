@@ -48,7 +48,7 @@ export const PageContainer = styled.div`
 const Game = ({ user, config } : Props) => {
   const { mapId, mapsetId } = useParams();
   
-  useEffect(() => {
+  const refreshBeatmap = () => {
     get(`/api/beatmaps/${mapId}`).then((beatmap) => {
       if (!beatmap || (beatmap.id === undefined) || beatmap.beatmapset.id != mapsetId) {
         setMap(null); // map not found or param is wrong
@@ -57,7 +57,8 @@ const Game = ({ user, config } : Props) => {
         setMap(beatmap);
       }
     });
-  }, []);
+  };
+  useEffect(refreshBeatmap, []);
 
   const [map, setMap] = useState<Beatmap | null>();
   if (map === undefined) { return <Loading />; }
@@ -82,6 +83,7 @@ const Game = ({ user, config } : Props) => {
           user={user}
           beatmap={map}
           config={config}
+          afterGameEnd={refreshBeatmap}
         />
         <Sidebar>
           <h2>Leaderboard</h2>

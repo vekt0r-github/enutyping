@@ -17,8 +17,7 @@ type Props = {
   beatmap: Beatmap,
   gameState: GameState,
   keyCallback: (hit: boolean, endKana: boolean) => void,
-  setOffset: React.Dispatch<React.SetStateAction<number>>,
-  startGame: () => void,
+  startGame: (offset: number) => void,
   config: Config,
 };
 
@@ -85,12 +84,11 @@ const Warning = styled.div`
   padding: var(--s) 0;
 `;
 
-const GameAreaDisplay = ({ user, beatmap, gameState, keyCallback, setOffset, startGame, config } : Props) => {
+const GameAreaDisplay = ({ user, beatmap, gameState, keyCallback, startGame, config } : Props) => {
 	const { volume } = config;
 
-  // from iframe API; in seconds, rounded? maybe
-  // maybe need later but idk
-  // const [duration, setDuration] = useState<number>(Infinity);
+  const [offset, setOffset] = useState<number>(0);
+	const totalOffset = offset + config.offset;
 
   const lines = beatmap.lines as LineData[];
   const {status, currTime, hits, misses, kanaHits, totalKana, score} = gameState;
@@ -110,7 +108,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, keyCallback, setOffset, sta
     return <Navigate to={`/play/${beatmap.beatmapset.id}`} replace={true} />;
   }
 
-  const isPlaying = (currTime !== undefined) && (currIndex !== undefined) && (currIndex > -1) && (currIndex < lines.length);
+  const isPlaying = status === Status.PLAYING && (currTime !== undefined) && (currIndex !== undefined) && (currIndex > -1) && (currIndex < lines.length);
   
   return (
     <GameContainer>
@@ -142,12 +140,12 @@ const GameAreaDisplay = ({ user, beatmap, gameState, keyCallback, setOffset, sta
           yt_id={beatmap.beatmapset.yt_id}
           status={status}
           currTime={currTime}
-          startGame={startGame}
+          startGame={() => startGame(totalOffset)}
           volume={volume}
         />
         <StatBox>
 					<p>Beatmap KPM: {Math.round(beatmap.kpm ?? 0)}</p>
-					<p>Line KPM: {(status === Status.PLAYING && isPlaying) ? (Math.round(lines[currIndex].kpm)) : "N/A"}</p>
+					<p>Line KPM: {isPlaying ? (Math.round(lines[currIndex].kpm)) : "N/A"}</p>
 				</StatBox>
       </BottomHalf>
       {status === Status.UNSTARTED ? 
@@ -162,7 +160,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, keyCallback, setOffset, sta
           <Line size="1em">Press Esc to exit during a game</Line>
           <Line size="0.5em">&nbsp;</Line>
           <Line size="1em">Set map offset:&nbsp;
-            <input defaultValue='0' onChange={(e) => {
+            <input defaultValue={offset} onChange={(e) => {
               const intValue = parseInt(e.target.value)
               if (!isNaN(intValue)) { setOffset(intValue); }
             }}></input>
