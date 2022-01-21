@@ -1,14 +1,14 @@
 import React, { useEffect, useState }  from "react";
 import { Navigate } from "react-router-dom";
 
-import YTThumbnail from "@/components/modules/YTThumbnail";
+import MapsetList from "@/components/modules/MapsetList";
 
 import { get, post } from "@/utils/functions";
 import { User, Config, Beatmapset } from "@/utils/types";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, SubBox, Link, Line } from '@/utils/styles';
+import {} from '@/utils/styles';
 
 type Props = {
   user: User | null,
@@ -17,68 +17,15 @@ type Props = {
 
 const SongsContainer = styled.div`
   display: grid;
-  @media (min-width: 760px) {
-    grid-template-columns: repeat(2, 1fr);
+  width: 100%;
+  grid-template-columns: 1fr;
+  max-width: 500px;
+  @media (min-width: 800px) {
+    grid-template-columns: 1fr 1fr;
+    max-width: 1000px;
   }
   justify-content: center;
-  max-width: 1000px;
   margin: 0 var(--s);
-`;
-
-const HoverContainer = styled(MainBox)`
-  background-color: var(--clr-primary-light);
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  padding-top: calc(90px + 2*var(--s));
-  box-sizing: border-box;
-  display: flex;
-  z-index: -1;
-  animation: fadeIn var(--tt-long);
-  @keyframes fadeIn {
-    from {
-      background-color: var(--clr-primary);
-      opacity: 0;
-      height: 90px;
-    }
-  }
-`;
-
-const Diff = styled(SubBox)`
-  display: block;
-  width: 100%;
-  padding: 1px var(--s);
-  & + & { margin-top: var(--xs); }
-  box-sizing: border-box;
-  color: black;
-  transition: var(--tt-short);
-  &:hover {
-    background-color: var(--clr-secondary-light);
-    color: black;
-  }
-`;
-
-const SongBox = styled(MainBox)`
-  height: 90px;
-  max-width: 480px;
-  min-width: 360px;
-  margin: var(--s);
-  box-sizing: content-box;
-  display: flex;
-  color: black;
-  position: relative;
-  & > ${HoverContainer} { display: none; }
-  &:hover, &:focus {
-    color: black;
-    & > ${HoverContainer} { display: block; }
-    z-index: 1;
-  }
-`;
-
-const Info = styled.div`
-  margin-left: var(--s);
-  min-width: 0;
 `;
 
 const SongSelect = ({ user, config } : Props) => {
@@ -101,31 +48,7 @@ const SongSelect = ({ user, config } : Props) => {
     <>
       <h1>Song Select</h1>
       <SongsContainer>
-        {mapsets?.map((mapset) => {
-          const {artist, title, artist_original, title_original, yt_id, preview_point, owner, beatmaps} = mapset;
-          return (
-            <SongBox 
-              as={Link} 
-              to={`/play/${mapset.id}`} 
-              key={mapset.id}
-            >
-              <YTThumbnail yt_id={yt_id} width={120} height={90} />
-              <Info>
-                <Line size='1.25em' as='h2'>{config.localizeMetadata ? title : title_original}</Line>
-                <Line size='1em'>by {config.localizeMetadata ? artist : artist_original}</Line>
-                <Line size='0.8em'>mapped by {owner.name}</Line>
-                <Line size='0.8em'>{beatmaps.length} difficult{beatmaps.length !== 1 ? 'ies' : 'y'}</Line>
-              </Info>
-              <HoverContainer>
-                {beatmaps.map((map) => 
-                  <Diff as={Link} to={`/play/${mapset.id}/${map.id}`}>
-                    {map.diffname}
-                  </Diff>
-                )}
-              </HoverContainer>
-            </SongBox>
-          );
-        })}
+        {mapsets ? <MapsetList mapsets={mapsets} config={config} /> : null}
       </SongsContainer>
     </>
   );

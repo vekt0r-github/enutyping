@@ -112,7 +112,7 @@ const DiffSelect = ({ user } : Props) => {
             <Line as="h2" size="1.5em" margin="1.5em 0">Select Difficulty:</Line>
             <DiffsContainer>
               {beatmaps.map((map) => 
-                <Diff as={Link} to={`/play/${mapset.id}/${map.id}`}>
+                <Diff as={Link} to={`/play/${mapset.id}/${map.id}`} key={map.id}>
                   {map.diffname}
                 </Diff>
               )}
