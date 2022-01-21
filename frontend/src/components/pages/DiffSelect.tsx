@@ -46,10 +46,6 @@ const Diff = styled(MainBox)`
 `;
 
 const DiffSelect = ({ user } : Props) => {
-  if (!user) { // include this in every restricted page
-    return <Navigate to='/login' replace={true} />
-  }
-
   const [goback, setGoback] = useState<boolean>(false);
 
   const { mapsetId } = useParams();

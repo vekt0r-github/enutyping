@@ -8,6 +8,7 @@ import Login from "@/components/pages/Login";
 import SongSelect from "@/components/pages/SongSelect";
 import DiffSelect from "@/components/pages/DiffSelect";
 import Game from "@/components/pages/Game";
+import EditorSongSelect from "@/components/pages/EditorSongSelect";
 import NotFound from "@/components/pages/NotFound";
 import UserPage from "@/components/pages/UserPage";
 import SettingsPage from "@/components/pages/Settings";
@@ -101,7 +102,6 @@ const App = ({} : Props) => {
             </Route>
             <Route path="/play" element={
               <SongSelect
-                user={user}
                 config={config}
               />
             }/>
@@ -112,6 +112,12 @@ const App = ({} : Props) => {
             }/>
             <Route path="/play/:mapsetId/:mapId" element={
               <Game
+                user={user}
+                config={config}
+              />
+            }/>
+            <Route path="/edit" element={
+              <EditorSongSelect
                 user={user}
                 config={config}
               />

@@ -67,8 +67,11 @@ const NavBar = ({ handleLogout, user, volume, setVolume } : Props) => (
       Logo
       <NavBarLink as={NavLink} to="/">Home</NavBarLink>
       <NavBarLink as={NavLink} to="/play">Play</NavBarLink>
-      {user && <NavBarLink as={NavLink} to={`/user/${user.id}`}>Account</NavBarLink>}
-			<NavBarLink as={NavLink} to="/settings">Settings</NavBarLink>
+      {user && <>
+        <NavBarLink as={NavLink} to="/edit">Create</NavBarLink>
+        <NavBarLink as={NavLink} to={`/user/${user.id}`}>Account</NavBarLink>
+        <NavBarLink as={NavLink} to="/settings">Settings</NavBarLink>
+      </>}
     </NavHalf>
     <Spacer />
     <NavHalf>

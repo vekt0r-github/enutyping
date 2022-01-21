@@ -80,10 +80,6 @@ const processBeatmap = (beatmap : Beatmap & {content: string}) => {
 };
 
 const Game = ({ user, config } : Props) => {
-  if (!user) { // include this in every restricted page
-    return <Navigate to='/login' replace={true} />
-  }
-
   const { mapId, mapsetId } = useParams();
   
   useEffect(() => {

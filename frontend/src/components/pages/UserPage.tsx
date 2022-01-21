@@ -43,7 +43,9 @@ const userPage = () => {
           <h2>Recent Scores</h2>
           <ul>
             {scores.map((score) =>
-              <li>Beatmap {score.beatmap_id}: Score {score.score}</li>
+              <li key={score.id}>
+                Beatmap {score.beatmap_id}: Score {score.score}
+              </li>
             )}
           </ul>
         </>

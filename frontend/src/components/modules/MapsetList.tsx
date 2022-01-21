@@ -13,6 +13,19 @@ type Props = {
   config: Config,
 };
 
+const SongsContainer = styled.div`
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr;
+  max-width: 500px;
+  @media (min-width: 800px) {
+    grid-template-columns: 1fr 1fr;
+    max-width: 1000px;
+  }
+  justify-content: center;
+  margin: 0 var(--s);
+`;
+
 const SetLink = styled(MainBox)`
   position: absolute;
   left: 0;
@@ -85,7 +98,7 @@ const Info = styled.div`
 
 const MapsetList = ({ mapsets, config } : Props) => {
   return (
-    <>
+    <SongsContainer>
       {mapsets?.map((mapset) => {
         const {artist, title, artist_original, title_original, yt_id, preview_point, owner, beatmaps} = mapset;
         return (
@@ -111,7 +124,7 @@ const MapsetList = ({ mapsets, config } : Props) => {
           </SongBox>
         );
       })}
-    </>
+    </SongsContainer>
   );
 }
 

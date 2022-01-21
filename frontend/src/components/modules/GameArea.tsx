@@ -16,7 +16,7 @@ import { Navigate } from "react-router-dom";
 export enum Status { GOBACK, UNSTARTED, STARTQUEUED, PLAYING, SUBMITTING, ENDED };
 
 type Props = {
-  user: User,
+  user: User | null,
   beatmap: Beatmap,
   config: Config,
 };
@@ -81,11 +81,16 @@ export const Overlay = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  & > ${Line} {
+  & ${Line} {
     width: 100%;
     text-align: center;
     font-style: italic;
   }
+`;
+
+const Warning = styled.div`
+  background-color: var(--clr-warn);
+  padding: var(--s) 0;
 `;
 
 const GameArea = ({ user, beatmap, config } : Props) => {
@@ -150,6 +155,7 @@ const GameArea = ({ user, beatmap, config } : Props) => {
 
   useEffect(() => {
     if (status !== Status.SUBMITTING) { return; }
+    if (!user) { endGame(); return; }
     const data = {
       beatmap_id: beatmap.id,
       user_id: user?.id,
@@ -259,6 +265,12 @@ const GameArea = ({ user, beatmap, config } : Props) => {
       </BottomHalf>
       {status === Status.UNSTARTED ? 
         <Overlay>
+          {!user && <>
+            <Warning>
+              <Line size="1.5em">Warning: You are not logged in, and your score will not be submitted.</Line>
+            </Warning>
+            <Line size="0.5em">&nbsp;</Line>
+          </>}
           <Line size="1.5em">Press Space to play</Line>
           <Line size="1em">Press Esc to exit during a game</Line>
           <Line size="0.5em">&nbsp;</Line>
