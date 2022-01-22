@@ -47,6 +47,14 @@ const UserPage = ({ yourUser, setYourUser }: Props) => {
     setRequestedName(event.target.value);
   }
   const handleSubmit = () => {
+    if (!requestedName) {
+      setErrorMessage("We don't like blank names! Pick something else.");
+      return;
+    }
+    if (/_(osu|github|google)$/.test(requestedName)) {
+      setErrorMessage("You sneaky rat! Pick something else.");
+      return;
+    }
     post('/api/me/changename', { requested_name: requestedName }).then((res) => {
       console.log(res);
       if (res.success) {
@@ -65,10 +73,14 @@ const UserPage = ({ yourUser, setYourUser }: Props) => {
     <>
     { (user && yourUser && user.id == yourUser.id) &&
       <>
-        <label>Requested Name:</label>
-        <input value={requestedName} onChange={handleChange} />
-        <input onClick={handleSubmit} type="button" value="Submit" />
-        {errorMessage && <div>{errorMessage}</div>}
+        <form>
+          <label>Requested Name:</label>
+          <input value={requestedName}
+                 onChange={handleChange}
+          />
+          <input onClick={handleSubmit} type="button" value="Submit" />
+          {errorMessage && <div>{errorMessage}</div>}
+        </form>
       </>
     }
     </>

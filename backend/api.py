@@ -34,6 +34,8 @@ def change_name(user_id):
         return 'No input provided', 400
     user = User.query.get(user_id)
     requested_name = json_data['requested_name']
+    if not requested_name or requested_name.endswith(("google", "osu", "github")):
+        return 'We do not like your name', 400
 
     exists_subq = User.query.filter(User.name == requested_name).exists()
     exists = db_session.query(exists_subq).scalar()
