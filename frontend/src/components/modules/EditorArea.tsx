@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Navigate } from "react-router-dom";
 
 import GameAreaDisplay from "@/components/modules/GameAreaDisplay";
+import EditorTimeline from "@/components/modules/EditorTimeline";
 
 import { post } from '@/utils/functions';
 import { 
@@ -25,6 +26,11 @@ type Props = {
   beatmap: Beatmap,
   config: Config,
 };
+
+const EditorAreaContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
 
 const initStatsState = () => ({
   hits: 0,
@@ -75,7 +81,9 @@ const EditorArea = ({ user, beatmap, config } : Props) => {
   };
 
   const onKeyPress = (e: KeyboardEvent) => {
-    if (e.key === "t") { // enter testing mode
+    if (e.repeat) { return; }
+    console.log(e)
+    if (e.code === "KeyT" && (e.altKey)) { // enter testing mode
       if (isEditing) { 
         e.preventDefault();
         e.stopPropagation();
@@ -141,7 +149,7 @@ const EditorArea = ({ user, beatmap, config } : Props) => {
     : gameState;
   
   return (
-    <>
+    <EditorAreaContainer>
       <GameAreaDisplay
         user={user}
         beatmap={beatmap}
@@ -151,7 +159,12 @@ const EditorArea = ({ user, beatmap, config } : Props) => {
         config={config}
       />
       {isTesting ? <span>Testing Mode</span> : null}
-    </>
+      {isEditing ? <EditorTimeline 
+        currTime={currTime ?? 0}
+        setCurrTime={(currTime: number) => set('currTime', currTime)}
+        length={lines[lines.length-1].line.endTime} // temp
+      /> : null}
+    </EditorAreaContainer>
   );
 }
 

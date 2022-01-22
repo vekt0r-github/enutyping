@@ -193,13 +193,15 @@ const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : P
     );
   });
 
+  const visualShift = (x: number) => Math.min(x + 0.005, 1); // 4px :ehehe:
+
   return (
     <LineContainer>
       <Timeline>
         {syllableList.reverse()}
         <TimelineBar>
           <ProgressBar
-            progress={(currTime - startTime) / (endTime - startTime)}
+            progress={visualShift((currTime - startTime) / (endTime - startTime))}
           />
         </TimelineBar>
       </Timeline>

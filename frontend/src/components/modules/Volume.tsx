@@ -127,7 +127,7 @@ const Volume = ({ volume, setVolume } : Props) => {
   const handleVolumeChange = (e : React.ChangeEvent<HTMLInputElement>) => {
     const vol = parseInt(e.target.value) / 100;
     setVolume(vol);
-  }
+  };
 
   const sliderValue = Math.round(volume * 100);
 
@@ -138,8 +138,8 @@ const Volume = ({ volume, setVolume } : Props) => {
       />
       <IconLabel>{sliderValue}</IconLabel>
       <SliderOuterContainer>
-        <SliderLabel as="label" htmlFor="slider-container">{sliderValue}</SliderLabel>
-        <SliderContainer id="slider-container">
+        <SliderLabel as="label" htmlFor="volume-sslider-container">{sliderValue}</SliderLabel>
+        <SliderContainer id="volume-slider-container">
           <SliderBody />
           <SliderFill
             value={sliderValue}
