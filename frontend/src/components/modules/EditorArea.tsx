@@ -9,6 +9,8 @@ import {
   GameStatus, GameState 
 } from "@/utils/types";
 import { 
+  makeLineStateAt,
+  makeSetFunc,
   timeToLineIndex, 
   updateStatsOnKeyPress, 
   updateStatsOnLineEnd 
@@ -24,55 +26,61 @@ type Props = {
   config: Config,
 };
 
+const initStatsState = () => ({
+  hits: 0,
+  misses: 0,
+  kanaHits: 0,
+  kanaMisses: 0,
+  totalKana: 0,
+  score: 0,
+});
+
+// for during playback
+const makeStateAt = (currTime: number, paused: boolean, lines: LineData[], config: Config) : GameState => ({
+  status: paused ? GameStatus.PAUSED : GameStatus.AUTOPLAYING,
+  offset: 0,
+  currTime: currTime, // maintained via timer independent of video
+  lines: lines.map((lineData) => makeLineStateAt(currTime, lineData, config)),
+  stats: initStatsState(),
+});
+
 const EditorArea = ({ user, beatmap, config } : Props) => {
-  const initState = () : GameState => ({
-    status: GameStatus.PAUSED,
-    offset: 0,
-    currTime: undefined, // maintained via timer independent of video
-    stats: {
-      hits: 0,
-      misses: 0,
-      kanaHits: 0,
-      kanaMisses: 0,
-      totalKana: 0,
-      score: 0,
-    },
-  });
-  const [gameState, setGameState] = useState<GameState>(initState());
-  const set = <K extends keyof GameState>(
-    prop : K, 
-    val : GameState[K] | ((oldState: GameState[K]) => GameState[K]),
-  ) => {
-    setGameState((state) => ({ ...state, 
-      [prop]: typeof val === "function" ? val(state[prop]) : val,
-    }))
-  };
+  const makeState = (currTime: number, paused: boolean) => makeStateAt(currTime, paused, beatmap.lines as LineData[], config);
+  const [gameState, setGameState] = useState<GameState>(makeState(0, true));
+  const set = makeSetFunc(setGameState);
 
   // from iframe API; in seconds, rounded? maybe
   // maybe need later but idk
   // const [duration, setDuration] = useState<number>(Infinity);
 
-  const lines = beatmap.lines as LineData[];
-  const {status, offset, currTime, stats} = gameState;
+  const {status, offset, currTime, lines, stats} = gameState;
   const currIndex = (currTime !== undefined) ? timeToLineIndex(lines, currTime) : undefined; 
   const isEditing = [GameStatus.PAUSED, GameStatus.AUTOPLAYING].includes(status);
   const isTesting = status === GameStatus.PLAYING;
+  
+  const currIndexValid = (currTime !== undefined) && (currIndex !== undefined) && (currIndex > -1) && (currIndex < lines.length);
 
   const startTest = () => {
-    if (!isEditing) { return; }
-    set('status', GameStatus.PLAYING);
+    setGameState((oldState) => ({ ...oldState,
+      status: GameStatus.PLAYING,
+      currTime: currIndexValid ? lines[currIndex].line.startTime : oldState.currTime,
+    }));
   }
 
   const stopTest = () => {
     setGameState((oldState) => ({ ...oldState,
       status: GameStatus.PAUSED,
-      stats: initState().stats,
+      stats: initStatsState(),
     }));
   };
 
   const onKeyPress = (e: KeyboardEvent) => {
     if (e.key === "t") { // enter testing mode
-      startTest();
+      if (isEditing) { 
+        e.preventDefault();
+        e.stopPropagation();
+        startTest();
+      }
     };
     if (e.key === " ") { // play/pause in normal edit mode
       if (isEditing) { 
@@ -88,9 +96,9 @@ const EditorArea = ({ user, beatmap, config } : Props) => {
   };
 
   useEffect(() => {
-    // start game-- status must change to PLAYING
-    // will cancel all game actions if status changes from PLAYING
-    if (status !== GameStatus.PLAYING) { return; }
+    // start playing-- status must change to PLAYING
+    // will cancel playing if status changes to not those
+    if (![GameStatus.PLAYING, GameStatus.AUTOPLAYING].includes(status)) { return; }
     const gameStartTime = new Date().getTime() - (currTime ?? 0); // resume at current time
     const intervalId = setInterval(() => {
       set('currTime', new Date().getTime() - gameStartTime);
@@ -103,9 +111,9 @@ const EditorArea = ({ user, beatmap, config } : Props) => {
   useEffect(() => {
     if (currIndex === undefined) { return; }
     if (currIndex === lines.length) {
-      set('status', GameStatus.PAUSED);
+      // set('status', GameStatus.PAUSED);
     } else if (currIndex > 0) {
-      set('stats', (oldStats) => updateStatsOnLineEnd(oldStats, lines[currIndex-1]));
+      set('stats', (oldStats) => updateStatsOnLineEnd(oldStats, lines[currIndex-1].line));
     }
   }, [currIndex]);
   
@@ -115,24 +123,35 @@ const EditorArea = ({ user, beatmap, config } : Props) => {
       document.removeEventListener("keydown", onKeyPress);
     }
   }, [status]); // may eventually depend on other things
+  
+  useEffect(() => { // refresh map content
+    setGameState((oldGameState) => makeState(oldGameState.currTime ?? 0, true));
+  }, [beatmap]);
 
   const keyCallback = (hit: number, miss: number, endKana: boolean) => {
 		set('stats', (oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana));
-  }
+  };
 
   if (status === GameStatus.GOBACK) {
     return <Navigate to={`/edit/${beatmap.beatmapset.id}`} replace={true} />;
   }
+
+  const displayGameState = (isEditing && currTime !== undefined) ? 
+    makeState(currTime, status === GameStatus.PAUSED) 
+    : gameState;
   
   return (
-    <GameAreaDisplay
-      user={user}
-      beatmap={beatmap}
-      gameState={gameState}
-      keyCallback={keyCallback}
-      setGameState={setGameState}
-      config={config}
-    />
+    <>
+      <GameAreaDisplay
+        user={user}
+        beatmap={beatmap}
+        gameState={displayGameState}
+        keyCallback={isTesting ? keyCallback : () => {}}
+        setGameState={isTesting ? setGameState : () => {}}
+        config={config}
+      />
+      {isTesting ? <span>Testing Mode</span> : null}
+    </>
   );
 }
 

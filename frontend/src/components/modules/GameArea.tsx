@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 
 import GameAreaDisplay from "@/components/modules/GameAreaDisplay";
@@ -9,6 +9,8 @@ import {
   GameStatus, GameState,
 } from "@/utils/types";
 import { 
+  makeLineStateAt,
+  makeSetFunc,
   timeToLineIndex, 
   updateStatsOnKeyPress, 
   updateStatsOnLineEnd 
@@ -25,37 +27,34 @@ type Props = {
   afterGameEnd: () => void,
 };
 
+const initStatsState = () => ({
+  hits: 0,
+  misses: 0,
+  kanaHits: 0,
+  kanaMisses: 0,
+  totalKana: 0,
+  score: 0,
+});
+
+const makeInitState = (lines: LineData[], config: Config) : GameState => ({
+  status: GameStatus.UNSTARTED,
+  offset: 0,
+  currTime: undefined, // maintained via timer independent of video
+  lines: lines.map((lineData) => makeLineStateAt(0, lineData, config)),
+  stats: initStatsState(),
+});
+
 const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
-  const initState = () : GameState => ({
-    status: GameStatus.UNSTARTED,
-    offset: 0,
-    currTime: undefined, // maintained via timer independent of video
-    stats: {
-      hits: 0,
-      misses: 0,
-      kanaHits: 0,
-      kanaMisses: 0,
-      totalKana: 0,
-      score: 0,
-    },
-  });
+  const initState = () => makeInitState(beatmap.lines as LineData[], config);
+
   const [gameState, setGameState] = useState<GameState>(initState());
-  const set = <K extends keyof GameState>(
-    prop : K, 
-    val : GameState[K] | ((oldState: GameState[K]) => GameState[K]),
-  ) => {
-    const isFunction = (val: any) : val is Function => { return typeof val === "function"; }
-    setGameState((state) => ({ ...state, 
-      [prop]: isFunction(val) ? val(state[prop]) : val,
-    }))
-  };
+  const set = makeSetFunc(setGameState);
 
   // from iframe API; in seconds, rounded? maybe
   // maybe need later but idk
   // const [duration, setDuration] = useState<number>(Infinity);
 
-  const lines = beatmap.lines as LineData[];
-  const {status, offset, currTime, stats} = gameState;
+  const {status, offset, currTime, lines, stats} = gameState;
   const currIndex = (currTime !== undefined) ? timeToLineIndex(lines, currTime) : undefined;
 
   const prepareStartGame = () => {
@@ -112,7 +111,7 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
     if (currIndex === lines.length) {
       submitScore();
     } else if (currIndex > 0) {
-      set('stats', (oldStats) => updateStatsOnLineEnd(oldStats, lines[currIndex-1]));
+      set('stats', (oldStats) => updateStatsOnLineEnd(oldStats, lines[currIndex-1].line));
     }
   }, [currIndex]);
 

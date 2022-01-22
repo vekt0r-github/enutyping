@@ -1,4 +1,4 @@
-import { Beatmap, Beatmapset, LineData, defaultConfig, Config, GameState } from '@/utils/types';
+import { Beatmap, Beatmapset, LineData, defaultConfig, Config, GameState, Kana, LineState } from '@/utils/types';
 import { computeMinKeypresses, parseKana } from '@/utils/kana';
 
 const MS_IN_MINUTE = 60000;
@@ -47,10 +47,10 @@ export const getArtist = (mapset: Beatmapset, config: Config) =>
 export const getTitle = (mapset: Beatmapset, config: Config) => 
   mapset[`title${config.localizeMetadata ? '' : '_original'}`];
 
-export const timeToLineIndex = (lines: LineData[], time: number) => {
-  if (!lines.length || time < lines[0].startTime) { return -1; }
+export const timeToLineIndex = (lines: LineState[], time: number) => {
+  if (!lines.length || time < lines[0].line.startTime) { return -1; }
   for (let i = 0; i < lines.length; i++) {
-    if (time < lines[i].endTime) { return i; }
+    if (time < lines[i].line.endTime) { return i; }
   }
   return lines.length;
 }
@@ -99,3 +99,33 @@ export const updateStatsOnLineEnd = (oldStats: GameState['stats'], line: LineDat
   };
 }
 
+// sorry but ehhhhh
+export const makeSetFunc = <State>(setState : React.Dispatch<React.SetStateAction<State>>) => (
+  <K extends keyof State>(
+    prop : K, 
+    val : State[K] | ((oldState: State[K]) => State[K]),
+  ) => {
+    const isFunction = (val: any) : val is Function => { return typeof val === "function"; }
+    setState((state) => ({ ...state, 
+      [prop]: isFunction(val) ? val(state[prop]) : val,
+    }))
+  }
+);
+
+const makeInitOrLastKanaState = (kana: Kana, last: boolean) => ({ 
+  kana: kana, 
+  prefix: last ? kana.romanizations[0] : "", 
+  suffix: last ? "" : kana.romanizations[0], 
+  minKeypresses: computeMinKeypresses(kana.text) 
+});
+
+export const makeLineStateAt = (currTime: number, lineData: LineData, config: Config) : LineState => ({
+  line: lineData,
+  position: [lineData.syllables.filter(s => s.time < currTime).length, 0],
+  syllables: lineData.syllables.map((syllable, i, arr) => ({
+    ...syllable,
+    kana: parseKana(syllable.text, config, arr[i+1]?.text)
+      .map((kana) => makeInitOrLastKanaState(kana, syllable.time < currTime)),
+  })),
+  nBuffer: false,
+});

@@ -45,8 +45,13 @@ const Editor = ({ user, config } : Props) => {
   const isNewMap = (mapId === "new");
 
   const [state, setState] = useState<BeatmapState>({ status: LOADING });
-  const load = (beatmap : (oldBeatmap?: Beatmap) => Beatmap | undefined) => 
-    setState((oldState) => ({ status: LOADED, beatmap: beatmap(oldState.beatmap) }));
+  const processAndLoad = (beatmap : (oldBeatmap?: Beatmap) => Beatmap | undefined) => {
+    setState((oldState) => {
+      const newBeatmap = beatmap(oldState.beatmap);
+      newBeatmap && processBeatmap(newBeatmap, config); // mutates
+      return { status: LOADED, beatmap: newBeatmap }
+    });
+  };
   const {status, beatmap} = state;
   
   useEffect(() => {
@@ -55,7 +60,7 @@ const Editor = ({ user, config } : Props) => {
         if (!beatmap || !beatmap.id || beatmap.beatmapset.id != mapsetId) {
           setState({ status: INVALID }); // map not found or param is wrong
         } else {
-          load(() => beatmap);
+          processAndLoad(() => beatmap);
         }
       });
     } else if (!isNewMapset) {
@@ -63,7 +68,7 @@ const Editor = ({ user, config } : Props) => {
         if (!beatmapset || !beatmapset.id) {
           setState({ status: INVALID }); // mapset not found
         } else {
-          load(() => ({
+          processAndLoad(() => ({
             id: -1,
             beatmapset: beatmapset,
             diffname: "",
@@ -120,7 +125,7 @@ const Editor = ({ user, config } : Props) => {
           config={config}
         />
         <Sidebar as="form" onSubmit={(e : React.FormEvent<HTMLFormElement>) => {
-            load((oldBeatmap) => oldBeatmap ? { ...oldBeatmap,
+            processAndLoad((oldBeatmap) => oldBeatmap ? { ...oldBeatmap,
               content: (e.currentTarget.elements[0] as HTMLInputElement).value,
             } : undefined);
             e.preventDefault();

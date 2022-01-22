@@ -8,7 +8,7 @@ import {
   User, Beatmap, LineData, Config,
   GameStatus, GameState,
 } from "@/utils/types";
-import { timeToLineIndex } from '@/utils/beatmaputils';
+import { makeSetFunc, timeToLineIndex } from '@/utils/beatmaputils';
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -16,8 +16,8 @@ import { SubBox, Line } from '@/utils/styles';
 
 type Props = {
   user: User | null,
-  beatmap: Beatmap,
-  gameState: GameState,
+  beatmap: Beatmap, 
+  gameState: GameState, // data in gameState.lines is a superset of beatmap.lines
   setGameState: React.Dispatch<React.SetStateAction<GameState>>,
   keyCallback: (hit: number, miss: number, endKana: boolean) => void,
   config: Config,
@@ -87,13 +87,14 @@ const Warning = styled.div`
 `;
 
 const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, config } : Props) => {
+  const set = makeSetFunc(setGameState);
+
   const { volume } = config;
 
   const [offset, setOffset] = useState<number>(0);
   const totalOffset = offset + config.offset;
 
-  const lines = beatmap.lines as LineData[];
-  const {status, currTime, stats} = gameState;
+  const {status, currTime, lines, stats} = gameState;
   const {hits, misses, kanaHits, kanaMisses, totalKana, score} = stats;
   const currIndex = (currTime !== undefined) ? timeToLineIndex(lines, currTime) : undefined;
 
@@ -132,11 +133,15 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, 
           <GameLine // current line
             key={currIndex}
             currTime={currTime}
-            lineData={lines[currIndex]}
+            lineState={lines[currIndex]}
+            setLineState={(makeNewLineState) => { set('lines', (oldLines) => {
+              oldLines[currIndex] = makeNewLineState(oldLines[currIndex]);
+              return oldLines;
+            }); }}
             keyCallback={keyCallback}
             config={config}
           />
-          <LyricLine>{lines[currIndex].lyric}</LyricLine>
+          <LyricLine>{lines[currIndex].line.lyric}</LyricLine>
         </> : null}
         {status === GameStatus.SUBMITTING ?
           <h2>Submitting score...</h2>
@@ -161,7 +166,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, 
         />
         <StatBox>
           <p>Beatmap KPM: {Math.round(beatmap.kpm ?? 0)}</p>
-          <p>Line KPM: {isPlayingGame ? (Math.round(lines[currIndex].kpm)) : "N/A"}</p>
+          <p>Line KPM: {isPlayingGame ? (Math.round(lines[currIndex].line.kpm)) : "N/A"}</p>
         </StatBox>
       </BottomHalf>
       {status === GameStatus.UNSTARTED ? 

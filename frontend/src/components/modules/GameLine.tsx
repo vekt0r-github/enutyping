@@ -2,37 +2,19 @@ import React, { useState, useEffect } from "react";
 
 import ProgressBar from "@/components/modules/ProgressBar";
 
-import { Config, Kana, LineData } from '@/utils/types'
+import { Config, Kana, KanaState, LineData, LineState } from '@/utils/types'
 import { parseKana, computeMinKeypresses } from '@/utils/kana'
 
 import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
 import {} from '@/utils/styles';
 
-type KanaState = {
-  kana: Kana,
-  prefix: string, // the correct keystrokes user has typed for this kana
-  suffix: string, // one possible romaji completion of this kana after prefix
-	minKeypresses: number, // fewest keystrokes to type this kana
-};
-
 type Props = {
   currTime: number,
-  lineData: LineData,
+  lineState: LineState,
+  setLineState: (makeNewLineState: (oldLineState: LineState) => LineState) => void,
   keyCallback: (hits: number, misses: number, endKana: boolean) => void,
   config: Config,
-}
-
-type Position = [number, number]; // syllable index, kana index
-
-type State = {
-  position: Position,
-  syllables: {
-    time: number,
-    text: string,
-    kana: KanaState[],
-  }[], 
-  nBuffer: boolean,
 }
 
 enum ActiveStatus { PAST, PRESENT, FUTURE };
@@ -123,22 +105,11 @@ const Tick = styled.div<{active?: ActiveStatus}>`
   };
 `;
 
-const GameLine = ({ currTime, lineData, keyCallback, config } : Props) => {
-  const {startTime, endTime, lyric} = lineData;
-  const initKanaState = (kana : Kana) => ({ kana, prefix: "", suffix: kana.romanizations[0], minKeypresses: computeMinKeypresses(kana.text) });
+const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : Props) => {
+  const {line, position, syllables, nBuffer} = lineState;
+  const {startTime, endTime, lyric} = line;
 
-  const initState = () : State => ({
-    position: [0, 0],
-    syllables: lineData.syllables.map((syllable, i, arr) => ({
-      ...syllable,
-      kana: parseKana(syllable.text, config, arr[i+1]?.text).map(initKanaState),
-    })),
-    nBuffer: false,
-  });
-  const [state, setState] = useState<State>(initState());
-
-  const {position, syllables, nBuffer} = state;
-  const getKana = (pos : Position) : KanaState | undefined => syllables[pos[0]]?.kana[pos[1]];
+  const getKana = (pos : LineState['position']) : KanaState | undefined => syllables[pos[0]]?.kana[pos[1]];
 
   const handleKeyPress = (e: KeyboardEvent) => {
     if (["Escape"].includes(e.key)) { return; } // GameArea is handling it
@@ -149,13 +120,13 @@ const GameLine = ({ currTime, lineData, keyCallback, config } : Props) => {
     const filteredRomanizations = kana.romanizations.filter(s => s.substring(0, newPrefix.length) == newPrefix);
 
     if(e.key == "n" && nBuffer) {
-      setState((s: State) => ({ ...s, nBuffer: false }));
+      setLineState((s) => ({ ...s, nBuffer: false }));
     } else if (filteredRomanizations.length == 0) {
       keyCallback(0, 1, false);
     } else {
       const newSuffix = filteredRomanizations[0].substring(newPrefix.length);
       const newKana: KanaState = {kana: kana, prefix: newPrefix, suffix: newSuffix, minKeypresses: minKeypresses};
-      setState(({position, syllables, nBuffer}) => {
+      setLineState(({line, position, syllables, nBuffer}) => {
         syllables[position[0]].kana[position[1]] = newKana; // should be safe
         if (newSuffix === "") {
           position[1]++;
@@ -163,7 +134,7 @@ const GameLine = ({ currTime, lineData, keyCallback, config } : Props) => {
           // if getKana(position) still undefined, line is over
           nBuffer = (newPrefix === "n" && newKana.kana.text == "ん");
         }
-        return {position, syllables, nBuffer};
+        return {line, position, syllables, nBuffer};
       });
       keyCallback((newPrefix.length <= minKeypresses) ? 1 : 0, 0, newSuffix === "");
     }
@@ -174,7 +145,7 @@ const GameLine = ({ currTime, lineData, keyCallback, config } : Props) => {
     return () => {
       document.removeEventListener("keydown", handleKeyPress);
     }
-  }, [state]); // any change in state affects the listener
+  }, [lineState]); // any change in state affects the listener
 
   const joinKana = (kana : KanaState[]) => "".concat.apply("", kana.map(k => k.kana.text));
   let syllableList = syllables.map(({time, text, kana}, index) => {

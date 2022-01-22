@@ -115,10 +115,29 @@ export enum GameStatus {
   PAUSED, AUTOPLAYING, // only for editor
 };
 
+export type KanaState = {
+  kana: Kana,
+  prefix: string, // the correct keystrokes user has typed for this kana
+  suffix: string, // one possible romaji completion of this kana after prefix
+	minKeypresses: number, // fewest keystrokes to type this kana
+};
+
+export type LineState = {
+	line: LineData,
+  position: [number, number]; // syllable index, kana index
+  syllables: { // yes this is basically a copy of line.syllables but whatever for now
+    time: number,
+    text: string,
+    kana: KanaState[],
+  }[], 
+  nBuffer: boolean,
+};
+
 export type GameState = {
   status: GameStatus,
   offset: number,
   currTime?: number,
+	lines: LineState[],
   stats: {
     hits: number,
     misses: number,

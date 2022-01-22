@@ -21,16 +21,16 @@ const GameVideo = ({ yt_id, status, currTime, startGame, volume } : Props) => {
 
   const [player, setPlayer] = useState<YT.Player>();
   const [playing, setPlaying] = useState<boolean>(false); // not stopped (playing or paused)
+  const seek = () => player && currTime && player.seekTo(currTime / 1000, true);
 
   useEffect(() => {
     if (!player || !currTime) { return; }
     const threshold = 0.5; // number of seconds before video corrects itself
     // only seek when manually changed in editor
     if (status === GameStatus.PAUSED) {
-      player.seekTo(currTime / 1000, true);
+      seek();
     } else if (Math.abs(currTime / 1000 - player.getCurrentTime()) > threshold) {
-      console.log(currTime, player.getCurrentTime())
-      player.seekTo(currTime / 1000, true);
+      seek();
     }
   }, [currTime]);
 
@@ -39,8 +39,10 @@ const GameVideo = ({ yt_id, status, currTime, startGame, volume } : Props) => {
     if (status === GameStatus.UNSTARTED) {
       player.stopVideo();
     } else if (status === GameStatus.PAUSED) {
+      player.playVideo();
       player.pauseVideo();
-    } else if ([GameStatus.STARTQUEUED, GameStatus.PLAYING].includes(status)) {
+    } else if ([GameStatus.STARTQUEUED, GameStatus.PLAYING, GameStatus.AUTOPLAYING].includes(status)) {
+      seek();
       player.playVideo();
     }
   }, [player, status]);
