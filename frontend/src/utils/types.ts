@@ -107,3 +107,24 @@ export type Beatmapset = { // example
   owner: User;
   beatmaps: Beatmap[] | BeatmapMetadata[];
 }
+
+export enum GameStatus { 
+  PLAYING,
+  GOBACK, // if esc is pressed
+  UNSTARTED, STARTQUEUED, SUBMITTING, ENDED, // only for gameplay
+  PAUSED, AUTOPLAYING, // only for editor
+};
+
+export type GameState = {
+  status: GameStatus,
+  offset: number,
+  currTime?: number,
+  stats: {
+    hits: number,
+    misses: number,
+    kanaHits: number, // total typed up to current time
+    kanaMisses: number, // total untyped in previous lines
+    totalKana: number, // total for all previous (not current) lines
+    score: number,
+  },
+};

@@ -1,4 +1,4 @@
-import { Beatmap, Beatmapset, LineData, defaultConfig, Config } from '@/utils/types';
+import { Beatmap, Beatmapset, LineData, defaultConfig, Config, GameState } from '@/utils/types';
 import { computeMinKeypresses, parseKana } from '@/utils/kana';
 
 const MS_IN_MINUTE = 60000;
@@ -82,4 +82,20 @@ export const computeLineKana = (line: LineData) => {
   return totalKana;
 }
 
+export const updateStatsOnKeyPress = (oldStats: GameState['stats'], hit: number, miss: number, endKana: boolean) => {
+  return { ...oldStats,
+    hits: oldStats.hits + hit,
+    misses: oldStats.misses + miss,
+    kanaHits: oldStats.kanaHits + (endKana ? 1 : 0),
+    score: oldStats.score + 10 * hit - 5 * miss,
+  };
+}
+
+export const updateStatsOnLineEnd = (oldStats: GameState['stats'], line: LineData) => {
+  const newTotalKana = oldStats.totalKana + computeLineKana(line); // should be prev line
+  return { ...oldStats,
+    totalKana: newTotalKana,
+    kanaMisses: newTotalKana - oldStats.kanaHits,
+  };
+}
 

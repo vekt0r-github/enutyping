@@ -2,7 +2,7 @@ import React, { useEffect, useState }  from "react";
 import { Navigate, useParams } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
-import GameAreaDisplay from "@/components/modules/GameAreaDisplay";
+import EditorArea from "@/components/modules/EditorArea";
 import NotFound from "@/components/pages/NotFound";
 
 import { get } from "@/utils/functions";
@@ -114,17 +114,11 @@ const Editor = ({ user, config } : Props) => {
           <Line>Set ID: {beatmapset.id}</Line>
           <Line>Source: {source}</Line>
         </Sidebar>
-        {/* <GameAreaDisplay
+        <EditorArea
           user={user}
           beatmap={beatmap}
-          gameState={{
-            
-          }}
-          keyCallback={(hit, endKana) => {}}
-          setOffset={}
-          startGame={() => {}}
           config={config}
-        /> */}
+        />
         <Sidebar as="form" onSubmit={(e : React.FormEvent<HTMLFormElement>) => {
             load((oldBeatmap) => oldBeatmap ? { ...oldBeatmap,
               content: (e.currentTarget.elements[0] as HTMLInputElement).value,

@@ -5,8 +5,8 @@ import GameAreaDisplay from "@/components/modules/GameAreaDisplay";
 
 import { post } from '@/utils/functions';
 import { 
-  User, Beatmap, LineData, Config, 
-  GameStatus, GameState,
+  User, Beatmap, LineData, Config,
+  GameStatus, GameState 
 } from "@/utils/types";
 import { 
   timeToLineIndex, 
@@ -22,12 +22,11 @@ type Props = {
   user: User | null,
   beatmap: Beatmap,
   config: Config,
-  afterGameEnd: () => void,
 };
 
-const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
+const EditorArea = ({ user, beatmap, config } : Props) => {
   const initState = () : GameState => ({
-    status: GameStatus.UNSTARTED,
+    status: GameStatus.PAUSED,
     offset: 0,
     currTime: undefined, // maintained via timer independent of video
     stats: {
@@ -44,9 +43,8 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
     prop : K, 
     val : GameState[K] | ((oldState: GameState[K]) => GameState[K]),
   ) => {
-    const isFunction = (val: any) : val is Function => { return typeof val === "function"; }
     setGameState((state) => ({ ...state, 
-      [prop]: isFunction(val) ? val(state[prop]) : val,
+      [prop]: typeof val === "function" ? val(state[prop]) : val,
     }))
   };
 
@@ -56,41 +54,36 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
 
   const lines = beatmap.lines as LineData[];
   const {status, offset, currTime, stats} = gameState;
-  const currIndex = (currTime !== undefined) ? timeToLineIndex(lines, currTime) : undefined;
+  const currIndex = (currTime !== undefined) ? timeToLineIndex(lines, currTime) : undefined; 
+  const isEditing = [GameStatus.PAUSED, GameStatus.AUTOPLAYING].includes(status);
+  const isTesting = status === GameStatus.PLAYING;
 
-  const prepareStartGame = () => {
-    if (status !== GameStatus.UNSTARTED) { return; }
-    set('status', GameStatus.STARTQUEUED);
+  const startTest = () => {
+    if (!isEditing) { return; }
+    set('status', GameStatus.PLAYING);
   }
 
-  const submitScore = () => {
-    setGameState((state) => ({ ...state,
-      status: GameStatus.SUBMITTING,
+  const stopTest = () => {
+    setGameState((oldState) => ({ ...oldState,
+      status: GameStatus.PAUSED,
+      stats: initState().stats,
     }));
-  };
-
-  const endGame = () => {
-    setGameState((state) => ({ ...state,
-      status: GameStatus.ENDED,
-    }));
-  };
-
-  const resetGame = () => {
-    setGameState(initState());
   };
 
   const onKeyPress = (e: KeyboardEvent) => {
-    if (e.key === " ") { // send signal to start game
-      if (status === GameStatus.UNSTARTED) { 
+    if (e.key === "t") { // enter testing mode
+      startTest();
+    };
+    if (e.key === " ") { // play/pause in normal edit mode
+      if (isEditing) { 
         e.preventDefault();
         e.stopPropagation();
-        prepareStartGame();
+        set('status', (status === GameStatus.PAUSED) ? GameStatus.AUTOPLAYING : GameStatus.PAUSED);
       }
     };
     if (e.key === "Escape") {
-      if (status === GameStatus.PLAYING) { endGame(); } 
-      if (status === GameStatus.ENDED) { resetGame(); } 
-      if (status === GameStatus.UNSTARTED) { set('status', GameStatus.GOBACK); } 
+      if (isTesting) { stopTest(); } 
+      if (isEditing) { set('status', GameStatus.GOBACK); }
     }
   };
 
@@ -98,7 +91,7 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
     // start game-- status must change to PLAYING
     // will cancel all game actions if status changes from PLAYING
     if (status !== GameStatus.PLAYING) { return; }
-    const gameStartTime = new Date().getTime() + offset;
+    const gameStartTime = new Date().getTime() - (currTime ?? 0); // resume at current time
     const intervalId = setInterval(() => {
       set('currTime', new Date().getTime() - gameStartTime);
     }, 50);
@@ -110,25 +103,11 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
   useEffect(() => {
     if (currIndex === undefined) { return; }
     if (currIndex === lines.length) {
-      submitScore();
+      set('status', GameStatus.PAUSED);
     } else if (currIndex > 0) {
       set('stats', (oldStats) => updateStatsOnLineEnd(oldStats, lines[currIndex-1]));
     }
   }, [currIndex]);
-
-  useEffect(() => {
-    if (status !== GameStatus.SUBMITTING) { return; }
-    if (!user) { endGame(); return; }
-    const data = {
-      beatmap_id: beatmap.id,
-      // Do not provide user_id as the backend should have stored in session
-      score: stats.score,
-    }
-    post('/api/scores', data).then((score) => {
-      afterGameEnd();
-      endGame();
-    });
-  }, [status]);
   
   useEffect(() => {
     document.addEventListener("keydown", onKeyPress);
@@ -142,7 +121,7 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
   }
 
   if (status === GameStatus.GOBACK) {
-    return <Navigate to={`/play/${beatmap.beatmapset.id}`} replace={true} />;
+    return <Navigate to={`/edit/${beatmap.beatmapset.id}`} replace={true} />;
   }
   
   return (
@@ -157,4 +136,4 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
   );
 }
 
-export default GameArea;
+export default EditorArea;

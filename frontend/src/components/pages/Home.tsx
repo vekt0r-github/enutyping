@@ -18,6 +18,7 @@ const Home = ({ user } : Props) => {
   return (
     <>
       <h1>Home</h1>
+      <h2>Skill Issue</h2>
       {user ?
         <p>You are logged in as {user.name} with id {user.id}</p>
         :

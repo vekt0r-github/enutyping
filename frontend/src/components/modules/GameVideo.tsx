@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import YTVideo from "@/components/modules/YTVideo";
 
-import { Status } from "@/components/modules/GameArea";
+import { GameStatus } from "@/utils/types";
 
 import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
@@ -10,34 +10,37 @@ import {} from '@/utils/styles';
 
 type Props = {
   yt_id: string,
-  status: Status,
+  status: GameStatus,
   currTime?: number,
   startGame: () => void,
   volume: number,
-  // setDuration: React.Dispatch<React.SetStateAction<number>>,
 }
 
 const GameVideo = ({ yt_id, status, currTime, startGame, volume } : Props) => {
   if (!yt_id) { return null; }
 
   const [player, setPlayer] = useState<YT.Player>();
-  const [playing, setPlaying] = useState<boolean>(false);
+  const [playing, setPlaying] = useState<boolean>(false); // not stopped (playing or paused)
 
   useEffect(() => {
     if (!player || !currTime) { return; }
-    if ([Status.PAUSED, Status.SEEKING].includes(status)) {
-      // only seek when manually changed in editor
+    const threshold = 0.5; // number of seconds before video corrects itself
+    // only seek when manually changed in editor
+    if (status === GameStatus.PAUSED) {
+      player.seekTo(currTime / 1000, true);
+    } else if (Math.abs(currTime / 1000 - player.getCurrentTime()) > threshold) {
+      console.log(currTime, player.getCurrentTime())
       player.seekTo(currTime / 1000, true);
     }
   }, [currTime]);
 
   useEffect(() => {
     if (!player) { return; }
-    if (status === Status.UNSTARTED) {
+    if (status === GameStatus.UNSTARTED) {
       player.stopVideo();
-    } else if (status === Status.PAUSED) {
+    } else if (status === GameStatus.PAUSED) {
       player.pauseVideo();
-    } else if ([Status.STARTQUEUED, Status.PLAYING].includes(status)) {
+    } else if ([GameStatus.STARTQUEUED, GameStatus.PLAYING].includes(status)) {
       player.playVideo();
     }
   }, [player, status]);
@@ -46,10 +49,11 @@ const GameVideo = ({ yt_id, status, currTime, startGame, volume } : Props) => {
     setPlayer(e.target);
   };
 
+
   const onStateChange = (e : YT.OnStateChangeEvent) => {
-    const playing = e.data === 1;
+    const playing = [1, 2, 3].includes(e.data);
     setPlaying(playing);
-    if (playing && status === Status.STARTQUEUED) { 
+    if (playing && status === GameStatus.STARTQUEUED) { 
       // playing and should be playing and didn't start game
       startGame();
     }

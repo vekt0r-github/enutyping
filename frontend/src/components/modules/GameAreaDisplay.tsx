@@ -4,8 +4,10 @@ import { Navigate } from "react-router-dom";
 import GameVideo from "@/components/modules/GameVideo";
 import GameLine from "@/components/modules/GameLine";
 
-import { User, Beatmap, LineData, Config } from "@/utils/types";
-import { Status, GameState } from "@/components/modules/GameArea";
+import { 
+  User, Beatmap, LineData, Config,
+  GameStatus, GameState,
+} from "@/utils/types";
 import { timeToLineIndex } from '@/utils/beatmaputils';
 
 import styled from 'styled-components';
@@ -16,8 +18,8 @@ type Props = {
   user: User | null,
   beatmap: Beatmap,
   gameState: GameState,
+  setGameState: React.Dispatch<React.SetStateAction<GameState>>,
   keyCallback: (hit: number, miss: number, endKana: boolean) => void,
-  startGame: (offset: number) => void,
   config: Config,
 };
 
@@ -84,15 +86,24 @@ const Warning = styled.div`
   padding: var(--s) 0;
 `;
 
-const GameAreaDisplay = ({ user, beatmap, gameState, keyCallback, startGame, config } : Props) => {
+const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, config } : Props) => {
   const { volume } = config;
 
   const [offset, setOffset] = useState<number>(0);
   const totalOffset = offset + config.offset;
 
   const lines = beatmap.lines as LineData[];
-  const {status, currTime, hits, misses, kanaHits, totalKana, score} = gameState;
+  const {status, currTime, stats} = gameState;
+  const {hits, misses, kanaHits, kanaMisses, totalKana, score} = stats;
   const currIndex = (currTime !== undefined) ? timeToLineIndex(lines, currTime) : undefined;
+
+  const startGame = (offset: number) => {
+    if (status !== GameStatus.STARTQUEUED) { return; }
+    setGameState((state) => ({ ...state,
+      status: GameStatus.PLAYING,
+      offset: offset,
+    }));
+  };
 
   const acc = ((hitCount: number, missCount: number) => {
     if (hitCount + missCount == 0) {
@@ -102,20 +113,22 @@ const GameAreaDisplay = ({ user, beatmap, gameState, keyCallback, startGame, con
   });  
 
   const keyAcc = acc(hits, misses);
-  const kanaAcc = acc(kanaHits, totalKana - kanaHits);
+  const kanaAcc = acc(kanaHits, kanaMisses);
 	
 	const KPM = currTime ? (Math.round(hits * 60000 / currTime)) : 0;
 
-  if (status === Status.GOBACK) {
+  if (status === GameStatus.GOBACK) {
     return <Navigate to={`/play/${beatmap.beatmapset.id}`} replace={true} />;
   }
 
-  const isPlaying = status === Status.PLAYING && (currTime !== undefined) && (currIndex !== undefined) && (currIndex > -1) && (currIndex < lines.length);
+  const isActive = [GameStatus.PLAYING, GameStatus.PAUSED, GameStatus.AUTOPLAYING].includes(status) &&
+    (currTime !== undefined) && (currIndex !== undefined) && (currIndex > -1) && (currIndex < lines.length);
+  const isPlayingGame = isActive && status === GameStatus.PLAYING;
   
   return (
     <GameContainer>
       <TopHalf>
-        {isPlaying ? <>
+        {isActive ? <>
           <GameLine // current line
             key={currIndex}
             currTime={currTime}
@@ -125,10 +138,10 @@ const GameAreaDisplay = ({ user, beatmap, gameState, keyCallback, startGame, con
           />
           <LyricLine>{lines[currIndex].lyric}</LyricLine>
         </> : null}
-        {status === Status.SUBMITTING ?
+        {status === GameStatus.SUBMITTING ?
           <h2>Submitting score...</h2>
           : null}
-        {status === Status.ENDED ?
+        {status === GameStatus.ENDED ?
           <h2>YOUR SCORE IS {score}</h2>
           : null} 
       </TopHalf>
@@ -148,10 +161,10 @@ const GameAreaDisplay = ({ user, beatmap, gameState, keyCallback, startGame, con
         />
         <StatBox>
           <p>Beatmap KPM: {Math.round(beatmap.kpm ?? 0)}</p>
-          <p>Line KPM: {isPlaying ? (Math.round(lines[currIndex].kpm)) : "N/A"}</p>
+          <p>Line KPM: {isPlayingGame ? (Math.round(lines[currIndex].kpm)) : "N/A"}</p>
         </StatBox>
       </BottomHalf>
-      {status === Status.UNSTARTED ? 
+      {status === GameStatus.UNSTARTED ? 
         <Overlay>
           {!user && <>
             <Warning>
