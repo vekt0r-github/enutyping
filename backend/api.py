@@ -26,6 +26,23 @@ def process_beatmapset(beatmapset):
     source = f"https://www.youtube.com/watch?v={beatmapset['yt_id']}"
     return { **beatmapset, 'source' : source }
 
+@api.route('/me/changename', methods=['POST'])
+@login_required
+def change_name(user_id):
+    json_data = request.get_json()
+    if not json_data:
+        return 'No input provided', 400
+    user = User.query.get(user_id)
+    requested_name = json_data['requested_name']
+
+    exists_subq = User.query.filter(User.name == requested_name).exists()
+    exists = db_session.query(exists_subq).scalar()
+    if exists:
+        return { 'success': False }, 409
+    user.name = requested_name
+    db_session.commit()
+    return { 'success': True, 'new_name': requested_name }
+
 @api.route('/users/<user_id>', methods=['GET'])
 def get_user(user_id):
     user = User.query.get(user_id)
@@ -86,13 +103,12 @@ def new_score(user_id):
     json_data = request.get_json()
     if not json_data:
         return 'No input provided', 400
-    json_data['user_id'] = user_id
     try:
         data = score_schema.load(json_data)
     except ValidationError as err:
         return err.messages, 400
-    bid, uid, score = itemgetter('beatmap_id', 'user_id', 'score')(data)
-    s = Score(beatmap_id=bid, user_id=uid, score=score)
+    bid, score = itemgetter('beatmap_id', 'score')(data)
+    s = Score(beatmap_id=bid, user_id=user_id, score=score)
     db_session.add(s)
     db_session.commit()
 
