@@ -133,7 +133,7 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
     if (!user) { endGame(); return; }
     const data = {
       beatmap_id: beatmap.id,
-      user_id: user?.id,
+      // Do not provide user_id as the backend should have stored in session
       score: gameState.score,
     }
     post('/api/scores', data).then((score) => {

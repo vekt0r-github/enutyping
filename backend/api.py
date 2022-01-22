@@ -15,11 +15,11 @@ api = Blueprint('api', __name__)
 
 def login_required(f):
     @wraps(f)
-    def wrapper(*args, **kwds):
+    def wrapper():
         user = session.get('user')
         if not user:
             return 'You are not logged in', 401
-        return f(*args, **kwds)
+        return f(user['id'])
     return wrapper
 
 def process_beatmapset(beatmapset):
@@ -80,12 +80,13 @@ def get_beatmapset_list():
 
 @api.route('/scores', methods=['POST'])
 @login_required
-def new_score():
+def new_score(user_id):
     # XXX: UID probably is in session or something, so we can't fake for someone else
     # TODO: Probably need protection lol fake scores
     json_data = request.get_json()
     if not json_data:
         return 'No input provided', 400
+    json_data['user_id'] = user_id
     try:
         data = score_schema.load(json_data)
     except ValidationError as err:
