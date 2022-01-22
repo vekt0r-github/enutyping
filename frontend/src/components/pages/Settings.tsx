@@ -6,6 +6,7 @@ import { Navigate } from "react-router-dom";
 import { User, Config } from "@/utils/types";
 import { kanaRespellings } from "@/utils/kana";
 import { MainBox, SubBox } from "@/utils/styles";
+import { post } from "@/utils/functions";
 
 const CategoryBox = styled(MainBox)`
   display: flex;
@@ -13,6 +14,7 @@ const CategoryBox = styled(MainBox)`
   justify-content: left;
   align-items: center;
   margin: 30px;
+	margin-bottom: 30px;
   max-width: 80%;
   min-width: 80%;
 `;
@@ -50,14 +52,20 @@ type Props = {
   user: User | null,
   initConfig: Config,
   setGlobalConfig: React.Dispatch<React.SetStateAction<Config>>, 
+  yourUser: User | null,
+  setYourUser: React.Dispatch<React.SetStateAction<User>>, 
 };
 
-const settingsPage = ({ user, initConfig, setGlobalConfig }: Props) => {
+const settingsPage = ({ user, yourUser, setYourUser, initConfig, setGlobalConfig }: Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />;
   }
   
   const [config, setConfig] = useState<Config>(initConfig); 
+  
+	// Account name change state
+  const [requestedName, setRequestedName] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>();
 
   useEffect(() => {
     setGlobalConfig(config);
@@ -86,6 +94,49 @@ const settingsPage = ({ user, initConfig, setGlobalConfig }: Props) => {
     }
     return kanaSelect;
   })();
+
+  // TODO: Possible refactor but fuck this right now with shared form hooks
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRequestedName(event.target.value);
+  }
+  const handleSubmit = () => {
+    if (!requestedName) {
+      setErrorMessage("We don't like blank names! Pick something else.");
+      return;
+    }
+    if (/_(osu|github|google)$/.test(requestedName)) {
+      setErrorMessage("You sneaky rat! Pick something else.");
+      return;
+    }
+    post('/api/me/changename', { requested_name: requestedName }).then((res) => {
+      if (res.success) {
+        setYourUser((old) => {
+          return {...old, 'name': requestedName }
+        });
+        setErrorMessage("");
+      } else {
+        setErrorMessage("Username was taken! Please choose another one.");
+      }
+      setRequestedName("");
+    })
+  }
+
+  const editUser = (
+    <>
+    { (user && yourUser && user.id == yourUser.id) &&
+      <>
+        <form>
+          <label>Requested Name: </label>
+          <input value={requestedName}
+                 onChange={handleChange}
+          />
+          <input onClick={handleSubmit} type="button" value="Submit" />
+          {errorMessage && <div>{errorMessage}</div>}
+        </form>
+      </>
+    }
+    </>
+  );
   return (
     <>
       <h1>Settings</h1>
@@ -138,6 +189,15 @@ const settingsPage = ({ user, initConfig, setGlobalConfig }: Props) => {
             <p>Choose whether you want to be able to type polygraphic kana such as しゃ and っぷ by typing each kana individually. For example, with this setting turned on, you can type しゃ as "sha" or "shixya".</p>
           </SettingBox>
         </SettingContainer>
+      </CategoryBox>
+      <CategoryBox>
+        <CategoryTitle>
+          <h2>Account</h2>
+        </CategoryTitle>
+        <SettingBox>
+          <SettingTitle>Change Username</SettingTitle>
+					{ editUser }
+        </SettingBox>
       </CategoryBox>
     </>
   );

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { get, post } from "@/utils/functions";
+import { get } from "@/utils/functions";
 import { Beatmap, Score, User, Config } from "@/utils/types";
 import { MainBox, SubBox } from '@/utils/styles';
 
@@ -33,23 +33,24 @@ const ScoreBox = styled(SubBox)`
 	justify-content: space-between;
 `;
 
+const UserAvatar = styled.img`
+	width: 150px;
+	margin: var(--s);
+`;
+
 
 
 type Props = {
   yourUser: User | null,
-  setYourUser: React.Dispatch<React.SetStateAction<User>>, 
 	config: Config,
 };
 
-const UserPage = ({ yourUser, setYourUser, config }: Props) => {
+const UserPage = ({ yourUser, config }: Props) => {
   const { userId } = useParams();
   const [user, setUser] = useState<User | null>();
   const [scores, setScores] = useState<Score[]>([]);
 	const [scoreBeatmaps, setScoreBeatmaps] = useState<Beatmap[]>([]);
 
-  // Account name change state
-  const [requestedName, setRequestedName] = useState<string>("");
-  const [errorMessage, setErrorMessage] = useState<string>();
 
   useEffect(() => {
     get(`/api/users/${userId}`).then((res) => {
@@ -86,49 +87,6 @@ const UserPage = ({ yourUser, setYourUser, config }: Props) => {
     );
   }
 
-  // TODO: Possible refactor but fuck this right now with shared form hooks
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRequestedName(event.target.value);
-  }
-  const handleSubmit = () => {
-    if (!requestedName) {
-      setErrorMessage("We don't like blank names! Pick something else.");
-      return;
-    }
-    if (/_(osu|github|google)$/.test(requestedName)) {
-      setErrorMessage("You sneaky rat! Pick something else.");
-      return;
-    }
-    post('/api/me/changename', { requested_name: requestedName }).then((res) => {
-      if (res.success) {
-        setYourUser((old) => {
-          return {...old, 'name': requestedName }
-        });
-        setErrorMessage("");
-      } else {
-        setErrorMessage("Username was taken! Please choose another one.");
-      }
-      setRequestedName("");
-    })
-  }
-
-  const editUser = (
-    <>
-    { (user && yourUser && user.id == yourUser.id) &&
-      <>
-        <form>
-          <label>Requested Name: </label>
-          <input value={requestedName}
-                 onChange={handleChange}
-          />
-          <input onClick={handleSubmit} type="button" value="Submit" />
-          {errorMessage && <div>{errorMessage}</div>}
-        </form>
-      </>
-    }
-    </>
-  );
-
 	const prettyBeatmap = (beatmap: Beatmap) => {
 		const [title, artist]: string[] = (config.localizeMetadata) ? [beatmap.beatmapset.title, beatmap.beatmapset.artist] : [beatmap.beatmapset.title_original, beatmap.beatmapset.artist_original]; 
 		return (
@@ -138,13 +96,13 @@ const UserPage = ({ yourUser, setYourUser, config }: Props) => {
 
   return (
     <>
-      <img src={user.avatar_url} />
-      <p>This is {user.name} with id {user.id}</p>
-      { editUser }
+      <UserAvatar src={user.avatar_url} />
+			<h1>{user.name}</h1>
 			<UserInfoContainer>
 				<SideBox>
 					<h2>User Statistics</h2>
-					<p>Honestly idk what to put here</p>
+					<p>Name: {user.name}</p>
+					<p>ID: {user.id}</p>
 				</SideBox>
 				<SideBox>
 					{ (scores && scores.length > 0) &&
