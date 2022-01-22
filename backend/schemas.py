@@ -20,9 +20,12 @@ score_schema = ScoreSchema()
 scores_without_user_schema = ScoreSchema(many=True, exclude=("user",))
 scores_schema = ScoreSchema(many=True)
 
+# TODO: probably a lot of these schemas are required=True, but w/e
+
 class BeatmapSchema(Schema):
     id = fields.Int(dump_only=True)
     scores = fields.Nested(score_schema, dump_only=True)
+    beatmapset_id = fields.Int(required=True, load_only=True)
     diffname = fields.Str()
     content = fields.Str()
 

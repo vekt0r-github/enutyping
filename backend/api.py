@@ -80,6 +80,40 @@ def get_beatmap_with_set_and_scores(beatmap_id):
     beatmapset_result = beatmapset_schema.dump(beatmap.beatmapset)
     return { **beatmap_result, 'scores' : scores_result, 'beatmapset' : process_beatmapset(beatmapset_result) }
 
+@api.route('/beatmaps', methods=['POST'])
+@login_required
+def add_beatmap(user_id):
+    '''
+    Data
+    ----
+    beatmapset_id
+    diffname
+    content
+    '''
+    json_data = request.get_json()
+    if not json_data:
+        return 'No input provided', 400
+    try:
+        data = beatmap_schema.load(json_data)
+    except ValidationError as err:
+        return err.messages, 400
+
+    bms_id, diffname, content = itemgetter('beatmapset_id', 'diffname', 'content')(data)
+
+    exists_subq = Beatmapset.query.filter(
+            Beatmapset.owner_id == user_id,
+            Beatmapset.id == bms_id).exists()
+    exists = db_session.query(exists_subq).scalar()
+    if not exists:
+        return 'Beatmapset does not exist or you do not own it!', 400
+
+    beatmap = Beatmap(beatmapset_id=bms_id, diffname=diffname, content=content)
+    db_session.add(beatmap)
+    db_session.commit()
+
+    res = beatmap_schema.dump(beatmap)
+    return { 'beatmap': res }
+
 @api.route('/beatmapsets/<int:beatmapset_id>', methods=['GET'])
 def get_beatmapset_with_diffs_and_scores(beatmapset_id):
     beatmapset = Beatmapset.query.get(beatmapset_id)
@@ -89,13 +123,54 @@ def get_beatmapset_with_diffs_and_scores(beatmapset_id):
     beatmaps_result = beatmaps_schema.dump(beatmapset.beatmaps)
     return { **process_beatmapset(beatmapset_result), 'beatmaps': beatmaps_result }
 
-@api.route('/beatmapsets')
+@api.route('/beatmapsets', methods=['GET'])
 def get_beatmapset_list():
     search_query = request.args.get('search', '')
     title_result = Beatmapset.query.filter(Beatmapset.title.ilike('%' + search_query + '%')).all()
     # https://softwareengineering.stackexchange.com/questions/286293/whats-the-best-way-to-return-an-array-as-a-response-in-a-restful-api
     results = beatmapsets_schema.dump(title_result)
     return { 'beatmapsets': list(map(process_beatmapset, results)) }
+
+@api.route('/beatmapsets', methods=['POST'])
+@login_required
+def add_beatmapset(user_id):
+    '''
+    Data
+    ----
+    artist
+    title
+    artist_original
+    title_original
+    yt_id
+    preview_point
+    '''
+    json_data = request.get_json()
+    if not json_data:
+        return 'No input provided', 400
+
+    try:
+        data = beatmapset_schema.load(json_data)
+    except ValidationError as err:
+        return err.messages, 400
+
+    artist, title, artist_original, title_original, yt_id, preview_point = \
+        itemgetter('artist', 'title', 'artist_original', 'title_original', 'yt_id', 'preview_point')(data)
+
+    owner = User.query.get(user_id)
+    assert owner is not None
+
+    new_bmset = Beatmapset(artist=artist, \
+                           title=title, \
+                           artist_original=artist_original, \
+                           title_original=title_original, \
+                           yt_id=yt_id, \
+                           preview_point=preview_point, \
+                           owner=owner)
+
+    db_session.add(new_bmset)
+    db_session.commit()
+    res = beatmapset_schema.dump(Beatmapset.query.get(new_bmset.id))
+    return { 'beatmapset': res }
 
 @api.route('/scores', methods=['POST'])
 @login_required

@@ -47,17 +47,6 @@ class Beatmapset(Base):
     owner = relationship('User', back_populates='beatmapsets')
     beatmaps = relationship('Beatmap', back_populates='beatmapset')
 
-    def __init__(self, owner_id, artist, title, artist_original, title_original, 
-                 yt_id, preview_point, id = None):
-        self.owner_id = owner_id
-        self.artist = artist
-        self.title = title
-        self.artist_original = artist_original
-        self.title_original = title_original
-        self.yt_id = yt_id
-        self.preview_point = preview_point
-        self.id = id
-
 class Score(Base):
     __tablename__ = 'scores'
     id = Column(Integer, primary_key=True)
