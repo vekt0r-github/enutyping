@@ -135,7 +135,7 @@ const App = ({} : Props) => {
               />
             }/>
             <Route path="/user/:userId" element={
-              <UserPage />
+              <UserPage yourUser={user} setYourUser={setUser} />
             }/>
             <Route path="/settings" element={
               <SettingsPage
