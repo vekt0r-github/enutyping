@@ -53,10 +53,10 @@ type Props = {
   initConfig: Config,
   setGlobalConfig: React.Dispatch<React.SetStateAction<Config>>, 
   yourUser: User | null,
-  setYourUser: React.Dispatch<React.SetStateAction<User>>, 
+  setYourUser: React.Dispatch<React.SetStateAction<User | null | undefined>>,
 };
 
-const settingsPage = ({ user, yourUser, setYourUser, initConfig, setGlobalConfig }: Props) => {
+const SettingsPage = ({ user, yourUser, setYourUser, initConfig, setGlobalConfig }: Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />;
   }
@@ -111,9 +111,11 @@ const settingsPage = ({ user, yourUser, setYourUser, initConfig, setGlobalConfig
     post('/api/me/changename', { requested_name: requestedName }).then((res) => {
       if (res.success) {
         setYourUser((old) => {
-          return {...old, 'name': requestedName }
+          if (old) {
+            return {...old, 'name': requestedName }
+          }
         });
-        setErrorMessage("");
+        setErrorMessage("Success!");
       } else {
         setErrorMessage("Username was taken! Please choose another one.");
       }
@@ -203,4 +205,4 @@ const settingsPage = ({ user, yourUser, setYourUser, initConfig, setGlobalConfig
   );
 };
 
-export default settingsPage;
+export default SettingsPage;
