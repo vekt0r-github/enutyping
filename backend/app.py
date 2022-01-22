@@ -39,4 +39,4 @@ def whoami():
     if not user:
         # Not logged in
         return {}
-    return user
+    return redirect(f'/api/users/{user["id"]}')

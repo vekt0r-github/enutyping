@@ -56,7 +56,6 @@ const UserPage = ({ yourUser, setYourUser }: Props) => {
       return;
     }
     post('/api/me/changename', { requested_name: requestedName }).then((res) => {
-      console.log(res);
       if (res.success) {
         setYourUser((old) => {
           return {...old, 'name': requestedName }
