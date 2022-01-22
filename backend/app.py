@@ -32,11 +32,3 @@ def logout():
 @app.route('/api/unauthorized/')
 def unauthorized():
     return 'wtf are you doing here?'
-
-@app.route('/api/whoami', methods = ['GET'])
-def whoami():
-    user = session.get('user')
-    if not user:
-        # Not logged in
-        return {}
-    return redirect(f'/api/users/{user["id"]}')

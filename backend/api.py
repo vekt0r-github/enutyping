@@ -45,6 +45,16 @@ def change_name(user_id):
     db_session.commit()
     return { 'success': True, 'new_name': requested_name }
 
+@api.route('/whoami', methods = ['GET'])
+def whoami():
+    user = session.get('user')
+    if not user:
+        # Not logged in
+        return {}
+    user = User.query.get(user['id'])
+    res = user_schema.dump(user)
+    return res
+
 @api.route('/users/<user_id>', methods=['GET'])
 def get_user(user_id):
     user = User.query.get(user_id)
@@ -112,7 +122,7 @@ def add_beatmap(user_id):
     db_session.commit()
 
     res = beatmap_schema.dump(beatmap)
-    return { 'beatmap': res }
+    return res, 201
 
 @api.route('/beatmapsets/<int:beatmapset_id>', methods=['GET'])
 def get_beatmapset_with_diffs_and_scores(beatmapset_id):
@@ -170,7 +180,7 @@ def add_beatmapset(user_id):
     db_session.add(new_bmset)
     db_session.commit()
     res = beatmapset_schema.dump(Beatmapset.query.get(new_bmset.id))
-    return { 'beatmapset': res }
+    return res, 201
 
 @api.route('/scores', methods=['POST'])
 @login_required
