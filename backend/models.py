@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, UnicodeText, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, UnicodeText, ForeignKey
 from sqlalchemy.orm import deferred, relationship
-
+from datetime import datetime
 from database import Base
 
 class User(Base):
@@ -53,15 +53,22 @@ class Score(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(String(69), ForeignKey('users.id'))
     beatmap_id = Column(Integer, ForeignKey('beatmaps.id'))
+
     score = Column(Integer)
+    key_accuracy = Column(Float)
+    kana_accuracy = Column(Float)
+    time = Column(DateTime)
 
     user = relationship('User', back_populates='scores')
     beatmap = relationship('Beatmap', back_populates='scores')
 
-    def __init__(self, user_id, beatmap_id, score, id = None):
+    def __init__(self, user_id, beatmap_id, score, key_accuracy, kana_accuracy, time, id = None):
         self.user_id = user_id
         self.beatmap_id = beatmap_id
         self.score = score
+        self.key_accuracy = key_accuracy
+        self.kana_accuracy = kana_accuracy
+        self.time = time
         self.id = id
 
 def init_db():
@@ -116,11 +123,11 @@ def init_db():
             beatmapset_id=272, \
             diffname="dev map ん～", \
             content=test_map_content),
-        Score(user_id=1234, beatmap_id=727, score=727),
-        Score(user_id=1234, beatmap_id=727, score=123),
-        Score(user_id=4321, beatmap_id=727, score=72727),
-        Score(user_id=4321, beatmap_id=727, score=72726),
-        Score(user_id=4321, beatmap_id=727, score=72725),
+        Score(user_id=1234, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time=datetime.now(), score=727),
+        Score(user_id=1234, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time=datetime.now(), score=123),
+        Score(user_id=4321, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time=datetime.now(), score=72727),
+        Score(user_id=4321, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time=datetime.now(), score=72726),
+        Score(user_id=4321, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time=datetime.now(), score=72725),
     ]
 
     db_session.bulk_save_objects(objects)

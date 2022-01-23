@@ -60,6 +60,9 @@ export type Score = {
   id: number;
   beatmap_id: number;
   score: number;
+	key_accuracy: number;
+	kana_accuracy: number;
+	time: string;
   user?: User;
 }
 
@@ -143,8 +146,8 @@ export type GameState = {
     hits: number,
     misses: number,
     kanaHits: number, // total typed up to current time
-    kanaMisses: number, // total untyped in previous lines
-    totalKana: number, // total for all previous (not current) lines
+		kanaMisses: number,
+		totalKana: number,
     score: number,
   },
 };

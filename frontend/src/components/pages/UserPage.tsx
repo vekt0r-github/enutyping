@@ -33,6 +33,10 @@ const ScoreBox = styled(SubBox)`
 	justify-content: space-between;
 `;
 
+const ScoreRight = styled.span`
+	text-align: right;
+`;
+
 const UserAvatar = styled.img`
 	width: 150px;
 	margin: var(--s);
@@ -87,10 +91,17 @@ const UserPage = ({ yourUser, config }: Props) => {
     );
   }
 
-	const prettyBeatmap = (beatmap: Beatmap) => {
+	const prettyScore = (score: Score, beatmap: Beatmap) => {
 		const [title, artist]: string[] = (config.localizeMetadata) ? [beatmap.beatmapset.title, beatmap.beatmapset.artist] : [beatmap.beatmapset.title_original, beatmap.beatmapset.artist_original]; 
 		return (
-			<span><b>{artist + " - " + title}</b>[{beatmap.diffname}]</span>
+			<>
+				<span>
+					<b>{artist + " - " + title}</b> [{beatmap.diffname}]<br />Played at {new Date(score.time).toLocaleString()}
+				</span>
+				<ScoreRight>
+					<b>{score.score}</b> points<br /> <b>{(score.key_accuracy * 100).toFixed(2)}%</b> key, <b>{(score.kana_accuracy * 100).toFixed(2)}%</b> kana
+				</ScoreRight>
+			</>
 		);
 	};
 
@@ -110,7 +121,7 @@ const UserPage = ({ yourUser, config }: Props) => {
 							<h2>Recent Scores</h2>
 							{scores.map((score, i) =>
 								<ScoreBox key={score.id}>
-									<span>{scoreBeatmaps[i] ? prettyBeatmap(scoreBeatmaps[i]): "fuck"}</span> <span>Score {score.score}</span>
+									{scoreBeatmaps[i] ? prettyScore(score, scoreBeatmaps[i]): "Couldn't load map"} 
 								</ScoreBox>
 							)}
 						</>

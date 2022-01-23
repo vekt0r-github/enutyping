@@ -12,8 +12,11 @@ class ScoreSchema(Schema):
     id = fields.Int(dump_only=True)
     beatmap_id = fields.Int()
     score = fields.Int()
+    key_accuracy = fields.Float()
+    kana_accuracy = fields.Float()
     user_id = fields.Str(load_only=True)
     user = fields.Nested(UserSchema(only=("id", "name", "avatar_url")), dump_only=True)
+    time = fields.DateTime()
 
 score_schema = ScoreSchema()
 # Nice to for account page since we know the user

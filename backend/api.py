@@ -3,6 +3,7 @@ from functools import wraps
 from marshmallow import ValidationError
 from operator import itemgetter
 from sqlalchemy import func, and_
+from datetime import datetime
 
 from models import Beatmap, Beatmapset, Score, User
 from schemas import beatmap_schema, beatmaps_schema, beatmapset_schema, beatmapsets_schema, \
@@ -196,8 +197,9 @@ def new_score(user_id):
         data = score_schema.load(json_data)
     except ValidationError as err:
         return err.messages, 400
-    bid, score = itemgetter('beatmap_id', 'score')(data)
-    s = Score(beatmap_id=bid, user_id=user_id, score=score)
+    print(data)
+    bid, score, key_accuracy, kana_accuracy = itemgetter('beatmap_id', 'score', 'key_accuracy', 'kana_accuracy')(data)
+    s = Score(beatmap_id=bid, user_id=user_id, score=score, key_accuracy=key_accuracy, kana_accuracy=kana_accuracy, time=datetime.now())
     db_session.add(s)
     db_session.commit()
 

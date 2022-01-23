@@ -95,7 +95,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, 
   const totalOffset = offset + config.offset;
 
   const {status, currTime, lines, stats} = gameState;
-  const {hits, misses, kanaHits, kanaMisses, totalKana, score} = stats;
+  const {hits, misses, kanaHits, kanaMisses, score} = stats;
   const currIndex = (currTime !== undefined) ? timeToLineIndex(lines, currTime) : undefined;
 
   const startGame = (offset: number) => {
