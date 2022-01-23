@@ -16,7 +16,7 @@ class ScoreSchema(Schema):
     kana_accuracy = fields.Float()
     user_id = fields.Str(load_only=True)
     user = fields.Nested(UserSchema(only=("id", "name", "avatar_url")), dump_only=True)
-    time = fields.DateTime()
+    time_unix = fields.Int()
 
 score_schema = ScoreSchema()
 # Nice to for account page since we know the user

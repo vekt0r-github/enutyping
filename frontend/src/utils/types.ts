@@ -62,7 +62,7 @@ export type Score = {
   score: number;
 	key_accuracy: number;
 	kana_accuracy: number;
-	time: string;
+	time_unix: number;
   user?: User;
 }
 

@@ -96,7 +96,7 @@ const UserPage = ({ yourUser, config }: Props) => {
 		return (
 			<>
 				<span>
-					<b>{artist + " - " + title}</b> [{beatmap.diffname}]<br />Played at {new Date(score.time).toLocaleString()}
+					<b>{artist + " - " + title}</b> [{beatmap.diffname}]<br />Played at {new Date(score.time_unix * 1000).toLocaleString()}
 				</span>
 				<ScoreRight>
 					<b>{score.score}</b> points<br /> <b>{(score.key_accuracy * 100).toFixed(2)}%</b> key, <b>{(score.kana_accuracy * 100).toFixed(2)}%</b> kana

@@ -86,8 +86,6 @@ const Game = ({ user, config } : Props) => {
   const {yt_id, source, preview_point, owner, beatmaps} = beatmapset;
   const [artist, title] = [getArtist(beatmapset, config), getTitle(beatmapset, config)];
 
-	console.log(map?.scores);
-  
   return (
     <>
       <h1>{artist} - {title} [{diffname}]</h1>

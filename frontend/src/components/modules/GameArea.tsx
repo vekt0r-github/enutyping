@@ -126,7 +126,6 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
 			key_accuracy: stats.hits / (stats.hits + stats.misses),
 			kana_accuracy: stats.kanaHits / stats.totalKana
     }
-		console.log(data);
     post('/api/scores', data).then((score) => {
       afterGameEnd();
       endGame();
