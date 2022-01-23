@@ -89,21 +89,31 @@ const EditorArea = ({ user, beatmap, config } : Props) => {
     }));
   };
 
+  /**
+   * Editor controls documentation (to write up in a user-facing infobox):
+   * - Space: play/pause
+   * - Up/Down: snap to nearest beat
+   * - Left/Right: snap to nearest beat division
+   * - Enter: begin/finish editing a new syllable at current time (cancelled if current time changes)
+   *   - while editing: there's some kind of input where you type in
+   *   - double click on a syllable: also snaps to it and begins editing
+   * - Ctrl+[/]: change beat snap divisor (2, 3, 4, 6, 8, 12, 16)
+   * - Ctrl+Up/Down: snap to nearest line start/end
+   * - Ctrl+Left/Right: snap to nearest syllable
+   * - Ctrl+Enter: enter testing mode
+   * - Esc: exit testing mode or go back
+   */
   const onKeyPress = (e: KeyboardEvent) => {
     if (e.repeat) { return; }
-    if (e.code === "KeyT" && (e.altKey)) { // enter testing mode
-      if (isEditing) { 
-        e.preventDefault();
-        e.stopPropagation();
-        startTest();
-      }
-    };
     if (e.key === " ") { // play/pause in normal edit mode
       if (isEditing) { 
         e.preventDefault();
         e.stopPropagation();
         set('status', (status === GameStatus.PAUSED) ? GameStatus.AUTOPLAYING : GameStatus.PAUSED);
       }
+    };
+    if (e.code === "Enter" && (e.ctrlKey || e.metaKey)) { // enter testing mode
+      if (isEditing) { startTest(); }
     };
     if (e.key === "Escape") {
       if (isTesting) { stopTest(); } 
