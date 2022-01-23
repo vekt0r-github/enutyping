@@ -86,8 +86,7 @@ const Slider = styled.input`
     width: var(--thumb-size); 
     height: var(--thumb-size); 
     border-radius: 100%;
-    background: var(--clr-primary-dim); 
-    cursor: pointer; 
+    background: var(--clr-primary-dim);
   }
 `;
 

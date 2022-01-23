@@ -3,6 +3,8 @@ import { computeMinKeypresses, parseKana } from '@/utils/kana';
 
 const MS_IN_MINUTE = 60000;
 
+export const GAME_FPS = 60;
+
 /**
  * process beatmap "file", mutating the object
  * @param beatmap 

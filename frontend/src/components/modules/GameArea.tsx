@@ -13,7 +13,8 @@ import {
   makeSetFunc,
   timeToLineIndex, 
   updateStatsOnKeyPress, 
-  updateStatsOnLineEnd 
+  updateStatsOnLineEnd,
+  GAME_FPS,
 } from '@/utils/beatmaputils';
 
 import styled from 'styled-components';
@@ -100,7 +101,7 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
     const gameStartTime = new Date().getTime() + offset;
     const intervalId = setInterval(() => {
       set('currTime', new Date().getTime() - gameStartTime);
-    }, 50);
+    }, 1000 / GAME_FPS);
     return () => {
       clearInterval(intervalId);
     };

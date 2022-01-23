@@ -35,6 +35,7 @@ export const PageContainer = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: center;
+  align-items: center;
   @media (max-width: 1496px) { // 800 + 2*(300+2*3*8)
     width: calc(var(--game-width) + 4*var(--s));
     flex-wrap: wrap;

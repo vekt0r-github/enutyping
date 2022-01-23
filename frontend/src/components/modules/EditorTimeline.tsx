@@ -1,99 +1,72 @@
 import React from "react";
 
+import { LineData } from "@/utils/types";
+
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { Line } from '@/utils/styles';
+import { EditorTimelineBox } from '@/utils/styles';
 
 type Props = {
+  windowLength: number,
   currTime: number,
-  setCurrTime: (newTime: number) => void,
-  length: number,
+  lines: LineData[]; // only need the static data
 }
 
-const SliderOuterContainer = styled.div`
-  --slider-width: 4px;
-  width: 100%;
-  height: 40px;
-  box-sizing: border-box;
-  padding: 0 var(--s);
+const Container = styled(EditorTimelineBox)`
   position: relative;
-  display: flex;
-  align-items: center;
-  background-color: var(--clr-secondary-light);
-  border: 2px solid var(--clr-secondary-dim);
+  align-items: flex-end;
 `;
 
-const SliderLabel = styled(Line)`
-  text-align: right;
-  width: 80px;
-  padding-right: var(--s);
-  font-size: 1.125em;
-  pointer-events: none;
-  user-select: none;
-`;
-
-const SliderContainer = styled.div`
-  flex-basis: 0;
-  flex-grow: 1;
-  height: var(--slider-width);
-  position: relative;
-`;
-
-const Slider = styled.input`
-  appearance: none;
+const Timeline = styled.div`
   position: absolute;
   width: 100%;
-  height: var(--slider-width);
-  margin: 0;
-  background: #0000;
-  outline: none;
-  -webkit-transition: .2s;
-  transition: opacity .2s;
-  &::-webkit-slider-thumb {
-    appearance: none;
-    width: 4px; 
-    height: 24px; 
-    background: var(--clr-primary-dim); 
-    cursor: pointer; 
-  }
+  height: 2px;
+  top: 32px;
+  background: black;
 `;
 
-const SliderBody = styled.div`
+const LineMarker = styled.div.attrs<{pos: number}>(({pos}) => ({
+  style: {
+    display: (0 <= pos && pos <= 1) ? 'block' : 'none',
+    left: `${pos * 100}%`,
+  },
+}))<{pos: number}>`
   position: absolute;
-  width: 100%;
-  height: var(--slider-width);
-  background: #ddd;
+  width: 1px;
+  height: 30px;
+  background-color: black;
 `;
 
-const SliderFill = styled.div<{fill: number}>`
+const SyllableMarker = styled(LineMarker)`
+  height: 20px;
+  background-color: green;
+`;
+
+const Cursor = styled.div`
   position: absolute;
-  width: ${(props) => props.fill * 100}%;
-  height: var(--slider-width);
-  background-color: var(--clr-primary);
+  left: calc(50% - 1px);
+  top: -2px;
+  width: 1px;
+  height: 38px;
+  border: 1px solid white;
 `;
 
-const EditorTimeline = ({ currTime, setCurrTime, length } : Props) => {
-  const handleScrub = (e : React.ChangeEvent<HTMLInputElement>) => {
-    setCurrTime(parseInt(e.target.value));
-  };
+const EditorTimeline = ({ windowLength, currTime, lines } : Props) => {
+  const calcPos = (time : number) => (0.5 + (time - currTime) / windowLength)
+  const mapEndTime = lines[lines.length - 1]?.endTime;
 
   return (
-    <SliderOuterContainer>
-      <SliderLabel as="label" htmlFor="editor-timeline-slider-container">{currTime}</SliderLabel>
-      <SliderContainer id="editor-timeline-slider-container">
-        <SliderBody />
-        <SliderFill
-          fill={currTime / length}
-        />
-        <Slider
-          type="range" 
-          min={0} 
-          max={length}
-          value={currTime}
-          onChange={handleScrub} 
-        />
-      </SliderContainer>
-    </SliderOuterContainer>
+    <Container>
+      <Timeline />
+      <Cursor />
+      {lines.map((line) => <>
+        <LineMarker key={line.startTime} pos={calcPos(line.startTime)} />
+        {line.syllables.map((syllable) => 
+          <SyllableMarker key={syllable.time} pos={calcPos(syllable.time)}/>
+        )}
+      </>)} 
+      {mapEndTime && <LineMarker key={mapEndTime} pos={calcPos(mapEndTime)} />}
+    </Container>
   );
 }
 

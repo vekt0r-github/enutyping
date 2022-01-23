@@ -41,3 +41,13 @@ export const Line = styled.span<{
   white-space: nowrap;
   text-overflow: ellipsis;
 `;
+
+export const EditorTimelineBox = styled.div`
+  width: 100%;
+  height: 40px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  background-color: var(--clr-secondary-light);
+  border: 2px solid var(--clr-secondary-dim);
+`;

@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 
 import GameAreaDisplay from "@/components/modules/GameAreaDisplay";
 import EditorTimeline from "@/components/modules/EditorTimeline";
+import EditorScrollBar from "@/components/modules/EditorScrollBar";
 
 import { post } from '@/utils/functions';
 import { 
@@ -14,12 +15,13 @@ import {
   makeSetFunc,
   timeToLineIndex, 
   updateStatsOnKeyPress, 
-  updateStatsOnLineEnd 
+  updateStatsOnLineEnd,
+  GAME_FPS, 
 } from '@/utils/beatmaputils';
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import {} from '@/utils/styles';
+import { Line, EditorTimelineBox } from '@/utils/styles';
 
 type Props = {
   user: User | null,
@@ -30,6 +32,10 @@ type Props = {
 const EditorAreaContainer = styled.div`
   display: flex;
   flex-direction: column;
+`;
+
+const TimelineMessageBox = styled(EditorTimelineBox)`
+  justify-content: center;
 `;
 
 const initStatsState = () => ({
@@ -117,7 +123,7 @@ const EditorArea = ({ user, beatmap, config } : Props) => {
       } else {
         set('status', GameStatus.PAUSED);
       }
-    }, 50);
+    }, 1000 / GAME_FPS);
     return () => {
       clearInterval(intervalId);
     };
@@ -165,6 +171,13 @@ const EditorArea = ({ user, beatmap, config } : Props) => {
   
   return (
     <EditorAreaContainer>
+      {isEditing ? <EditorTimeline 
+        windowLength={4000}
+        currTime={currTime ?? 0}
+        lines={beatmap.lines ?? []}
+      /> : <TimelineMessageBox>
+        <Line size="1.25em">Testing Mode</Line>
+      </TimelineMessageBox>}
       <GameAreaDisplay
         user={user}
         beatmap={beatmap}
@@ -173,14 +186,14 @@ const EditorArea = ({ user, beatmap, config } : Props) => {
         setGameState={isTesting ? setGameState : () => {}}
         config={config}
       />
-      {isTesting ? <span>Testing Mode</span> : null}
-      {isEditing ? <EditorTimeline 
+      {isEditing ? <EditorScrollBar 
         currTime={currTime ?? 0}
-        setCurrTime={(currTime: number) => {
-          setSeekingTo(currTime)
-        }}
-        length={beatmap.beatmapset.duration} // temp
-      /> : null}
+        setCurrTime={setSeekingTo}
+        lines={beatmap.lines ?? []}
+        length={beatmap.beatmapset.duration}
+      /> : <TimelineMessageBox>
+        <Line size="1.25em">Testing Mode</Line>
+      </TimelineMessageBox>}
     </EditorAreaContainer>
   );
 }
