@@ -146,8 +146,8 @@ export type GameState = {
     hits: number,
     misses: number,
     kanaHits: number, // total typed up to current time
-		kanaMisses: number,
-		totalKana: number,
+		kanaMisses: number, // total untyped in previous lines
+		totalKana: number, // total for all previous (not current) lines
     score: number,
   },
 };
