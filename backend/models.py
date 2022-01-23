@@ -80,7 +80,8 @@ def init_db():
             artist_original='ななひら', \
             title_original='Nanahira singing from the window to a fucking van', \
             yt_id='9USxPiJzdv0', \
-            preview_point=0),
+            preview_point=0, \
+            duration=78000),
         Beatmap(id=727, \
             beatmapset_id=727, \
             diffname="sampai_'s ear damage", \
@@ -92,7 +93,8 @@ def init_db():
             artist_original='猫又おかゆ', \
             title_original='flos', \
             yt_id='4muYzftomAE', \
-            preview_point=0),
+            preview_point=0, \
+            duration=280000),
         Beatmap(id=1337, \
             beatmapset_id=1337, \
             diffname="Lythrum", \
@@ -104,7 +106,8 @@ def init_db():
             artist_original='YOASOBI', \
             title_original='夜に駆ける', \
             yt_id='xtfXl7TZTac', \
-            preview_point=0),
+            preview_point=0, \
+            duration=261000),
         Beatmap(id=272, \
             beatmapset_id=272, \
             diffname="夜にこｃｋ", \

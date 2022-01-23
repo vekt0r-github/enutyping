@@ -61,8 +61,6 @@ const GameVideo = ({ yt_id, status, currTime, startGame, volume } : Props) => {
     }
   };
 
-  const f = () => {console.log("We Done FUcked Up")};
-
   return (
     <YTVideo
       yt_id={yt_id}
@@ -71,8 +69,6 @@ const GameVideo = ({ yt_id, status, currTime, startGame, volume } : Props) => {
       options={{
         onReady: onReady,
         onStateChange: onStateChange,
-        onBuffering: f,
-        onPause: f,
       }}
     />
   );

@@ -15,6 +15,7 @@ const SliderOuterContainer = styled.div`
   width: 100%;
   height: 40px;
   box-sizing: border-box;
+  padding: 0 var(--s);
   position: relative;
   display: flex;
   align-items: center;
@@ -24,7 +25,7 @@ const SliderOuterContainer = styled.div`
 
 const SliderLabel = styled(Line)`
   text-align: right;
-  width: 100px;
+  width: 80px;
   padding-right: var(--s);
   font-size: 1.125em;
   pointer-events: none;
@@ -51,7 +52,7 @@ const Slider = styled.input`
   &::-webkit-slider-thumb {
     appearance: none;
     width: 4px; 
-    height: 20px; 
+    height: 24px; 
     background: var(--clr-primary-dim); 
     cursor: pointer; 
   }

@@ -104,6 +104,7 @@ export type Beatmapset = { // example
   yt_id: string;
   source?: string; // created from yt_id on backend
   preview_point: number;
+  duration: number;
   owner: User;
   beatmaps: Beatmap[] | BeatmapMetadata[];
 }

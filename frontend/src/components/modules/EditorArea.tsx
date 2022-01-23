@@ -42,18 +42,19 @@ const initStatsState = () => ({
 });
 
 // for during playback
-const makeStateAt = (currTime: number, paused: boolean, lines: LineData[], config: Config) : GameState => ({
-  status: paused ? GameStatus.PAUSED : GameStatus.AUTOPLAYING,
+const makeStateAt = (lines: LineData[], config: Config, currTime?: number, status?: GameStatus) : GameState => ({
+  status: status ?? GameStatus.PAUSED,
   offset: 0,
-  currTime: currTime, // maintained via timer independent of video
-  lines: lines.map((lineData) => makeLineStateAt(currTime, lineData, config)),
+  currTime: currTime ?? 0, // maintained via timer independent of video
+  lines: lines.map((lineData) => makeLineStateAt(currTime ?? 0, lineData, config)),
   stats: initStatsState(),
 });
 
 const EditorArea = ({ user, beatmap, config } : Props) => {
-  const makeState = (currTime: number, paused: boolean) => makeStateAt(currTime, paused, beatmap.lines as LineData[], config);
-  const [gameState, setGameState] = useState<GameState>(makeState(0, true));
+  const makeState = (currTime?: number, status?: GameStatus) => makeStateAt(beatmap.lines as LineData[], config, currTime, status);
+  const [gameState, setGameState] = useState<GameState>(makeState());
   const set = makeSetFunc(setGameState);
+  const [seekingTo, setSeekingTo] = useState<number>();
 
   // from iframe API; in seconds, rounded? maybe
   // maybe need later but idk
@@ -64,13 +65,15 @@ const EditorArea = ({ user, beatmap, config } : Props) => {
   const isEditing = [GameStatus.PAUSED, GameStatus.AUTOPLAYING].includes(status);
   const isTesting = status === GameStatus.PLAYING;
   
-  const currIndexValid = (currTime !== undefined) && (currIndex !== undefined) && (currIndex > -1) && (currIndex < lines.length);
-
   const startTest = () => {
-    setGameState((oldState) => ({ ...oldState,
-      status: GameStatus.PLAYING,
-      currTime: currIndexValid ? lines[currIndex].line.startTime : oldState.currTime,
-    }));
+    setGameState((oldState) => {
+      const currIndex = timeToLineIndex(lines, oldState.currTime!);
+      const currIndexValid = (currIndex !== undefined) && (currIndex > -1) && (currIndex < lines.length);
+      return makeState(
+        currIndexValid ? lines[currIndex].line.startTime : oldState.currTime,
+        GameStatus.PLAYING,
+      );
+    });
   }
 
   const stopTest = () => {
@@ -82,7 +85,6 @@ const EditorArea = ({ user, beatmap, config } : Props) => {
 
   const onKeyPress = (e: KeyboardEvent) => {
     if (e.repeat) { return; }
-    console.log(e)
     if (e.code === "KeyT" && (e.altKey)) { // enter testing mode
       if (isEditing) { 
         e.preventDefault();
@@ -109,12 +111,26 @@ const EditorArea = ({ user, beatmap, config } : Props) => {
     if (![GameStatus.PLAYING, GameStatus.AUTOPLAYING].includes(status)) { return; }
     const gameStartTime = new Date().getTime() - (currTime ?? 0); // resume at current time
     const intervalId = setInterval(() => {
-      set('currTime', new Date().getTime() - gameStartTime);
+      const currTime = new Date().getTime() - gameStartTime;
+      if (currTime < beatmap.beatmapset.duration) {
+        set('currTime', currTime);
+      } else {
+        set('status', GameStatus.PAUSED);
+      }
     }, 50);
     return () => {
       clearInterval(intervalId);
     };
-  }, [status]);
+  }, [status, seekingTo]);
+
+  useEffect(() => {
+    if (seekingTo === undefined) { return; }
+    if (seekingTo === currTime) {
+      setSeekingTo(undefined);
+    } else {
+      set('currTime', seekingTo);
+    }
+  }, [seekingTo, currTime]);
 
   useEffect(() => {
     if (currIndex === undefined) { return; }
@@ -133,7 +149,7 @@ const EditorArea = ({ user, beatmap, config } : Props) => {
   }, [status]); // may eventually depend on other things
   
   useEffect(() => { // refresh map content
-    setGameState((oldGameState) => makeState(oldGameState.currTime ?? 0, true));
+    setGameState((oldGameState) => makeState(oldGameState.currTime));
   }, [beatmap]);
 
   const keyCallback = (hit: number, miss: number, endKana: boolean) => {
@@ -145,8 +161,7 @@ const EditorArea = ({ user, beatmap, config } : Props) => {
   }
 
   const displayGameState = (isEditing && currTime !== undefined) ? 
-    makeState(currTime, status === GameStatus.PAUSED) 
-    : gameState;
+    makeState(currTime, status) : gameState;
   
   return (
     <EditorAreaContainer>
@@ -161,8 +176,10 @@ const EditorArea = ({ user, beatmap, config } : Props) => {
       {isTesting ? <span>Testing Mode</span> : null}
       {isEditing ? <EditorTimeline 
         currTime={currTime ?? 0}
-        setCurrTime={(currTime: number) => set('currTime', currTime)}
-        length={lines[lines.length-1].line.endTime} // temp
+        setCurrTime={(currTime: number) => {
+          setSeekingTo(currTime)
+        }}
+        length={beatmap.beatmapset.duration} // temp
       /> : null}
     </EditorAreaContainer>
   );
