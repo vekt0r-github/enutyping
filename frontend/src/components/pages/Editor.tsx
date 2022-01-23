@@ -72,6 +72,8 @@ const Editor = ({ user, config } : Props) => {
             id: -1,
             beatmapset: beatmapset,
             diffname: "",
+            content: "",
+            lines: [],
           }));
         }
       });
@@ -98,8 +100,9 @@ const Editor = ({ user, config } : Props) => {
 
   useEffect(() => {
     if (!beatmap) { return; }
+    console.log("oi")
     processBeatmap(beatmap, config);
-  }, [beatmap]);
+  }, [beatmap?.content]);
 
   if (status === LOADING) { return <Loading />; }
   if (status === INVALID || !beatmap) { return <NotFound />; }
@@ -107,6 +110,11 @@ const Editor = ({ user, config } : Props) => {
   const {yt_id, source, preview_point, owner, beatmaps} = beatmapset;
   const [artist, title] = [getArtist(beatmapset, config), getTitle(beatmapset, config)];
   
+  const setContent = (content : string) => 
+    processAndLoad((oldBeatmap) => oldBeatmap ? { ...oldBeatmap,
+      content: content,
+    } : undefined);
+
   return (
     <>
       <h1>Editing: {artist} - {title} [{diffname}]</h1>
@@ -122,16 +130,15 @@ const Editor = ({ user, config } : Props) => {
         <EditorArea
           user={user}
           beatmap={beatmap}
+          setContent={setContent}
           config={config}
         />
         <Sidebar as="form" onSubmit={(e : React.FormEvent<HTMLFormElement>) => {
-            processAndLoad((oldBeatmap) => oldBeatmap ? { ...oldBeatmap,
-              content: (e.currentTarget.elements[0] as HTMLInputElement).value,
-            } : undefined);
+            setContent((e.currentTarget.elements[0] as HTMLInputElement).value);
             e.preventDefault();
           }}>
           <h2>Beatmap File</h2>
-          <GameFile defaultValue={content} />
+          <GameFile value={content} />
           <button type='submit'>SUbSMIT</button>
         </Sidebar>
       </PageContainer>

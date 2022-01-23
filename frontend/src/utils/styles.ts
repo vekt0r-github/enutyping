@@ -46,6 +46,7 @@ export const EditorTimelineBox = styled.div`
   width: 100%;
   height: 40px;
   box-sizing: border-box;
+  margin: var(--s) 0;
   display: flex;
   align-items: center;
   background-color: var(--clr-secondary-light);

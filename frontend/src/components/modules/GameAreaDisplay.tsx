@@ -8,7 +8,7 @@ import {
   User, Beatmap, LineData, Config,
   GameStatus, GameState,
 } from "@/utils/types";
-import { makeSetFunc, timeToLineIndex } from '@/utils/beatmaputils';
+import { computeLineKPM, makeSetFunc, timeToLineIndex } from '@/utils/beatmaputils';
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -96,7 +96,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, 
 
   const {status, currTime, lines, stats} = gameState;
   const {hits, misses, kanaHits, kanaMisses, score} = stats;
-  const currIndex = (currTime !== undefined) ? timeToLineIndex(lines, currTime) : undefined;
+  const currIndex = (currTime !== undefined) ? timeToLineIndex(beatmap.lines, currTime) : undefined;
 
   const startGame = (offset: number) => {
     if (status !== GameStatus.STARTQUEUED) { return; }
@@ -166,7 +166,9 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, 
         />
         <StatBox>
           <p>Beatmap KPM: {Math.round(beatmap.kpm ?? 0)}</p>
-          <p>Line KPM: {isPlayingGame ? (Math.round(lines[currIndex].line.kpm)) : "N/A"}</p>
+          <p>Line KPM: {isPlayingGame ? 
+            (Math.round(computeLineKPM(lines[currIndex].line)))
+            : "N/A"}</p>
         </StatBox>
       </BottomHalf>
       {status === GameStatus.UNSTARTED ? 

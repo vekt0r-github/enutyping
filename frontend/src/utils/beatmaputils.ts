@@ -23,7 +23,7 @@ export const processBeatmap = (beatmap : Beatmap, config: Config) => {
     
     if (line && ['L','E'].includes(type)) {
       line.endTime = time;
-      line.kpm = computeLineKPM(line);
+      beatmap.endTime = time; // last one (hopefully E)
       lines.push(line);
     }
     if (type === 'L') {
@@ -31,7 +31,6 @@ export const processBeatmap = (beatmap : Beatmap, config: Config) => {
         startTime: time,
         endTime: 0, // set when line ends
         lyric: text,
-        kpm: 0,
         syllables: [],
       };
     } else if (type === 'S') {
@@ -43,18 +42,44 @@ export const processBeatmap = (beatmap : Beatmap, config: Config) => {
   beatmap.kpm = computeBeatmapKPM(beatmap);
 };
 
+/**
+ * writes beatmap to file format
+ * @param beatmap specifically {lines, endTime}
+ * @returns string containing new content field
+ */
+export const writeBeatmap = (beatmap : Beatmap) => {
+  let content = [];
+  for (const line of beatmap.lines) {
+    content.push(`L,${line.startTime},${line.lyric}`);
+    for (const syllable of line.syllables) {
+      content.push(`S,${syllable.time},${syllable.text}`);
+    }
+  }
+  content.push(`E,${beatmap.endTime}`);
+  return content.join('\n');
+}
+
 export const getArtist = (mapset: Beatmapset, config: Config) => 
   mapset[`artist${config.localizeMetadata ? '' : '_original'}`];
 
 export const getTitle = (mapset: Beatmapset, config: Config) => 
   mapset[`title${config.localizeMetadata ? '' : '_original'}`];
 
-export const timeToLineIndex = (lines: LineState[], time: number) => {
-  if (!lines.length || time < lines[0].line.startTime) { return -1; }
+// -1 to lines.length
+export const timeToLineIndex = (lines: LineData[], time: number) => {
+  if (!lines.length || time < lines[0].startTime) { return -1; }
   for (let i = 0; i < lines.length; i++) {
-    if (time < lines[i].line.endTime) { return i; }
+    if (time < lines[i].endTime) { return i; }
   }
   return lines.length;
+}
+
+// 0 to syllables.length
+export const timeToSyllableIndex = (syllables: LineData['syllables'], time: number) => {
+  for (let i = 0; i < syllables.length; i++) {
+    if (time < syllables[i].time) { return i; }
+  }
+  return syllables.length;
 }
 
 const computeLineKeypresses = (line: LineData) => {

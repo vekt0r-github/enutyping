@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 
 import { LineData } from "@/utils/types";
 
@@ -10,6 +10,7 @@ type Props = {
   windowLength: number,
   currTime: number,
   lines: LineData[]; // only need the static data
+  endTime?: number,
 }
 
 const Container = styled(EditorTimelineBox)`
@@ -37,6 +38,10 @@ const LineMarker = styled.div.attrs<{pos: number}>(({pos}) => ({
   background-color: black;
 `;
 
+const EndMarker = styled(LineMarker)`
+  width: 2px;
+`;
+
 const SyllableMarker = styled(LineMarker)`
   height: 20px;
   background-color: green;
@@ -51,21 +56,20 @@ const Cursor = styled.div`
   border: 1px solid white;
 `;
 
-const EditorTimeline = ({ windowLength, currTime, lines } : Props) => {
+const EditorTimeline = ({ windowLength, currTime, lines, endTime } : Props) => {
   const calcPos = (time : number) => (0.5 + (time - currTime) / windowLength)
-  const mapEndTime = lines[lines.length - 1]?.endTime;
 
   return (
     <Container>
       <Timeline />
       <Cursor />
-      {lines.map((line) => <>
-        <LineMarker key={line.startTime} pos={calcPos(line.startTime)} />
+      {lines.map((line) => <Fragment key={`L${line.startTime}`}>
+        <LineMarker pos={calcPos(line.startTime)} />
         {line.syllables.map((syllable) => 
-          <SyllableMarker key={syllable.time} pos={calcPos(syllable.time)}/>
+          <SyllableMarker key={`S${syllable.time}`} pos={calcPos(syllable.time)}/>
         )}
-      </>)} 
-      {mapEndTime && <LineMarker key={mapEndTime} pos={calcPos(mapEndTime)} />}
+      </Fragment>)} 
+      {endTime && <EndMarker key={`E${endTime}`} pos={calcPos(endTime)} />}
     </Container>
   );
 }

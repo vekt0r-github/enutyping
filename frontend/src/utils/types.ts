@@ -75,7 +75,6 @@ export type LineData = {
   startTime: number,
   endTime: number,
   lyric: string,
-  kpm: number,
   syllables: {
     time: number,
     text: string,
@@ -92,8 +91,9 @@ export type Beatmap = {
   id: number;
   beatmapset: Beatmapset;
   diffname: string;
-  content?: string;
-  lines?: LineData[]; // processed content
+  content: string;
+  lines: LineData[]; // processed content
+  endTime?: number; // also processed
   kpm?: number;
   scores?: Score[];
 };

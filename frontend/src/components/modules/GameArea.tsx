@@ -56,7 +56,7 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
   // const [duration, setDuration] = useState<number>(Infinity);
 
   const {status, offset, currTime, lines, stats} = gameState;
-  const currIndex = (currTime !== undefined) ? timeToLineIndex(lines, currTime) : undefined;
+  const currIndex = (currTime !== undefined) ? timeToLineIndex(beatmap.lines, currTime) : undefined;
 
   const prepareStartGame = () => {
     if (status !== GameStatus.UNSTARTED) { return; }

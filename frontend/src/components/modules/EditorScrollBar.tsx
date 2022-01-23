@@ -10,6 +10,7 @@ type Props = {
   currTime: number,
   setCurrTime: (newTime: number) => void,
   lines: LineData[]; // only need the static data
+  endTime?: number,
   length: number,
 }
 
@@ -83,12 +84,14 @@ const LineMarker = styled.div.attrs<{pos: number}>(({pos}) => ({
   background-color: black;
 `;
 
-const EditorScrollBar = ({ currTime, setCurrTime, lines, length } : Props) => {
+const EndMarker = styled(LineMarker)`
+  width: 2px;
+`;
+
+const EditorScrollBar = ({ currTime, setCurrTime, lines, endTime, length } : Props) => {
   const handleScrub = (e : React.ChangeEvent<HTMLInputElement>) => {
     setCurrTime(parseInt(e.target.value));
   };
-  
-  const mapEndTime = lines[lines.length - 1]?.endTime;
 
   return (
     <SliderOuterContainer>
@@ -105,10 +108,10 @@ const EditorScrollBar = ({ currTime, setCurrTime, lines, length } : Props) => {
           value={currTime}
           onChange={handleScrub} 
         />
-        {lines.map((line) => <>
+        {lines.map((line) =>
           <LineMarker key={line.startTime} pos={line.startTime / length} />
-        </>)} 
-        {mapEndTime && <LineMarker key={mapEndTime} pos={mapEndTime / length} />}
+        )} 
+        {endTime && <EndMarker key={endTime} pos={endTime / length} />}
       </SliderContainer>
     </SliderOuterContainer>
   );
