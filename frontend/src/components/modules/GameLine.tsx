@@ -112,7 +112,10 @@ const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : P
   const getKana = (pos : LineState['position']) : KanaState | undefined => syllables[pos[0]]?.kana[pos[1]];
 
   const handleKeyPress = (e: KeyboardEvent) => {
+		console.log(e.key);
     if (["Escape"].includes(e.key)) { return; } // GameArea is handling it
+		const allowedCharacters = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890-`~ \"'.?!,"; // idk if this is comprehensive
+		if(!allowedCharacters.includes(e.key)) { return; }
     const curKana = getKana(position);
     if (!curKana) return;
     const {kana, prefix, minKeypresses} = curKana;
