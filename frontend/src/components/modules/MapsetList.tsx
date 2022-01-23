@@ -1,4 +1,4 @@
-import React  from "react";
+import React, { useState }  from "react";
 
 import YTThumbnail from "@/components/modules/YTThumbnail";
 
@@ -15,6 +15,12 @@ type Props = {
   config: Config,
   link: (mapsetId: number, mapId?: number) => string,
 };
+
+const SearchBar = styled.input`
+	font-size: 18px;
+	width: 80%;
+	margin: var(--s);
+`;
 
 const SongsContainer = styled.div`
   display: grid;
@@ -100,34 +106,44 @@ const Info = styled.div`
 `;
 
 const MapsetList = ({ mapsets, config, link } : Props) => {
+	const [searchQuery, setSearchQuery] = useState<string>("");
+
+	const filteredMapsets = mapsets.filter((set: Beatmapset) => {	
+		const lowercaseQuery = searchQuery.toLowerCase();
+		return JSON.stringify(set).toLowerCase().includes(lowercaseQuery);
+	});
+
   return (
-    <SongsContainer>
-      {mapsets?.map((mapset) => {
-        const {yt_id, preview_point, owner, beatmaps} = mapset;
-        return (
-          <SongBox key={mapset.id}>
-            <HoverContainer>
-              <SetLink as={Link} to={link(mapset.id)}>
-                <YTThumbnail yt_id={yt_id} width={120} height={90} />
-                <Info>
-                  <Line size='1.25em' as='h2'>{getTitle(mapset, config)}</Line>
-                  <Line size='1em'>by {getArtist(mapset, config)}</Line>
-                  <Line size='0.8em'>mapped by {owner.name}</Line>
-                  <Line size='0.8em'>{beatmaps.length} difficult{beatmaps.length !== 1 ? 'ies' : 'y'}</Line>
-                </Info>
-              </SetLink>
-              <DiffsContainer>
-                {beatmaps.map((map) => 
-                  <Diff as={Link} to={link(mapset.id, map.id)} key={map.id}>
-                    {map.diffname}
-                  </Diff>
-                )}
-              </DiffsContainer>
-            </HoverContainer>
-          </SongBox>
-        );
-      })}
-    </SongsContainer>
+		<>
+			<SearchBar value={searchQuery} placeholder={"Search for a mapset:"} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} />
+			<SongsContainer>
+				{filteredMapsets?.map((mapset) => {
+					const {yt_id, preview_point, owner, beatmaps} = mapset;
+					return (
+						<SongBox key={mapset.id}>
+							<HoverContainer>
+								<SetLink as={Link} to={link(mapset.id)}>
+									<YTThumbnail yt_id={yt_id} width={120} height={90} />
+									<Info>
+										<Line size='1.25em' as='h2'>{getTitle(mapset, config)}</Line>
+										<Line size='1em'>by {getArtist(mapset, config)}</Line>
+										<Line size='0.8em'>mapped by {owner.name}</Line>
+										<Line size='0.8em'>{beatmaps.length} difficult{beatmaps.length !== 1 ? 'ies' : 'y'}</Line>
+									</Info>
+								</SetLink>
+								<DiffsContainer>
+									{beatmaps.map((map) => 
+										<Diff as={Link} to={link(mapset.id, map.id)} key={map.id}>
+											{map.diffname}
+										</Diff>
+									)}
+								</DiffsContainer>
+							</HoverContainer>
+						</SongBox>
+					);
+				})}
+			</SongsContainer>
+		</>
   );
 }
 
