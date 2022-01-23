@@ -220,6 +220,7 @@ const EditorArea = ({ user, beatmap, setContent, config } : Props) => {
         }
       } else if (e.code === "Enter") {
         if (editingState.status === NOT) { // begin editing something
+          if (ctrl && currIndex === lines.length) { return; }
           if (!ctrl && !indexValid(currIndex)) { return; }
           const newEditingState = { status: ctrl ? LINE : SYLLABLE, time: currTime, content: "" };
           writeFromEditingState(newEditingState);
@@ -332,10 +333,10 @@ const EditorArea = ({ user, beatmap, setContent, config } : Props) => {
         setGameState={isTesting ? setGameState : () => {}}
         config={config}
       />
-      {editingState.status === EditingStatus.LINE && 
-        <LineInput onChange={onInputChange} />}
-      {editingState.status === EditingStatus.SYLLABLE && 
-        <SyllableInput onChange={onInputChange} />}
+      {editingState.status === EditingStatus.LINE ?
+        <LineInput onChange={onInputChange} /> : null}
+      {editingState.status === EditingStatus.SYLLABLE ?
+        <SyllableInput onChange={onInputChange} /> : null}
       {isEditing ? <EditorScrollBar 
         currTime={currTime ?? 0}
         setCurrTime={setSeekingTo}

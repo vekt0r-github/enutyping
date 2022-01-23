@@ -14,16 +14,19 @@ export const processBeatmap = (beatmap : Beatmap, config: Config) => {
   let lines : LineData[] = [];
   if (!beatmap.content) { return; } // idk man
   const objects = beatmap.content.split(/\r?\n/);
-  let line : LineData;
-  objects.forEach((obj_str) => {
+  let line : LineData | undefined = undefined;
+  let endTime : number | undefined = undefined;
+  for (const obj_str of objects) {
     const obj = obj_str.split(',');
     const type = obj[0];
     const time = parseInt(obj[1]);
     const text = obj.slice(2).join(',');
     
+    if (type === 'E') { 
+      endTime = time;
+    }
     if (line && ['L','E'].includes(type)) {
       line.endTime = time;
-      beatmap.endTime = time; // last one (hopefully E)
       lines.push(line);
     }
     if (type === 'L') {
@@ -35,10 +38,15 @@ export const processBeatmap = (beatmap : Beatmap, config: Config) => {
       };
     } else if (type === 'S') {
       const kana = parseKana(text, config);
-      line.syllables.push({ time, text, kana });
+      line?.syllables.push({ time, text, kana });
     }
-  });
+  }
+  if (endTime === undefined && line) {
+    line.endTime = beatmap.beatmapset.duration;
+    lines.push(line);
+  } 
   beatmap.lines = lines;
+  beatmap.endTime = endTime;
   beatmap.kpm = computeBeatmapKPM(beatmap);
 };
 
@@ -55,7 +63,7 @@ export const writeBeatmap = (beatmap : Beatmap) => {
       content.push(`S,${syllable.time},${syllable.text}`);
     }
   }
-  content.push(`E,${beatmap.endTime}`);
+  if (beatmap.endTime !== undefined) { content.push(`E,${beatmap.endTime}`); }
   return content.join('\n');
 }
 

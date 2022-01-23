@@ -69,7 +69,7 @@ const EditorTimeline = ({ windowLength, currTime, lines, endTime } : Props) => {
           <SyllableMarker key={`S${syllable.time}`} pos={calcPos(syllable.time)}/>
         )}
       </Fragment>)} 
-      {endTime && <EndMarker key={`E${endTime}`} pos={calcPos(endTime)} />}
+      {endTime ? <EndMarker key={`E${endTime}`} pos={calcPos(endTime)} /> : null}
     </Container>
   );
 }

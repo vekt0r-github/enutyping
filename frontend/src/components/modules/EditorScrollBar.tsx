@@ -74,7 +74,7 @@ const SliderFill = styled.div.attrs<{fill: number}>(({fill}) => ({
 
 const LineMarker = styled.div.attrs<{pos: number}>(({pos}) => ({
   style: {
-    left: `${pos * 100}%`,
+    left: `calc(1px + ${pos} * (100% - 4px))`,
   },
 }))<{pos: number}>`
   position: absolute;
@@ -85,7 +85,9 @@ const LineMarker = styled.div.attrs<{pos: number}>(({pos}) => ({
 `;
 
 const EndMarker = styled(LineMarker)`
+  top: calc((var(--slider-width) - 34px) / 2);
   width: 2px;
+  height: 34px;
 `;
 
 const EditorScrollBar = ({ currTime, setCurrTime, lines, endTime, length } : Props) => {
@@ -111,7 +113,7 @@ const EditorScrollBar = ({ currTime, setCurrTime, lines, endTime, length } : Pro
         {lines.map((line) =>
           <LineMarker key={line.startTime} pos={line.startTime / length} />
         )} 
-        {endTime && <EndMarker key={endTime} pos={endTime / length} />}
+        {endTime ? <EndMarker key={endTime} pos={endTime / length} /> : null}
       </SliderContainer>
     </SliderOuterContainer>
   );
