@@ -43,6 +43,7 @@ class Beatmapset(Base):
     title_original = Column(String(100))
     yt_id = Column(String(69))
     preview_point = Column(Integer)
+    duration = Column(Integer)
 
     owner = relationship('User', back_populates='beatmapsets')
     beatmaps = relationship('Beatmap', back_populates='beatmapset')
@@ -71,6 +72,7 @@ def init_db():
     objects = [
         User(id=1234, name='ppfarmer', avatar_url='https://avatars.githubusercontent.com/u/34809632'),
         User(id=4321, name='songenjoyer', avatar_url='https://avatars.githubusercontent.com/u/1700346'),
+        # TODO: Add durations to the beatmapsets, choose what unit you want but make it consistent
         Beatmapset(id=727, 
             owner_id=1234,
             artist='Nanahira', \

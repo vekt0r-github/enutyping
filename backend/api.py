@@ -153,6 +153,7 @@ def add_beatmapset(user_id):
     title_original
     yt_id
     preview_point
+    duration
     '''
     json_data = request.get_json()
     if not json_data:
@@ -163,8 +164,8 @@ def add_beatmapset(user_id):
     except ValidationError as err:
         return err.messages, 400
 
-    artist, title, artist_original, title_original, yt_id, preview_point = \
-        itemgetter('artist', 'title', 'artist_original', 'title_original', 'yt_id', 'preview_point')(data)
+    artist, title, artist_original, title_original, yt_id, preview_point, duration = \
+        itemgetter('artist', 'title', 'artist_original', 'title_original', 'yt_id', 'preview_point', 'duration')(data)
 
     owner = User.query.get(user_id)
     assert owner is not None
@@ -175,7 +176,8 @@ def add_beatmapset(user_id):
                            title_original=title_original, \
                            yt_id=yt_id, \
                            preview_point=preview_point, \
-                           owner=owner)
+                           owner=owner, \
+                           duration=duration)
 
     db_session.add(new_bmset)
     db_session.commit()
