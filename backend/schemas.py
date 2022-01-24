@@ -36,7 +36,8 @@ scores_schema = ScoreSchema(many=True)
 class BeatmapSchema(Schema):
     id = fields.Int(dump_only=True)
     scores = fields.Nested(score_schema, dump_only=True)
-    beatmapset_id = fields.Int(required=True, load_only=True)
+    # beatmapset_id = fields.Int(required=True, load_only=True)
+    beatmapset_id = fields.Int(load_only=True)
     diffname = fields.Str()
     content = fields.Str()
 

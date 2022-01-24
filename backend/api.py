@@ -98,7 +98,6 @@ def update_beatmap(user_id, beatmap_id):
     '''
     Data
     ----
-    beatmapset_id
     diffname
     content
     '''
@@ -110,7 +109,12 @@ def update_beatmap(user_id, beatmap_id):
     except ValidationError as err:
         return err.messages, 400
 
-    bms_id, diffname, content = itemgetter('beatmapset_id', 'diffname', 'content')(data)
+    diffname, content = itemgetter('diffname', 'content')(data)
+
+    beatmap = Beatmap.query.get(beatmap_id)
+    if not beatmap:
+        return 'Beatmap does not exist!', 400
+    bms_id = beatmap.beatmapset_id
 
     exists_subq = Beatmapset.query.filter(
             Beatmapset.owner_id == user_id,
@@ -119,7 +123,6 @@ def update_beatmap(user_id, beatmap_id):
     if not exists:
         return 'Beatmapset does not exist or you do not own it!', 400
 
-    beatmap = Beatmap.query.get(beatmap_id)
     beatmap.content = content
     beatmap.diffname = diffname
     db_session.commit()
