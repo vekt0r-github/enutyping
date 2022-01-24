@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, UnicodeText, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, UnicodeText, ForeignKey
 from sqlalchemy.orm import deferred, relationship
 from time import time
 from database import Base
@@ -11,11 +11,21 @@ class User(Base):
     avatar_url = Column(String(100))
     scores = relationship('Score', lazy="dynamic", order_by="desc(Score.id)", back_populates='user')
     beatmapsets = relationship('Beatmapset', back_populates='owner')
+    join_time = Column(Integer())
+    key_accuracy = Column(Float())
+    kana_accuracy = Column(Float())
+    total_score = Column(Integer())
+    play_count = Column(Integer())
 
     def __init__(self, id, name, avatar_url):
         self.id = id
         self.name = name
         self.avatar_url = avatar_url
+        self.join_time = time()
+        self.key_accuracy = 1
+        self.kana_accuracy = 1
+        self.total_score = 0
+        self.play_count = 0
 
 class Beatmap(Base):
     __tablename__ = 'beatmaps'

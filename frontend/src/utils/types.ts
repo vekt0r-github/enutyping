@@ -4,6 +4,14 @@ export type User = { // example
   avatar_url: string;
 };
 
+export type UserStats = {
+	join_time: number;
+	kana_accuracy: number;
+	key_accuracy: number;
+	play_count: number;
+	total_score: number;
+};
+
 export type Config = {
   volume: number;
   offset: number;

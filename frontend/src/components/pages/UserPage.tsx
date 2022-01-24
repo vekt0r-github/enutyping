@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { get } from "@/utils/functions";
-import { Beatmap, Score, User, Config } from "@/utils/types";
+import { Beatmap, Score, User, UserStats, Config } from "@/utils/types";
 import { MainBox, SubBox } from '@/utils/styles';
 
 
@@ -25,15 +25,21 @@ const UserInfoContainer = styled.div`
 	min-width: 90%;
 `;
 
-const ScoreBox = styled(SubBox)`
+const InfoBox = styled(SubBox)<{width: number}>`
+	display: flex;
+	flex-direction: column;
+	width: ${(props) => props.width}%;
+	margin: var(--s);
+	justify-content: center;
+`;
+
+const InfoEntry = styled.div`
 	display: flex;
 	flex-direction: row;
-	min-width: 90%;
-	margin: var(--s);
 	justify-content: space-between;
 `;
 
-const ScoreRight = styled.span`
+const SpanRight = styled.span`
 	text-align: right;
 `;
 
@@ -53,6 +59,7 @@ const UserPage = ({ yourUser, config }: Props) => {
   const { userId } = useParams();
   const [user, setUser] = useState<User | null>();
   const [scores, setScores] = useState<Score[]>([]);
+	const [stats, setStats] = useState<UserStats | null>();
 	const [scoreBeatmaps, setScoreBeatmaps] = useState<Beatmap[]>([]);
 
 
@@ -63,6 +70,7 @@ const UserPage = ({ yourUser, config }: Props) => {
       } else {
         setUser(res.user);
         setScores(res.scores);
+				setStats(res.stats);
       }
     });
   }, [yourUser]);
@@ -79,13 +87,13 @@ const UserPage = ({ yourUser, config }: Props) => {
 	}, [scores]);
 
 
-  if (user === undefined) {
+  if (user === undefined || stats === undefined) {
     return (
       <Loading />
     );
   }
 
-  if (user === null) {
+  if (user === null || stats === null) {
     return (
       <p>User not found!</p>
     );
@@ -95,15 +103,33 @@ const UserPage = ({ yourUser, config }: Props) => {
 		const [title, artist]: string[] = (config.localizeMetadata) ? [beatmap.beatmapset.title, beatmap.beatmapset.artist] : [beatmap.beatmapset.title_original, beatmap.beatmapset.artist_original]; 
 		return (
 			<>
-				<span>
-					<b>{artist + " - " + title}</b> [{beatmap.diffname}]<br />Played at {new Date(score.time_unix * 1000).toLocaleString()}
-				</span>
-				<ScoreRight>
-					<b>{score.score}</b> points<br /> <b>{(score.key_accuracy * 100).toFixed(2)}%</b> key, <b>{(score.kana_accuracy * 100).toFixed(2)}%</b> kana
-				</ScoreRight>
+				<InfoEntry>
+					<span><b>{artist}-{title}</b> [{beatmap.diffname}]</span>
+					<span><b>{score.score}</b> points</span>
+				</InfoEntry>
+				<InfoEntry>
+					<span>Played at {new Date(score.time_unix * 1000).toLocaleString()}</span>
+					<span><b>{(score.key_accuracy * 100).toFixed(2)}%</b> key, <b>{(score.kana_accuracy * 100).toFixed(2)}%</b> kana</span>
+				</InfoEntry>
 			</>
 		);
 	};
+
+	const userInfoPairs = [
+		["Username", user.name],
+		["Join Date", new Date(stats.join_time * 1000).toDateString()],
+		["Overall Kana Accuracy", (stats.kana_accuracy * 100).toFixed(2)],
+		["Overall Key Accuracy", (stats.key_accuracy * 100).toFixed(2)],
+		["Play Count", stats.play_count],
+		["Total Score", stats.total_score]
+	];
+
+	const userStatsElements = userInfoPairs.map((entry: (string | number)[]) => (
+		<InfoEntry key={entry[0]}>
+			<span><b>{entry[0]}:</b></span>
+			<span>{entry[1]}</span>
+		</InfoEntry>
+	));
 
   return (
     <>
@@ -112,17 +138,18 @@ const UserPage = ({ yourUser, config }: Props) => {
 			<UserInfoContainer>
 				<SideBox>
 					<h2>User Statistics</h2>
-					<p>Name: {user.name}</p>
-					<p>ID: {user.id}</p>
+					<InfoBox width={50}>
+						{userStatsElements}
+					</InfoBox>
 				</SideBox>
 				<SideBox>
+					<h2>Recent Scores</h2>
 					{ (scores && scores.length > 0) &&
 						<>
-							<h2>Recent Scores</h2>
 							{scores.map((score, i) =>
-								<ScoreBox key={score.id}>
+								<InfoBox width={90} key={score.id}>
 									{scoreBeatmaps[i] ? prettyScore(score, scoreBeatmaps[i]): "Couldn't load map"} 
-								</ScoreBox>
+								</InfoBox>
 							)}
 						</>
 					}

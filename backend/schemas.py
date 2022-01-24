@@ -1,5 +1,12 @@
 from marshmallow import Schema, fields
 
+class UserStats(Schema):
+    join_time = fields.Int()
+    key_accuracy = fields.Float()
+    kana_accuracy = fields.Float()
+    total_score = fields.Int()
+    play_count = fields.Int()
+
 class UserSchema(Schema):
     id = fields.Str(dump_only=True)
     name = fields.Str()
@@ -7,6 +14,7 @@ class UserSchema(Schema):
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
+user_stats_schema = UserStats()
 
 class ScoreSchema(Schema):
     id = fields.Int(dump_only=True)

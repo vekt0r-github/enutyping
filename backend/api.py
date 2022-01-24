@@ -7,7 +7,7 @@ from time import time
 
 from models import Beatmap, Beatmapset, Score, User
 from schemas import beatmap_schema, beatmaps_schema, beatmapset_schema, beatmapsets_schema, \
-                    score_schema, scores_schema, scores_without_user_schema, user_schema, users_schema
+                    score_schema, scores_schema, scores_without_user_schema, user_schema, users_schema, user_stats_schema
 from database import db_session
 
 MAX_NUM_SCORES = 50
@@ -62,9 +62,10 @@ def get_user(user_id):
     if user is None:
         abort(404, description = 'User not found')
     user_result = user_schema.dump(user)
+    user_stats_result = user_stats_schema.dump(user)
     scores = user.scores.limit(MAX_NUM_SCORES)
     scores_result = scores_without_user_schema.dump(scores)
-    return {"user": user_result, "scores": scores_result}
+    return {"user": user_result, "scores": scores_result, "stats": user_stats_result}
 
 @api.route('/users', methods=['GET'])
 def get_users():
@@ -234,6 +235,14 @@ def new_score(user_id):
     print(data)
     bid, score, key_accuracy, kana_accuracy = itemgetter('beatmap_id', 'score', 'key_accuracy', 'kana_accuracy')(data)
     s = Score(beatmap_id=bid, user_id=user_id, score=score, key_accuracy=key_accuracy, kana_accuracy=kana_accuracy, time_unix=int(time()))
+    user = User.query.filter_by(id=user_id).first()
+    if not user:
+       return 'Invalid User', 400
+
+    user.key_accuracy = (user.key_accuracy * user.play_count + key_accuracy) / (user.play_count + 1)
+    user.kana_accuracy = (user.kana_accuracy * user.play_count + kana_accuracy) / (user.play_count + 1)
+    user.play_count += 1
+    user.total_score += score
     db_session.add(s)
     db_session.commit()
 
