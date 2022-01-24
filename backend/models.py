@@ -56,7 +56,7 @@ class Beatmapset(Base):
     duration = Column(Integer)
 
     owner = relationship('User', back_populates='beatmapsets')
-    beatmaps = relationship('Beatmap', back_populates='beatmapset')
+    beatmaps = relationship('Beatmap', back_populates='beatmapset', cascade="all, delete, delete-orphan")
 
 class Score(Base):
     __tablename__ = 'scores'

@@ -129,6 +129,24 @@ def update_beatmap(user_id, beatmap_id):
     res = beatmap_schema.dump(beatmap)
     return res
 
+@api.route('/beatmaps/<int:beatmap_id>', methods=['DELETE'])
+@login_required
+def delete_beatmap(user_id, beatmap_id):
+    beatmap = Beatmap.query.get(beatmap_id)
+    if not beatmap:
+        return 'Beatmap does not exist!', 400
+    bms_id = beatmap.beatmapset_id
+
+    exists_subq = Beatmapset.query.filter(
+            Beatmapset.owner_id == user_id,
+            Beatmapset.id == bms_id).exists()
+    exists = db_session.query(exists_subq).scalar()
+    if not exists:
+        return 'Beatmapset does not exist or you do not own it!', 400
+    db_session.delete(beatmap)
+    db_session.commit()
+    return { 'success': True }
+
 @api.route('/beatmaps', methods=['POST'])
 @login_required
 def add_beatmap(user_id):
@@ -222,6 +240,18 @@ def add_beatmapset(user_id):
     db_session.commit()
     res = beatmapset_schema.dump(Beatmapset.query.get(new_bmset.id))
     return res, 201
+
+@api.route('/beatmapsets/<int:beatmapset_id>', methods=['DELETE'])
+@login_required
+def delete_beatmapset(user_id, beatmapset_id):
+    beatmap_set = Beatmapset.query.filter(
+            Beatmapset.owner_id == user_id,
+            Beatmapset.id == beatmapset_id).one_or_none()
+    if not beatmap_set:
+        return 'Beatmapset does not exist or you do not own it!', 400
+    db_session.delete(beatmap_set)
+    db_session.commit()
+    return { 'success': True }
 
 @api.route('/scores', methods=['POST'])
 @login_required
