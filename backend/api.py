@@ -16,11 +16,11 @@ api = Blueprint('api', __name__)
 
 def login_required(f):
     @wraps(f)
-    def wrapper():
+    def wrapper(*args, **kwargs):
         user = session.get('user')
         if not user:
             return 'You are not logged in', 401
-        return f(user['id'])
+        return f(user['id'], *args, **kwargs)
     return wrapper
 
 def process_beatmapset(beatmapset):
@@ -90,6 +90,40 @@ def get_beatmap_with_set_and_scores(beatmap_id):
     scores_result = scores_schema.dump(scores)
     beatmapset_result = beatmapset_schema.dump(beatmap.beatmapset)
     return { **beatmap_result, 'scores' : scores_result, 'beatmapset' : process_beatmapset(beatmapset_result) }
+
+@api.route('/beatmaps/<int:beatmap_id>', methods=['PUT'])
+@login_required
+def update_beatmap(user_id, beatmap_id):
+    '''
+    Data
+    ----
+    beatmapset_id
+    diffname
+    content
+    '''
+    json_data = request.get_json()
+    if not json_data:
+        return 'No input provided', 400
+    try:
+        data = beatmap_schema.load(json_data)
+    except ValidationError as err:
+        return err.messages, 400
+
+    bms_id, diffname, content = itemgetter('beatmapset_id', 'diffname', 'content')(data)
+
+    exists_subq = Beatmapset.query.filter(
+            Beatmapset.owner_id == user_id,
+            Beatmapset.id == bms_id).exists()
+    exists = db_session.query(exists_subq).scalar()
+    if not exists:
+        return 'Beatmapset does not exist or you do not own it!', 400
+
+    beatmap = Beatmap.query.get(beatmap_id)
+    beatmap.content = content
+    beatmap.diffname = diffname
+    db_session.commit()
+    res = beatmap_schema.dump(beatmap)
+    return res
 
 @api.route('/beatmaps', methods=['POST'])
 @login_required
