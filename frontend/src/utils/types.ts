@@ -90,8 +90,8 @@ export type LineData = {
   }[],
 };
 
-type BeatmapMetadata = {
-  id: number;
+export type BeatmapMetadata = {
+  id: number | string;
   diffname: string;
 }
 

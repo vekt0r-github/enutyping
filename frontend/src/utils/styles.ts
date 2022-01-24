@@ -80,3 +80,22 @@ export const GamePageContainer = styled.div`
     }
   }
 `;
+
+export const SearchBar = styled.input`
+  font-size: 18px;
+  width: 80%;
+  margin: var(--s);
+`;
+
+export const SongsContainer = styled.div`
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr;
+  max-width: 500px;
+  @media (min-width: 800px) {
+    grid-template-columns: 1fr 1fr;
+    max-width: 1000px;
+  }
+  justify-content: center;
+  margin: 0 var(--s);
+`;

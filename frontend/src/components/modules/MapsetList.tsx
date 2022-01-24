@@ -13,27 +13,8 @@ import { MainBox, SubBox, Link, Line } from '@/utils/styles';
 type Props = {
   mapsets: Beatmapset[],
   config: Config,
-  link: (mapsetId: number, mapId?: number) => string,
+  link: (mapsetId: number, mapId?: number|string) => string,
 };
-
-const SearchBar = styled.input`
-  font-size: 18px;
-  width: 80%;
-  margin: var(--s);
-`;
-
-const SongsContainer = styled.div`
-  display: grid;
-  width: 100%;
-  grid-template-columns: 1fr;
-  max-width: 500px;
-  @media (min-width: 800px) {
-    grid-template-columns: 1fr 1fr;
-    max-width: 1000px;
-  }
-  justify-content: center;
-  margin: 0 var(--s);
-`;
 
 const SetLink = styled(MainBox)`
   position: absolute;
@@ -53,9 +34,12 @@ const DiffsContainer = styled.div`
   z-index: 1;
 `;
 
-const Diff = styled(SubBox)`
-  display: block;
+const Diff = styled(SubBox)<{color: string}>`
+  background-color: ${({color}) => `var(--clr-${color})`};
+  display: flex;
+  align-items: center;
   width: 100%;
+  height: 30px;
   padding: 1px var(--s);
   & + & { margin-top: var(--xs); }
   box-sizing: border-box;
@@ -63,7 +47,7 @@ const Diff = styled(SubBox)`
   transition: var(--tt-short);
   z-index: 1;
   &:hover {
-    background-color: var(--clr-secondary-light);
+    background-color: ${({color}) => `var(--clr-${color}-light)`};
     color: black;
   }
 `;
@@ -106,43 +90,40 @@ const Info = styled.div`
 `;
 
 const MapsetList = ({ mapsets, config, link } : Props) => {
-  const [searchQuery, setSearchQuery] = useState<string>("");
-
-  const filteredMapsets = mapsets.filter((set: Beatmapset) => {  
-    const lowercaseQuery = searchQuery.toLowerCase();
-    return JSON.stringify(set).toLowerCase().includes(lowercaseQuery);
-  });
-
   return (
     <>
-      <SearchBar value={searchQuery} placeholder={"Search for a mapset:"} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} />
-      <SongsContainer>
-        {filteredMapsets?.map((mapset) => {
-          const {yt_id, preview_point, owner, beatmaps} = mapset;
-          return (
-            <SongBox key={mapset.id}>
-              <HoverContainer>
-                <SetLink as={Link} to={link(mapset.id)}>
-                  <YTThumbnail yt_id={yt_id} width={120} height={90} />
-                  <Info>
-                    <Line size='1.25em' as='h2'>{getTitle(mapset, config)}</Line>
-                    <Line size='1em'>by {getArtist(mapset, config)}</Line>
-                    <Line size='0.8em'>mapped by {owner.name}</Line>
-                    <Line size='0.8em'>{beatmaps.length} difficult{beatmaps.length !== 1 ? 'ies' : 'y'}</Line>
-                  </Info>
-                </SetLink>
-                <DiffsContainer>
-                  {beatmaps.map((map) => 
-                    <Diff as={Link} to={link(mapset.id, map.id)} key={map.id}>
-                      {map.diffname}
-                    </Diff>
-                  )}
-                </DiffsContainer>
-              </HoverContainer>
-            </SongBox>
-          );
-        })}
-      </SongsContainer>
+      {mapsets?.map((mapset) => {
+        const {yt_id, preview_point, owner, beatmaps} = mapset;
+        const diffCount = beatmaps.filter((map) => map.id !== "new").length;
+        return (
+          <SongBox key={mapset.id}>
+            <HoverContainer>
+              <SetLink as={Link} to={link(mapset.id)}>
+                <YTThumbnail yt_id={yt_id} width={120} height={90} />
+                <Info>
+                  <Line size='1.25em' as='h2'>{getTitle(mapset, config)}</Line>
+                  <Line size='1em'>by {getArtist(mapset, config)}</Line>
+                  <Line size='0.8em'>mapped by {owner.name}</Line>
+                  <Line size='0.8em'>{diffCount} difficult{diffCount !== 1 ? 'ies' : 'y'}</Line>
+                </Info>
+              </SetLink>
+              <DiffsContainer>
+                {beatmaps.map((map) => 
+                  <Diff
+                    as={Link} 
+                    to={link(mapset.id, map.id)} 
+                    color={(map.id === "new") ? "create" : "secondary"}
+                    key={map.id}
+                  >
+                    {(map.id === "new") ? <Line size="2.5em" margin="-4px 8px 0 0">+</Line> : null}
+                    <Line size="1em">{map.diffname}</Line>
+                  </Diff>
+                )}
+              </DiffsContainer>
+            </HoverContainer>
+          </SongBox>
+        );
+      })}
     </>
   );
 }

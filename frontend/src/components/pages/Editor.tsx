@@ -57,7 +57,8 @@ const Editor = ({ user, config } : Props) => {
   const {status, beatmap} = state;
   
   const saveBeatmap = () => {
-    if (!beatmap || !beatmap.content.length) { return; }
+    if (!beatmap) { return; }
+    if (!beatmap.content.length || !beatmap.diffname.length) { return; }
     if (isNewMap) {
       const data = {
         beatmapset_id: mapsetId,
@@ -174,11 +175,11 @@ const Editor = ({ user, config } : Props) => {
           config={config}
         />
         <Sidebar as="form" onSubmit={(e : React.FormEvent<HTMLFormElement>) => {
-            setContent((e.currentTarget.elements[0] as HTMLInputElement).value);
+            saveBeatmap();
             e.preventDefault();
           }}>
           <h2>Beatmap File</h2>
-          <GameFile value={content} />
+          <GameFile value={content} readOnly={true} />
           <button type='submit'>SUbSMIT</button>
         </Sidebar>
       </GamePageContainer>

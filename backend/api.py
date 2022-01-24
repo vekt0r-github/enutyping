@@ -193,9 +193,9 @@ def get_beatmapset_with_diffs_and_scores(beatmapset_id):
 @api.route('/beatmapsets', methods=['GET'])
 def get_beatmapset_list():
     search_query = request.args.get('search', '')
-    title_result = Beatmapset.query.filter(Beatmapset.title.ilike('%' + search_query + '%')).all()
+    owner_result = Beatmapset.query.filter(Beatmapset.owner_id.ilike('%' + search_query + '%')).all()
     # https://softwareengineering.stackexchange.com/questions/286293/whats-the-best-way-to-return-an-array-as-a-response-in-a-restful-api
-    results = beatmapsets_schema.dump(title_result)
+    results = beatmapsets_schema.dump(owner_result)
     return { 'beatmapsets': list(map(process_beatmapset, results)) }
 
 @api.route('/beatmapsets', methods=['POST'])
