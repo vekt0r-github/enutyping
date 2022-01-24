@@ -65,7 +65,7 @@ export const writeBeatmap = (beatmap : Beatmap) => {
   }
   if (beatmap.endTime !== undefined) { content.push(`E,${beatmap.endTime}`); }
   return content.join('\n');
-}
+};
 
 export const getArtist = (mapset: Beatmapset, config: Config) => 
   mapset[`artist${config.localizeMetadata ? '' : '_original'}`];
@@ -80,7 +80,7 @@ export const timeToLineIndex = (lines: LineData[], time: number) => {
     if (time < lines[i].endTime) { return i; }
   }
   return lines.length;
-}
+};
 
 // 0 to syllables.length
 export const timeToSyllableIndex = (syllables: LineData['syllables'], time: number) => {
@@ -88,13 +88,20 @@ export const timeToSyllableIndex = (syllables: LineData['syllables'], time: numb
     if (time < syllables[i].time) { return i; }
   }
   return syllables.length;
-}
+};
+
+export const lastLineOrSyllableTime = (lines: LineData[]) => {
+  if (!lines.length) { return 0; }
+  const syllables = lines[lines.length - 1].syllables;
+  if (!syllables.length) { return lines[lines.length - 1].startTime; }
+  return syllables[syllables.length - 1].time;
+};
 
 const computeLineKeypresses = (line: LineData) => {
   let keypresses: number = 0;
   line.syllables.forEach(({ text }) => { keypresses += computeMinKeypresses(text) });
   return keypresses;
-}
+};
 
 export const computeLineKPM = (line: LineData) => {
   const lineTime = (line.endTime - line.startTime) / MS_IN_MINUTE;
@@ -115,7 +122,7 @@ export const computeLineKana = (line: LineData) => {
   let totalKana: number = 0;
   line.syllables.forEach(({ text }) => {totalKana += parseKana(text, defaultConfig).length});  
   return totalKana;
-}
+};
 
 export const updateStatsOnKeyPress = (oldStats: GameState['stats'], hit: number, miss: number, endKana: boolean) => {
   return { ...oldStats,
@@ -124,7 +131,7 @@ export const updateStatsOnKeyPress = (oldStats: GameState['stats'], hit: number,
     kanaHits: oldStats.kanaHits + (endKana ? 1 : 0),
     score: oldStats.score + 10 * hit - 5 * miss,
   };
-}
+};
 
 export const updateStatsOnLineEnd = (oldStats: GameState['stats'], line: LineData) => {
   const newTotalKana = oldStats.totalKana + computeLineKana(line); // should be prev line
@@ -132,7 +139,7 @@ export const updateStatsOnLineEnd = (oldStats: GameState['stats'], line: LineDat
 		totalKana: newTotalKana,
     kanaMisses: newTotalKana - oldStats.kanaHits,
   };
-}
+};
 
 // sorry but ehhhhh
 export const makeSetFunc = <State>(setState : React.Dispatch<React.SetStateAction<State>>) => (

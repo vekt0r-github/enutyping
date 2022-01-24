@@ -19,7 +19,8 @@ import {
   GAME_FPS,
   timeToSyllableIndex,
   writeBeatmap,
-  processBeatmap, 
+  processBeatmap,
+  lastLineOrSyllableTime, 
 } from '@/utils/beatmaputils';
 
 import styled from 'styled-components';
@@ -125,7 +126,7 @@ const EditorArea = ({ user, beatmap, setContent, config } : Props) => {
 
   const deleteLastLineBefore = (time : number) => { // or endpoint if applicable
     const index = timeToLineIndex(lines, time);
-    if (index === -1) { return; }
+    if (index <= 0) { return; }
     const currLine : LineData | undefined = lines[index];
     const prevLine : LineData | undefined = lines[index - 1];
     if (index === lines.length) { beatmap.endTime = undefined; }
@@ -152,24 +153,30 @@ const EditorArea = ({ user, beatmap, setContent, config } : Props) => {
     // if currTime coincides with a line/syllable, it will overwrite
     const time = editingState.time!;
     if (editingState.status === LINE) { // finish editing line
-      if (isOnLine(time)) { deleteLastLineBefore(time); }
       const index = timeToLineIndex(lines, time);
       if (index === lines.length) { return; } // past end of map
       const currLine : LineData | undefined = lines[index];
       const nextLine : LineData | undefined = lines[index + 1];
-      let syllables : LineData['syllables'] = [];
-      if (currLine) { 
-        currLine.endTime = time;
-        syllables = currLine.syllables.splice(timeToSyllableIndex(currLine.syllables, time));
+      if (isOnLine(time)) {
+        console.log("ZAMN")
+        currLine.lyric = editingState.content!;
+      } else {
+        let syllables : LineData['syllables'] = [];
+        if (currLine) { 
+          currLine.endTime = time;
+          let sIndex = timeToSyllableIndex(currLine.syllables, time);
+          if (isOnSyllable(time)) { sIndex--; }
+          syllables = currLine.syllables.splice(sIndex);
+        }
+        lines.splice(index + 1, 0, {
+          startTime: time,
+          endTime: currLine ? currLine.endTime :
+            (nextLine ? nextLine.startTime : 
+              (beatmap.endTime ?? beatmap.beatmapset.duration)),
+          lyric: editingState.content!,
+          syllables: syllables,
+        });
       }
-      lines.splice(index + 1, 0, {
-        startTime: time,
-        endTime: currLine ? currLine.endTime :
-          (nextLine ? nextLine.startTime : 
-            (beatmap.endTime ?? beatmap.beatmapset.duration)),
-        lyric: editingState.content!,
-        syllables: syllables,
-      });
     } else { // finish editing syllable
       if (isOnSyllable(time)) { deleteLastSyllableBefore(time); }
       const index = timeToLineIndex(lines, time);
@@ -194,21 +201,23 @@ const EditorArea = ({ user, beatmap, setContent, config } : Props) => {
    * - Up/Down: snap to nearest beat
    * - Left/Right: snap to nearest beat division
    * - Ctrl+[/]: change beat snap divisor (2, 3, 4, 6, 8, 12, 16)
-   * - Ctrl+Up/Down: snap to nearest line start/end
-   * - Ctrl+Left/Right: snap to nearest syllable
+   * -^ Ctrl+Up/Down: snap to nearest line start/end
+   * -^ Ctrl+Left/Right: snap to nearest syllable
    * -^ Enter: begin/finish editing a new syllable at current time (cancelled if current time changes)
    *   - while editing: there's some kind of input where you type in
    *   - double click on a syllable: also snaps to it, but does not begin editing
    * -^ Ctrl+Enter: same but for a line
-   * - Ctrl+Shift+Enter: place the ending position (maybe button only)
+   * -^ Ctrl+Shift+Enter: place the ending position (maybe button only)
    * - Ctrl+Shift+P: place the preview point (maybe button only)
    * -^ Backspace: delete previous syllable, timewise
    * -^ Ctrl+Backspace: same but for a line
    * -^ Esc: exit testing mode or go back
    */
   const onKeyPress = (e: KeyboardEvent) => {
-    if (e.repeat) { return; }
     const ctrl = e.ctrlKey || e.metaKey;
+    const shift = e.shiftKey;
+    const time = currTime!;
+    let index = currIndex!;
     if (isEditing) { 
       if (e.code === "Space") { 
         e.preventDefault();
@@ -219,12 +228,29 @@ const EditorArea = ({ user, beatmap, setContent, config } : Props) => {
           set('status', (status === GameStatus.PAUSED) ? GameStatus.AUTOPLAYING : GameStatus.PAUSED);
         }
       } else if (e.code === "Enter") {
-        if (editingState.status === NOT) { // begin editing something
-          if (ctrl && currIndex === lines.length) { return; }
-          if (!ctrl && !indexValid(currIndex)) { return; }
-          const newEditingState = { status: ctrl ? LINE : SYLLABLE, time: currTime, content: "" };
-          writeFromEditingState(newEditingState);
-          setEditingState(newEditingState);
+        if (ctrl && shift) { // place game end
+          if (time <= lastLineOrSyllableTime(lines)) { return; }
+          beatmap.endTime = time;
+          setContent(writeBeatmap(beatmap));
+        } else if (editingState.status === NOT) { // begin editing something
+          if (ctrl) { // edit line
+            if (index === lines.length) { return; }
+            const content = lines[index].lyric;
+            const newEditingState = { status: LINE, time: time, content: "" };
+            writeFromEditingState(newEditingState);
+            setEditingState({...newEditingState, content: content});
+          } else { // edit syllable
+            if (!indexValid(index)) { return; }
+            let content = "";
+            if (isOnSyllable(time)) {
+              const syllables = lines[index].syllables;
+              const sIndex = timeToSyllableIndex(syllables, time);
+              content = syllables[sIndex - 1].text;
+            }
+            const newEditingState = { status: SYLLABLE, time: time, content: "" };
+            writeFromEditingState(newEditingState);
+            setEditingState({...newEditingState, content: content});
+          }
         } else { // finish editing something
           writeFromEditingState(editingState);
           setEditingState({ status: NOT });
@@ -232,15 +258,56 @@ const EditorArea = ({ user, beatmap, setContent, config } : Props) => {
       } else if (e.code === "Backspace") { // delete the last something
         if (editingState.status !== NOT) { return; } // probably a mistake
         if (ctrl) {
-          currTime && deleteLastLineBefore(currTime);
+          deleteLastLineBefore(time);
         } else {
-          currTime && deleteLastSyllableBefore(currTime);
+          deleteLastSyllableBefore(time);
+        }
+      } else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (ctrl) { // seek to lines/syllables
+          const dir = e.code.substring(5,6).toLowerCase();
+          if (dir === 'u') { // seek to next line
+            if (indexValid(index)) { setSeekingTo(lines[index].endTime); }
+            else if (index === -1 && lines[0]) { setSeekingTo(lines[0].startTime); }
+          } else if (dir === 'd') { // seek to prev line
+            if (isOnLine(time)) { index--; }
+            if (indexValid(index)) { setSeekingTo(lines[index].startTime); }
+            else if (index !== -1) { setSeekingTo(beatmap.endTime); }
+          } else if (dir === 'l') { // seek to prev syllable
+            if (isOnLine(time)) { index--; }
+            if (indexValid(index)) {
+              const syllables = lines[index].syllables;
+              let sIndex = timeToSyllableIndex(syllables, time);
+              if (isOnSyllable(time)) { sIndex--; } // how did it come to this
+              if (sIndex > 0) { setSeekingTo(syllables[sIndex - 1].time); }
+              else { setSeekingTo(lines[index].startTime); }
+            } else if (index !== -1) {
+              setSeekingTo(beatmap.endTime);
+            }
+          } else if (dir === 'r') { // seek to next syllable
+            if (indexValid(index)) {
+              const syllables = lines[index].syllables;
+              let sIndex = timeToSyllableIndex(syllables, time);
+              if (sIndex < syllables.length) { setSeekingTo(syllables[sIndex].time); }
+              else { setSeekingTo(lines[index].endTime); }
+            } else if (index === -1 && lines[0]) {
+              setSeekingTo(lines[0].startTime);
+            }
+          }
+        } else { // seek to beats?
+
         }
       }
     }
     if (e.code === "Escape") {
       if (isTesting) { stopTest(); } 
-      if (isEditing) { set('status', GameStatus.GOBACK); }
+      else if (editingState.status !== NOT) {
+        writeFromEditingState(editingState);
+        setEditingState({ status: NOT });
+      } else {
+        set('status', GameStatus.GOBACK); 
+      }
     }
   };
 
@@ -334,9 +401,9 @@ const EditorArea = ({ user, beatmap, setContent, config } : Props) => {
         config={config}
       />
       {editingState.status === EditingStatus.LINE ?
-        <LineInput onChange={onInputChange} /> : null}
+        <LineInput value={editingState.content} onChange={onInputChange} /> : null}
       {editingState.status === EditingStatus.SYLLABLE ?
-        <SyllableInput onChange={onInputChange} /> : null}
+        <SyllableInput value={editingState.content} onChange={onInputChange} /> : null}
       {isEditing ? <EditorScrollBar 
         currTime={currTime ?? 0}
         setCurrTime={setSeekingTo}
