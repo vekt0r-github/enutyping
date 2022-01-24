@@ -4,23 +4,23 @@ import { Navigate, useParams } from "react-router-dom";
 import Loading from "@/components/modules/Loading";
 import EditorArea from "@/components/modules/EditorArea";
 import NotFound from "@/components/pages/NotFound";
+import MapInfoDisplay from "@/components/modules/MapInfoDisplay";
 
-import { get } from "@/utils/functions";
+import { get, post, put } from "@/utils/functions";
 import { User, Config, Beatmap } from "@/utils/types";
 import { getArtist, getTitle, processBeatmap } from '@/utils/beatmaputils';
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Line } from '@/utils/styles';
-import { Sidebar, PageContainer } from '@/components/pages/Game';
+import { MainBox, Line, Sidebar, GamePageContainer } from '@/utils/styles';
 
 type Props = {
   user: User | null,
   config: Config,
 };
 
-enum Status { LOADING, LOADED, INVALID };
-const { LOADING, LOADED, INVALID } = Status;
+enum Status { LOADING, LOADED, INVALID, CREATED_DIFF };
+const { LOADING, LOADED, INVALID, CREATED_DIFF } = Status;
 
 type BeatmapState = {
   status: Status,
@@ -34,14 +34,16 @@ const GameFile = styled.textarea`
   resize: none;
 `;
 
+const DiffName = styled.input`
+
+`;
+
 const Editor = ({ user, config } : Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />
   }
 
   const { mapId, mapsetId } = useParams();
-  // const isNewMapset = (mapsetId === "new");
-  const isNewMapset = false;
   const isNewMap = (mapId === "new");
 
   const [state, setState] = useState<BeatmapState>({ status: LOADING });
@@ -54,8 +56,37 @@ const Editor = ({ user, config } : Props) => {
   };
   const {status, beatmap} = state;
   
+  const saveBeatmap = () => {
+    if (!beatmap || !beatmap.content.length) { return; }
+    if (isNewMap) {
+      const data = {
+        beatmapset_id: mapsetId,
+        diffname: diffname,
+        content: beatmap.content,
+      }
+      post('/api/beatmaps', data)
+        .then((beatmapRes) => {
+          setState({
+            status: CREATED_DIFF, 
+            beatmap: { ...beatmap, id: beatmapRes.id}
+          });
+        })
+        .catch((err) => console.log(err));
+    } else {
+      const data = {
+        diffname: diffname,
+        content: beatmap.content,
+      }
+      put(`/api/beatmaps/${mapId}`, data)
+        .then(() => {
+          // do something to indicate map is saved
+        })
+        .catch((err) => console.log(err));
+    }
+  };
+  
   useEffect(() => {
-    if (!isNewMapset && !isNewMap) {
+    if (!isNewMap) {
       get(`/api/beatmaps/${mapId}`).then((beatmap) => {
         if (!beatmap || !beatmap.id || beatmap.beatmapset.id != mapsetId) {
           setState({ status: INVALID }); // map not found or param is wrong
@@ -63,7 +94,7 @@ const Editor = ({ user, config } : Props) => {
           processAndLoad(() => beatmap);
         }
       });
-    } else if (!isNewMapset) {
+    } else {
       get(`/api/beatmapsets/${mapsetId}`).then((beatmapset) => {
         if (!beatmapset || !beatmapset.id) {
           setState({ status: INVALID }); // mapset not found
@@ -77,7 +108,7 @@ const Editor = ({ user, config } : Props) => {
           }));
         }
       });
-    } else {
+    }
       // TODO: support this later, in EditorNewMapset.tsx
 
       // load({
@@ -95,18 +126,17 @@ const Editor = ({ user, config } : Props) => {
       //   },
       //   diffname: "",
       // });
-    }
   }, []);
 
   useEffect(() => {
     if (!beatmap) { return; }
-    console.log("oi")
     processBeatmap(beatmap, config);
   }, [beatmap?.content]);
 
   if (status === LOADING) { return <Loading />; }
+  if (status === CREATED_DIFF) { return <Navigate to={`/edit/${mapsetId}/${beatmap!.id}`} />; }
   if (status === INVALID || !beatmap) { return <NotFound />; }
-  const {beatmapset, diffname, content, lines, scores} = beatmap;
+  const {beatmapset, content, diffname, lines, kpm, scores} = beatmap;
   const {yt_id, source, preview_point, owner, beatmaps} = beatmapset;
   const [artist, title] = [getArtist(beatmapset, config), getTitle(beatmapset, config)];
   
@@ -114,23 +144,33 @@ const Editor = ({ user, config } : Props) => {
     processAndLoad((oldBeatmap) => oldBeatmap ? { ...oldBeatmap,
       content: content,
     } : undefined);
+  const setDiffname = (diffname : string) => 
+    processAndLoad((oldBeatmap) => oldBeatmap ? { ...oldBeatmap,
+      diffname: diffname,
+    } : undefined);
 
   return (
     <>
       <h1>Editing: {artist} - {title} [{diffname}]</h1>
-      <PageContainer>
-        <Sidebar>
-          <h2>Map info and stats etc.</h2>
-          <Line>Title: {title}</Line>
-          <Line>Artist: {artist}</Line>
-          <Line>Map ID: {beatmap.id}</Line>
-          <Line>Set ID: {beatmapset.id}</Line>
-          <Line>Source: {source}</Line>
-        </Sidebar>
+      <GamePageContainer>
+        <MapInfoDisplay 
+          title={title}
+          artist={artist}
+          source={source!}
+          diffname={
+            <DiffName
+              value={diffname}
+              onChange={(e : React.ChangeEvent<HTMLInputElement>) => {
+                setDiffname(e.target.value);
+              }}
+            />}
+          kpm={kpm}
+        />
         <EditorArea
           user={user}
           beatmap={beatmap}
           setContent={setContent}
+          saveBeatmap={saveBeatmap}
           config={config}
         />
         <Sidebar as="form" onSubmit={(e : React.FormEvent<HTMLFormElement>) => {
@@ -141,9 +181,21 @@ const Editor = ({ user, config } : Props) => {
           <GameFile value={content} />
           <button type='submit'>SUbSMIT</button>
         </Sidebar>
-      </PageContainer>
+      </GamePageContainer>
     </>
   );
 }
 
-export default Editor;
+const EditorWithKey = (props : Props) => {
+  const params = useParams();
+  // etc... other react-router-dom v6 hooks
+
+  return (
+    <Editor
+      key={`${params.mapsetId}-${params.mapId}`}
+      {...props}
+    />
+  );
+};
+
+export default EditorWithKey;

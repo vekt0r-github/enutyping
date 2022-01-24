@@ -52,3 +52,31 @@ export const EditorTimelineBox = styled.div`
   background-color: var(--clr-secondary-light);
   border: 2px solid var(--clr-secondary-dim);
 `;
+
+export const Sidebar = styled(MainBox)`
+  min-width: 300px;
+  max-width: 400px;
+  height: var(--game-height);
+  flex-basis: 300px;
+  flex-grow: 1;
+  flex-shrink: 0;
+  box-sizing: content-box;
+  margin: 0 var(--s);
+`;
+
+export const GamePageContainer = styled.div`
+  width: 100%;
+  min-width: var(--game-width);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  @media (max-width: 1496px) { // 800 + 2*(300+2*3*8)
+    width: calc(var(--game-width) + 4*var(--s));
+    flex-wrap: wrap;
+    & ${Sidebar} {
+      order: 1;
+      margin-top: var(--s);
+    }
+  }
+`;

@@ -31,6 +31,7 @@ type Props = {
   user: User | null,
   beatmap: Beatmap,
   setContent: (content: string) => void,
+  saveBeatmap: () => void,
   config: Config,
 };
 
@@ -84,7 +85,7 @@ const makeStateAt = (lines: LineData[], config: Config, currTime?: number, statu
   stats: initStatsState(),
 });
 
-const EditorArea = ({ user, beatmap, setContent, config } : Props) => {
+const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) => {
   const lines = beatmap.lines;
   const makeState = (currTime?: number, status?: GameStatus) => makeStateAt(lines as LineData[], config, currTime, status);
   const [gameState, setGameState] = useState<GameState>(makeState());
@@ -158,7 +159,6 @@ const EditorArea = ({ user, beatmap, setContent, config } : Props) => {
       const currLine : LineData | undefined = lines[index];
       const nextLine : LineData | undefined = lines[index + 1];
       if (isOnLine(time)) {
-        console.log("ZAMN")
         currLine.lyric = editingState.content!;
       } else {
         let syllables : LineData['syllables'] = [];
@@ -190,9 +190,8 @@ const EditorArea = ({ user, beatmap, setContent, config } : Props) => {
       });
     }
     // submit changes to newly edited thing to file format
-    console.log("HOLY SHIT")
     setContent(writeBeatmap(beatmap));
-  }
+  };
 
   /**
    * Editor controls documentation (to write up in a user-facing infobox):
@@ -214,6 +213,11 @@ const EditorArea = ({ user, beatmap, setContent, config } : Props) => {
    * -^ Esc: exit testing mode or go back
    */
   const onKeyPress = (e: KeyboardEvent) => {
+    const indirect = (e.target != document.body); // in a textbox or whatever
+    if (indirect) {
+      if (["Space", "Backspace"].includes(e.code)) { return; }
+      if (editingState.status === NOT && ["Enter"].includes(e.code)) { return; }
+    }
     const ctrl = e.ctrlKey || e.metaKey;
     const shift = e.shiftKey;
     const time = currTime!;
@@ -235,7 +239,7 @@ const EditorArea = ({ user, beatmap, setContent, config } : Props) => {
         } else if (editingState.status === NOT) { // begin editing something
           if (ctrl) { // edit line
             if (index === lines.length) { return; }
-            const content = lines[index].lyric;
+            const content = indexValid(index) && isOnLine(time) ? lines[index].lyric : "";
             const newEditingState = { status: LINE, time: time, content: "" };
             writeFromEditingState(newEditingState);
             setEditingState({...newEditingState, content: content});
@@ -298,6 +302,10 @@ const EditorArea = ({ user, beatmap, setContent, config } : Props) => {
         } else { // seek to beats?
 
         }
+      } else if (e.code === "KeyS" && ctrl) { // save map
+        e.preventDefault();
+        e.stopPropagation();
+        saveBeatmap();
       }
     }
     if (e.code === "Escape") {
@@ -310,8 +318,6 @@ const EditorArea = ({ user, beatmap, setContent, config } : Props) => {
       }
     }
   };
-
-  useEffect(() => {console.log(editingState)}, [editingState])
 
   useEffect(() => {
     // start playing-- status must change to PLAYING
@@ -363,7 +369,6 @@ const EditorArea = ({ user, beatmap, setContent, config } : Props) => {
   }, [status, editingState, currTime]); // may eventually depend on other things
   
   useEffect(() => { // refresh map content
-    console.log("refr")
     setGameState((oldGameState) => makeState(oldGameState.currTime));
   }, [beatmap.content]);
 

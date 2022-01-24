@@ -4,6 +4,7 @@ import { Navigate, useParams, useLocation } from "react-router-dom";
 import Loading from "@/components/modules/Loading";
 import NotFound from "@/components/pages/NotFound";
 import YTThumbnail from "@/components/modules/YTThumbnail";
+import MapInfoDisplay from "@/components/modules/MapInfoDisplay";
 
 import { get } from "@/utils/functions";
 import { Config, Beatmapset } from "@/utils/types";
@@ -11,9 +12,8 @@ import { getArtist, getTitle } from "@/utils/beatmaputils"
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Line, Link } from '@/utils/styles';
+import { MainBox, Line, Link, Sidebar, GamePageContainer } from '@/utils/styles';
 
-import { Sidebar, PageContainer } from "@/components/pages/Game";
 import { GameContainer, BottomHalf, StatBox, Overlay as GameOverlay } from "@/components/modules/GameAreaDisplay";
 
 type Props = {
@@ -93,15 +93,12 @@ const DiffSelect = ({ config } : Props) => {
   return (
     <>
       <h1>{(base === "edit") && "Editing: "}{artist} - {title}</h1>
-      <PageContainer>
-        <Sidebar>
-          <h2>Map info and stats etc.</h2>
-          <Line>Title: {title}</Line>
-          <Line>Artist: {artist}</Line>
-          <Line>Map ID: </Line>
-          <Line>Set ID: {mapset.id}</Line>
-          <Line>Source: {source}</Line>
-        </Sidebar>
+      <GamePageContainer>
+        <MapInfoDisplay 
+          title={title}
+          artist={artist}
+          source={source!}
+        />
         <GameContainer>
           <BottomHalf>
             <StatBox />
@@ -123,7 +120,7 @@ const DiffSelect = ({ config } : Props) => {
           <h2>Is this still leaderboard</h2>
           <Line>i have no fucking clue what goes here</Line>
         </Sidebar>
-      </PageContainer>
+      </GamePageContainer>
     </>
   );
 }
