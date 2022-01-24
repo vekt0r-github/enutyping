@@ -115,8 +115,8 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, 
 
   const keyAcc = acc(hits, misses);
   const kanaAcc = acc(kanaHits, kanaMisses);
-	
-	const KPM = currTime ? (Math.round(hits * 60000 / currTime)) : 0;
+  
+  const KPM = currTime ? (Math.round(hits * 60000 / currTime)) : 0;
 
   if (status === GameStatus.GOBACK) {
     return <Navigate to={`/play/${beatmap.beatmapset.id}`} replace={true} />;
@@ -155,7 +155,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, 
           <p>Keypress Acc: {keyAcc.toFixed(2)}</p>
           <p>Kana Acc: {kanaAcc.toFixed(2)}</p>
           <p>Score: {score}</p>
-					<p>KPM: {KPM}</p>
+          <p>KPM: {KPM}</p>
         </StatBox>
         <GameVideo
           yt_id={beatmap.beatmapset.yt_id}

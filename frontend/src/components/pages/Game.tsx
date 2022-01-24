@@ -23,21 +23,21 @@ type Props = {
 };
 
 const LBContainer = styled.div`
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const LBEntry = styled(SubBox)`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: space-between;
-	min-width: 80%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 80%;
 `;
 
 const UserAvatar = styled.img`
-	width:30px;
+  width:30px;
 `;
 
 const Game = ({ user, config } : Props) => {
@@ -81,20 +81,20 @@ const Game = ({ user, config } : Props) => {
         />
         <Sidebar>
           <h2>Leaderboard</h2>
-					<LBContainer>
-						{ map?.scores?.map((score) =>
-							// XXX: hmm is this okay to be optional?
-							<LBEntry key={score.id}>
-								<Link to={`/user/${score.user?.id}`}>
-									<UserAvatar src={score.user?.avatar_url} />
-								</Link>
-								<Link to={`/user/${score.user?.id}`}>
-									{score.user?.name + ":"}
-								</Link>
-								{score.score}
-							</LBEntry>
-						)}
-					</LBContainer>
+          <LBContainer>
+            { map?.scores?.map((score) =>
+              // XXX: hmm is this okay to be optional?
+              <LBEntry key={score.id}>
+                <Link to={`/user/${score.user?.id}`}>
+                  <UserAvatar src={score.user?.avatar_url} />
+                </Link>
+                <Link to={`/user/${score.user?.id}`}>
+                  {score.user?.name + ":"}
+                </Link>
+                {score.score}
+              </LBEntry>
+            )}
+          </LBContainer>
         </Sidebar>
       </GamePageContainer>
     </>

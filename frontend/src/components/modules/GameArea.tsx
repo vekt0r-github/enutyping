@@ -33,7 +33,7 @@ const initStatsState = () => ({
   misses: 0,
   kanaHits: 0,
   kanaMisses: 0,
-	totalKana: 0,
+  totalKana: 0,
   score: 0,
 });
 
@@ -123,8 +123,8 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
       beatmap_id: beatmap.id,
       // Do not provide user_id as the backend should have stored in session
       score: stats.score,
-			key_accuracy: stats.hits / (stats.hits + stats.misses),
-			kana_accuracy: stats.kanaHits / stats.totalKana
+      key_accuracy: stats.hits / (stats.hits + stats.misses),
+      kana_accuracy: stats.kanaHits / stats.totalKana
     }
     post('/api/scores', data).then((score) => {
       afterGameEnd();
@@ -140,7 +140,7 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
   }, [status]); // may eventually depend on other things
 
   const keyCallback = (hit: number, miss: number, endKana: boolean) => {
-		set('stats', (oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana));
+    set('stats', (oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana));
   }
 
   if (status === GameStatus.GOBACK) {

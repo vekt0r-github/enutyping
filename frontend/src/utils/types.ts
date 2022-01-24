@@ -5,18 +5,18 @@ export type User = { // example
 };
 
 export type UserStats = {
-	join_time: number;
-	kana_accuracy: number;
-	key_accuracy: number;
-	play_count: number;
-	total_score: number;
+  join_time: number;
+  kana_accuracy: number;
+  key_accuracy: number;
+  play_count: number;
+  total_score: number;
 };
 
 export type Config = {
   volume: number;
   offset: number;
   localizeMetadata: boolean;
-	typePolygraphs: boolean;
+  typePolygraphs: boolean;
   kanaSpellings: {
     し: string,
     ち: string,
@@ -42,7 +42,7 @@ export const defaultConfig: Config = {
   volume: 1.0,
   offset: 0,
   localizeMetadata: true,
-	typePolygraphs: true,
+  typePolygraphs: true,
   kanaSpellings: {
     し: "shi", 
     ち: "chi",
@@ -68,9 +68,9 @@ export type Score = {
   id: number;
   beatmap_id: number;
   score: number;
-	key_accuracy: number;
-	kana_accuracy: number;
-	time_unix: number;
+  key_accuracy: number;
+  kana_accuracy: number;
+  time_unix: number;
   user?: User;
 }
 
@@ -131,11 +131,11 @@ export type KanaState = {
   kana: Kana,
   prefix: string, // the correct keystrokes user has typed for this kana
   suffix: string, // one possible romaji completion of this kana after prefix
-	minKeypresses: number, // fewest keystrokes to type this kana
+  minKeypresses: number, // fewest keystrokes to type this kana
 };
 
 export type LineState = {
-	line: LineData,
+  line: LineData,
   position: [number, number]; // syllable index, kana index
   syllables: { // yes this is basically a copy of line.syllables but whatever for now
     time: number,
@@ -149,13 +149,13 @@ export type GameState = {
   status: GameStatus,
   offset: number,
   currTime?: number,
-	lines: LineState[],
+  lines: LineState[],
   stats: {
     hits: number,
     misses: number,
     kanaHits: number, // total typed up to current time
-		kanaMisses: number, // total untyped in previous lines
-		totalKana: number, // total for all previous (not current) lines
+    kanaMisses: number, // total untyped in previous lines
+    totalKana: number, // total for all previous (not current) lines
     score: number,
   },
 };

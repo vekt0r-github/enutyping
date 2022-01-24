@@ -373,7 +373,7 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
   }, [beatmap.content]);
 
   const keyCallback = (hit: number, miss: number, endKana: boolean) => {
-		set('stats', (oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana));
+    set('stats', (oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana));
   };
 
   if (status === GameStatus.GOBACK) {

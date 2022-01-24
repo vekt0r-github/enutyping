@@ -60,8 +60,8 @@ html, body, #root {
 }
 
 html {
-	height: auto;
-	min-height: 100%;
+  height: auto;
+  min-height: 100%;
 }
 
 #root {

@@ -136,7 +136,7 @@ export const updateStatsOnKeyPress = (oldStats: GameState['stats'], hit: number,
 export const updateStatsOnLineEnd = (oldStats: GameState['stats'], line: LineData) => {
   const newTotalKana = oldStats.totalKana + computeLineKana(line); // should be prev line
   return { ...oldStats,
-		totalKana: newTotalKana,
+    totalKana: newTotalKana,
     kanaMisses: newTotalKana - oldStats.kanaHits,
   };
 };

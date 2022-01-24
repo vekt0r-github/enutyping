@@ -14,7 +14,7 @@ const CategoryBox = styled(MainBox)`
   justify-content: left;
   align-items: center;
   margin: 30px;
-	margin-bottom: 30px;
+  margin-bottom: 30px;
   max-width: 80%;
   min-width: 80%;
 `;
@@ -63,7 +63,7 @@ const SettingsPage = ({ user, yourUser, setYourUser, initConfig, setGlobalConfig
   
   const [config, setConfig] = useState<Config>(initConfig); 
   
-	// Account name change state
+  // Account name change state
   const [requestedName, setRequestedName] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>();
 
@@ -180,14 +180,14 @@ const SettingsPage = ({ user, yourUser, setYourUser, initConfig, setGlobalConfig
               {kanaOptions}
             </KanaContainer>
           </SettingBox>
-					<SettingBox>
+          <SettingBox>
           <SettingTitle>Polygraphic Kana Input:</SettingTitle>
-						<select name={"polygraphs"} value={config.typePolygraphs ? "true" : "false"} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-							setConfig({ ...config, typePolygraphs: (e.target.value === "true") });
-						}}>
-							<option value={"true"}>Enable individual typing of polygraphs</option>
-							<option value={"false"}>Disable individual typing of polygraphs</option>
-						</select>
+            <select name={"polygraphs"} value={config.typePolygraphs ? "true" : "false"} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              setConfig({ ...config, typePolygraphs: (e.target.value === "true") });
+            }}>
+              <option value={"true"}>Enable individual typing of polygraphs</option>
+              <option value={"false"}>Disable individual typing of polygraphs</option>
+            </select>
             <p>Choose whether you want to be able to type polygraphic kana such as しゃ and っぷ by typing each kana individually. For example, with this setting turned on, you can type しゃ as "sha" or "shixya".</p>
           </SettingBox>
         </SettingContainer>
@@ -198,7 +198,7 @@ const SettingsPage = ({ user, yourUser, setYourUser, initConfig, setGlobalConfig
         </CategoryTitle>
         <SettingBox>
           <SettingTitle>Change Username</SettingTitle>
-					{ editUser }
+          { editUser }
         </SettingBox>
       </CategoryBox>
     </>
