@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 
 import ProgressBar from "@/components/modules/ProgressBar";
 
-import { Config, Kana, KanaState, LineData, LineState } from '@/utils/types'
-import { parseKana, computeMinKeypresses } from '@/utils/kana'
+import { Config, KanaState, LineState } from '@/utils/types'
+import { getVisualPosition } from "@/utils/beatmaputils";
 
 import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
@@ -182,7 +182,7 @@ const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : P
         <CharText active={FUTURE}>{suffixes.substring(1)}</CharText>
       </>);
     }
-    const timeRatio = (time - startTime) / (endTime - startTime);
+    const timeRatio = getVisualPosition(time, line);
     return (
       <Syllable 
         key={index}
@@ -203,7 +203,7 @@ const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : P
         {syllableList.reverse()}
         <TimelineBar>
           <ProgressBar
-            progress={visualShift((currTime - startTime) / (endTime - startTime))}
+            progress={visualShift(getVisualPosition(currTime, line))}
           />
         </TimelineBar>
       </Timeline>

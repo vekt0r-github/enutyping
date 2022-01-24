@@ -171,3 +171,8 @@ export const makeLineStateAt = (currTime: number, lineData: LineData, config: Co
   })),
   nBuffer: false,
 });
+
+export const getVisualPosition = (currTime: number, lineData: LineData) => {
+  const {startTime, endTime} = lineData;
+  return (currTime - startTime) / (endTime - startTime);
+}

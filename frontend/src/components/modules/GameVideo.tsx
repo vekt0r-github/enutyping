@@ -40,7 +40,7 @@ const GameVideo = ({ yt_id, status, currTime, startGame, volume } : Props) => {
       player.stopVideo();
     } else if (status === GameStatus.PAUSED) {
       player.playVideo();
-      player.pauseVideo();
+      if (playing) { player.pauseVideo(); }
     } else if ([GameStatus.STARTQUEUED, GameStatus.PLAYING, GameStatus.AUTOPLAYING].includes(status)) {
       seek();
       player.playVideo();
@@ -58,6 +58,8 @@ const GameVideo = ({ yt_id, status, currTime, startGame, volume } : Props) => {
     if (playing && status === GameStatus.STARTQUEUED) { 
       // playing and should be playing and didn't start game
       startGame();
+    } else if (playing && status === GameStatus.PAUSED) { 
+      player?.pauseVideo();
     }
   };
 

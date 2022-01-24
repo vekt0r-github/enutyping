@@ -74,7 +74,7 @@ const SliderFill = styled.div.attrs<{fill: number}>(({fill}) => ({
 
 const LineMarker = styled.div.attrs<{pos: number}>(({pos}) => ({
   style: {
-    left: `calc(1px + ${pos} * (100% - 4px))`,
+    left: `calc(1.5px + ${pos} * (100% - 4px))`,
   },
 }))<{pos: number}>`
   position: absolute;

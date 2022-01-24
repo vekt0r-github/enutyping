@@ -5,7 +5,6 @@ import GameAreaDisplay from "@/components/modules/GameAreaDisplay";
 import EditorTimeline from "@/components/modules/EditorTimeline";
 import EditorScrollBar from "@/components/modules/EditorScrollBar";
 
-import { post } from '@/utils/functions';
 import { 
   User, Beatmap, LineData, Config,
   GameStatus, GameState 
@@ -19,8 +18,8 @@ import {
   GAME_FPS,
   timeToSyllableIndex,
   writeBeatmap,
-  processBeatmap,
   lastLineOrSyllableTime, 
+  getVisualPosition,
 } from '@/utils/beatmaputils';
 
 import styled from 'styled-components';
@@ -40,6 +39,7 @@ const {NOT, LINE, SYLLABLE} = EditingStatus;
 
 type EditingState = {
   status: EditingStatus,
+  unsaved: boolean,
   time?: number,
   content?: string,
 };
@@ -62,9 +62,20 @@ const LineInput = styled.input`
   top: 150px; // empirical; subject to change
 `;
 
-const SyllableInput = styled(LineInput)`
+const SyllableInput = styled(LineInput).attrs<{pos: number}>(({pos}) =>({
+  style: {
+    left: `calc(var(--s) + ${pos} * (100% - 2*var(--s)))`,
+  },
+}))<{pos: number}>`
   font-size: 1.125em;
-  top: 80px; // empirical; subject to change
+  top: 60px; // empirical; subject to change
+`;
+
+const UnsavedWarning = styled(Line)`
+  background-color: var(--clr-warn);
+  color: var(--clr-grey);
+  position: absolute;
+  top: 200px;
 `;
 
 const initStatsState = () => ({
@@ -91,7 +102,7 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
   const [gameState, setGameState] = useState<GameState>(makeState());
   const set = makeSetFunc(setGameState);
   const [seekingTo, setSeekingTo] = useState<number>();
-  const [editingState, setEditingState] = useState<EditingState>({ status: NOT });
+  const [editingState, setEditingState] = useState<EditingState>({ status: NOT, unsaved: false });
 
   // from iframe API; in seconds, rounded? maybe
   // maybe need later but idk
@@ -127,17 +138,21 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
 
   const deleteLastLineBefore = (time : number) => { // or endpoint if applicable
     const index = timeToLineIndex(lines, time);
-    if (index <= 0) { return; }
+    if (index === -1) { return; }
     const currLine : LineData | undefined = lines[index];
     const prevLine : LineData | undefined = lines[index - 1];
     if (index === lines.length) { beatmap.endTime = undefined; }
-    else {
+    else if (index > 0) {
       lines.splice(index, 1);
       prevLine.endTime = currLine.endTime;
       prevLine.syllables = prevLine.syllables.concat(currLine.syllables);
-      prevLine.lyric = prevLine.lyric.concat(currLine.lyric);
+      // prevLine.lyric = prevLine.lyric.concat(currLine.lyric);
+    } else {
+      if (currLine.syllables.length) { return; }
+      lines.splice(index, 1);
     }
     setContent(writeBeatmap(beatmap));
+    setEditingState({ status: NOT, unsaved: true });
   }
   
   const deleteLastSyllableBefore = (time : number) => { // only works within current line
@@ -148,6 +163,7 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
     if (sIndex === 0) { return; }
     syllables.splice(sIndex - 1, 1);
     setContent(writeBeatmap(beatmap));
+    setEditingState({ status: NOT, unsaved: true });
   }
 
   const writeFromEditingState = (editingState : EditingState) => {
@@ -213,8 +229,8 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
    * -^ Esc: exit testing mode or go back
    */
   const onKeyPress = (e: KeyboardEvent) => {
-    const indirect = (e.target != document.body); // in a textbox or whatever
-    if (indirect) {
+    if ((e.target as Element)?.tagName?.toLowerCase() == 'input' &&
+      (e.target as HTMLInputElement)?.type?.toLowerCase() != 'range') { // in a textbox or whatever
       if (["Space", "Backspace"].includes(e.code)) { return; }
       if (editingState.status === NOT && ["Enter"].includes(e.code)) { return; }
     }
@@ -240,7 +256,7 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
           if (ctrl) { // edit line
             if (index === lines.length) { return; }
             const content = indexValid(index) && isOnLine(time) ? lines[index].lyric : "";
-            const newEditingState = { status: LINE, time: time, content: "" };
+            const newEditingState = { status: LINE, unsaved: true, time: time, content: "" };
             writeFromEditingState(newEditingState);
             setEditingState({...newEditingState, content: content});
           } else { // edit syllable
@@ -251,13 +267,13 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
               const sIndex = timeToSyllableIndex(syllables, time);
               content = syllables[sIndex - 1].text;
             }
-            const newEditingState = { status: SYLLABLE, time: time, content: "" };
+            const newEditingState = { status: SYLLABLE, unsaved: true, time: time, content: "" };
             writeFromEditingState(newEditingState);
             setEditingState({...newEditingState, content: content});
           }
         } else { // finish editing something
           writeFromEditingState(editingState);
-          setEditingState({ status: NOT });
+          setEditingState({ status: NOT, unsaved: true });
         }
       } else if (e.code === "Backspace") { // delete the last something
         if (editingState.status !== NOT) { return; } // probably a mistake
@@ -305,15 +321,19 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
       } else if (e.code === "KeyS" && ctrl) { // save map
         e.preventDefault();
         e.stopPropagation();
+        if (editingState.status !== NOT) {
+          writeFromEditingState(editingState);
+        } 
         saveBeatmap();
+        setEditingState({ status: NOT, unsaved: false });
       }
     }
     if (e.code === "Escape") {
       if (isTesting) { stopTest(); } 
       else if (editingState.status !== NOT) {
         writeFromEditingState(editingState);
-        setEditingState({ status: NOT });
-      } else {
+        setEditingState({ status: NOT, unsaved: true });
+      } else if (!editingState.unsaved) {
         set('status', GameStatus.GOBACK); 
       }
     }
@@ -349,7 +369,7 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
   useEffect(() => { // edit canceling
     if (editingState.status === NOT || editingState.time! === currTime) { return; }
     writeFromEditingState(editingState);
-    setEditingState({ status: NOT });
+    setEditingState({ status: NOT, unsaved: true });
   }, [currTime, editingState]);
 
   useEffect(() => {
@@ -405,10 +425,22 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
         setGameState={isTesting ? setGameState : () => {}}
         config={config}
       />
+      {/* a few absolutely positioned components to overlay */}
       {editingState.status === EditingStatus.LINE ?
-        <LineInput value={editingState.content} onChange={onInputChange} /> : null}
+        <LineInput
+          value={editingState.content} 
+          onChange={onInputChange} 
+          autoFocus={true}
+        /> : null}
       {editingState.status === EditingStatus.SYLLABLE ?
-        <SyllableInput value={editingState.content} onChange={onInputChange} /> : null}
+        <SyllableInput 
+          size={5}
+          pos={getVisualPosition(currTime!, lines[currIndex!])}
+          value={editingState.content}
+          onChange={onInputChange}
+          autoFocus={true}
+        /> : null}
+      {editingState.unsaved ? <UnsavedWarning>*Unsaved Changes*</UnsavedWarning> : null}
       {isEditing ? <EditorScrollBar 
         currTime={currTime ?? 0}
         setCurrTime={setSeekingTo}

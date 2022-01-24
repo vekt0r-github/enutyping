@@ -3,7 +3,6 @@ import { Navigate, useParams } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
 import EditorArea from "@/components/modules/EditorArea";
-import NotFound from "@/components/pages/NotFound";
 import MapInfoDisplay from "@/components/modules/MapInfoDisplay";
 
 import { get, post, put } from "@/utils/functions";
@@ -12,15 +11,15 @@ import { getArtist, getTitle, processBeatmap } from '@/utils/beatmaputils';
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Line, Sidebar, GamePageContainer } from '@/utils/styles';
+import { MainBox, Line, Sidebar, GamePageContainer, Link } from '@/utils/styles';
 
 type Props = {
   user: User | null,
   config: Config,
 };
 
-enum Status { LOADING, LOADED, INVALID, CREATED_DIFF };
-const { LOADING, LOADED, INVALID, CREATED_DIFF } = Status;
+enum Status { LOADING, LOADED, INVALID, NO_PERMS, CREATED_DIFF };
+const { LOADING, LOADED, INVALID, NO_PERMS, CREATED_DIFF } = Status;
 
 type BeatmapState = {
   status: Status,
@@ -91,14 +90,20 @@ const Editor = ({ user, config } : Props) => {
       get(`/api/beatmaps/${mapId}`).then((beatmap) => {
         if (!beatmap || !beatmap.id || beatmap.beatmapset.id != mapsetId) {
           setState({ status: INVALID }); // map not found or param is wrong
+        } else if (beatmap.beatmapset.owner.id !== user.id) {
+          setState({ status: NO_PERMS }); // user doesn't own mapset
         } else {
           processAndLoad(() => beatmap);
         }
+      }).catch((err) => {
+        setState({ status: INVALID }); // map not found or param is wrong
       });
     } else {
       get(`/api/beatmapsets/${mapsetId}`).then((beatmapset) => {
         if (!beatmapset || !beatmapset.id) {
           setState({ status: INVALID }); // mapset not found
+        } else if (beatmapset.owner.id !== user.id) {
+          setState({ status: NO_PERMS }); // user doesn't own mapset
         } else {
           processAndLoad(() => ({
             id: -1,
@@ -108,6 +113,8 @@ const Editor = ({ user, config } : Props) => {
             lines: [],
           }));
         }
+      }).catch((err) => {
+        setState({ status: INVALID }); // map not found or param is wrong
       });
     }
       // TODO: support this later, in EditorNewMapset.tsx
@@ -134,9 +141,11 @@ const Editor = ({ user, config } : Props) => {
     processBeatmap(beatmap, config);
   }, [beatmap?.content]);
 
+  const Invalid = <p>This beatmap doesn't exist, or you don't have the permissions to edit it. <Link to="/edit/new">Create a new one?</Link></p>;
   if (status === LOADING) { return <Loading />; }
   if (status === CREATED_DIFF) { return <Navigate to={`/edit/${mapsetId}/${beatmap!.id}`} />; }
-  if (status === INVALID || !beatmap) { return <NotFound />; }
+  if (status === NO_PERMS) { return Invalid; }
+  if (status === INVALID || !beatmap) { return Invalid; }
   const {beatmapset, content, diffname, lines, kpm, scores} = beatmap;
   const {yt_id, source, preview_point, owner, beatmaps} = beatmapset;
   const [artist, title] = [getArtist(beatmapset, config), getTitle(beatmapset, config)];
