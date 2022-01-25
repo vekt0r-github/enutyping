@@ -21,7 +21,9 @@ const MapInfoDisplay = ({ title, artist, diffname, kpm, source } : Props) => {
       <Line>Difficulty level: {diffname}</Line>
       <Line>Average KPM: {kpm}</Line>
       <Line>Difficulty rating: @sampai</Line>
-      <Link as="a" href={source}>Link to source video (YouTube)</Link>
+      {source.length ? 
+        <Link as="a" href={source}>Link to source video (YouTube)</Link>
+        : <Line>Source link not set</Line>}
     </Sidebar>
   );
 }

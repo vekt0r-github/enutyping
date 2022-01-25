@@ -28,7 +28,7 @@ const NewMapset = styled(MainBox)`
   align-items: center;
   color: black;
   position: relative;
-  transition: var(--tt-fast);
+  transition: var(--tt-short);
   &:hover, &:focus {
     background-color: var(--clr-create-light);
     color: black;
@@ -43,7 +43,7 @@ const EditorSongSelect = ({ user, config } : Props) => {
   const [mapsets, setMapsets] = useState<Beatmapset[]>();
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const newDiff = (mapsetId : number) => ({
+  const newDiff = () => ({
     id: "new",
     diffname: "Create New Difficulty"
   });
@@ -53,7 +53,7 @@ const EditorSongSelect = ({ user, config } : Props) => {
     return JSON.stringify(set).toLowerCase().includes(lowercaseQuery);
   }).map((set: Beatmapset) => ({ ...set,
     beatmaps: [ ...set.beatmaps,
-      newDiff(set.id),
+      newDiff(),
     ],
   }));
 
@@ -76,7 +76,7 @@ const EditorSongSelect = ({ user, config } : Props) => {
         {(filteredMapsets === undefined) ? <Loading /> :
           <>
             <NewMapset as={Link} to='/edit/new'>
-              <Line size="5em" margin="-8px 12px 0 0">+</Line>
+              <Line size="6em" margin="-11px 20px 0 0">+</Line>
               <Line as="h2" size="1.5em">Create New Mapset</Line>
             </NewMapset>
             <MapsetList 

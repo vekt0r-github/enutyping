@@ -142,11 +142,8 @@ export const updateStatsOnLineEnd = (oldStats: GameState['stats'], line: LineDat
 };
 
 // sorry but ehhhhh
-export const makeSetFunc = <State>(setState : React.Dispatch<React.SetStateAction<State>>) => (
-  <K extends keyof State>(
-    prop : K, 
-    val : State[K] | ((oldState: State[K]) => State[K]),
-  ) => {
+export const makeSetFunc = <State>(setState : (state : State | ((oldState: State) => State)) => void) => (
+  <K extends keyof State> (prop : K) => (val : State[K] | ((oldState: State[K]) => State[K])) => {
     const isFunction = (val: any) : val is Function => { return typeof val === "function"; }
     setState((state) => ({ ...state, 
       [prop]: isFunction(val) ? val(state[prop]) : val,

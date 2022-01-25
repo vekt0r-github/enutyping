@@ -35,9 +35,13 @@ const DiffsContainer = styled.div`
 `;
 
 const Diff = styled(MainBox)`
+  max-width: 400px;
+  height: 60px;
+  display: flex;
+  align-items: center;
   color: black;
   transition: var(--tt-short);
-  padding: var(--m) var(--l);
+  padding: 0 var(--l);
   margin: var(--m);
   border-radius: var(--m);
   &:hover, &:focus {
@@ -55,8 +59,6 @@ const DiffSelect = ({ config } : Props) => {
   const [goback, setGoback] = useState<boolean>(false);
 
   const { mapsetId } = useParams();
-  const { pathname } = useLocation();
-  const base = pathname.split("/").filter(s => s)[0];
   
   useEffect(() => {
     get(`/api/beatmapsets/${mapsetId}`).then((beatmapset) => {
@@ -87,12 +89,12 @@ const DiffSelect = ({ config } : Props) => {
   const [artist, title] = [getArtist(mapset, config), getTitle(mapset, config)];
   
   if (goback) {
-    return <Navigate to={`/${base}`} replace={true} />;
+    return <Navigate to={`/play`} replace={true} />;
   }
   
   return (
     <>
-      <h1>{(base === "edit") && "Editing: "}{artist} - {title}</h1>
+      <h1>{artist} - {title}</h1>
       <GamePageContainer>
         <MapInfoDisplay 
           title={title}
@@ -109,7 +111,7 @@ const DiffSelect = ({ config } : Props) => {
             <Line as="h2" size="1.5em" margin="1.5em 0">Select Difficulty:</Line>
             <DiffsContainer>
               {beatmaps.map((map) => 
-                <Diff as={Link} to={`/${base}/${mapset.id}/${map.id}`} key={map.id}>
+                <Diff as={Link} to={`/play/${mapset.id}/${map.id}`} key={map.id}>
                   {map.diffname}
                 </Diff>
               )}

@@ -134,7 +134,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, 
             key={currIndex}
             currTime={currTime}
             lineState={lines[currIndex]}
-            setLineState={(makeNewLineState) => { set('lines', (oldLines) => {
+            setLineState={(makeNewLineState) => { set('lines')((oldLines) => {
               oldLines[currIndex] = makeNewLineState(oldLines[currIndex]);
               return oldLines;
             }); }}

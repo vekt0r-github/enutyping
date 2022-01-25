@@ -60,7 +60,7 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
 
   const prepareStartGame = () => {
     if (status !== GameStatus.UNSTARTED) { return; }
-    set('status', GameStatus.STARTQUEUED);
+    set('status')(GameStatus.STARTQUEUED);
   }
 
   const submitScore = () => {
@@ -90,7 +90,7 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
     if (e.key === "Escape") {
       if (status === GameStatus.PLAYING) { endGame(); } 
       if (status === GameStatus.ENDED) { resetGame(); } 
-      if (status === GameStatus.UNSTARTED) { set('status', GameStatus.GOBACK); } 
+      if (status === GameStatus.UNSTARTED) { set('status')(GameStatus.GOBACK); } 
     }
   };
 
@@ -100,7 +100,7 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
     if (status !== GameStatus.PLAYING) { return; }
     const gameStartTime = new Date().getTime() + offset;
     const intervalId = setInterval(() => {
-      set('currTime', new Date().getTime() - gameStartTime);
+      set('currTime')(new Date().getTime() - gameStartTime);
     }, 1000 / GAME_FPS);
     return () => {
       clearInterval(intervalId);
@@ -112,7 +112,7 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
     if (currIndex === lines.length) {
       submitScore();
     } else if (currIndex > 0) {
-      set('stats', (oldStats) => updateStatsOnLineEnd(oldStats, lines[currIndex-1].line));
+      set('stats')((oldStats) => updateStatsOnLineEnd(oldStats, lines[currIndex-1].line));
     }
   }, [currIndex]);
 
@@ -140,7 +140,7 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
   }, [status]); // may eventually depend on other things
 
   const keyCallback = (hit: number, miss: number, endKana: boolean) => {
-    set('stats', (oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana));
+    set('stats')((oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana));
   }
 
   if (status === GameStatus.GOBACK) {

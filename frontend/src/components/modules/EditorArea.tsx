@@ -245,7 +245,7 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
         if (ctrl) { // enter testing mode
           startTest();
         } else { // play/pause
-          set('status', (status === GameStatus.PAUSED) ? GameStatus.AUTOPLAYING : GameStatus.PAUSED);
+          set('status')((status === GameStatus.PAUSED) ? GameStatus.AUTOPLAYING : GameStatus.PAUSED);
         }
       } else if (e.code === "Enter") {
         if (ctrl && shift) { // place game end
@@ -334,7 +334,7 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
         writeFromEditingState(editingState);
         setEditingState({ status: NOT, unsaved: true });
       } else if (!editingState.unsaved) {
-        set('status', GameStatus.GOBACK); 
+        set('status')(GameStatus.GOBACK); 
       }
     }
   };
@@ -347,9 +347,9 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
     const intervalId = setInterval(() => {
       const currTime = new Date().getTime() - gameStartTime;
       if (currTime < beatmap.beatmapset.duration) {
-        set('currTime', currTime);
+        set('currTime')(currTime);
       } else {
-        set('status', GameStatus.PAUSED);
+        set('status')(GameStatus.PAUSED);
       }
     }, 1000 / GAME_FPS);
     return () => {
@@ -362,7 +362,7 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
     if (seekingTo === currTime) {
       setSeekingTo(undefined);
     } else {
-      set('currTime', seekingTo);
+      set('currTime')(seekingTo);
     }
   }, [currTime, seekingTo]);
 
@@ -375,9 +375,9 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
   useEffect(() => {
     if (currIndex === undefined) { return; }
     if (currIndex === lines.length) {
-      // set('status', GameStatus.PAUSED);
+      // set('status')(GameStatus.PAUSED);
     } else if (currIndex > 0) {
-      set('stats', (oldStats) => updateStatsOnLineEnd(oldStats, lines[currIndex-1]));
+      set('stats')((oldStats) => updateStatsOnLineEnd(oldStats, lines[currIndex-1]));
     }
   }, [currIndex]);
   
@@ -393,7 +393,7 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
   }, [beatmap.content]);
 
   const keyCallback = (hit: number, miss: number, endKana: boolean) => {
-    set('stats', (oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana));
+    set('stats')((oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana));
   };
 
   if (status === GameStatus.GOBACK) {

@@ -35,7 +35,7 @@ const Overlay = styled(YTThumbnail)`
 `;
 
 const YTVideo = ({ yt_id, show, volume, options } : Props) => {
-  if (!yt_id) { return null; }
+  // if (!yt_id) { return null; }
   return (
     <VideoContainer>
       <Video

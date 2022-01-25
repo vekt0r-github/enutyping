@@ -51,7 +51,6 @@ const GameVideo = ({ yt_id, status, currTime, startGame, volume } : Props) => {
     setPlayer(e.target);
   };
 
-
   const onStateChange = (e : YT.OnStateChangeEvent) => {
     const playing = [1, 2, 3].includes(e.data);
     setPlaying(playing);
