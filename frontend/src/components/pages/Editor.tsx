@@ -34,6 +34,7 @@ const GameFile = styled.textarea`
 `;
 
 const DiffName = styled.input`
+  width: 170px;
   font-size: 1em;
   font-family: "Noto Sans";
 `;
@@ -110,7 +111,8 @@ const Editor = ({ user, config } : Props) => {
             id: -1,
             beatmapset: beatmapset,
             diffname: "",
-            content: "",
+            content: "ishpytoing file format v1\n\n[TimingPoints]\n\n[Lines]\n",
+            timing_points: [],
             lines: [],
           }));
         }
@@ -118,23 +120,6 @@ const Editor = ({ user, config } : Props) => {
         setState({ status: INVALID }); // map not found or param is wrong
       });
     }
-      // TODO: support this later, in EditorNewMapset.tsx
-
-      // load({
-      //   id: -1,
-      //   beatmapset: {
-      //     id: -1,
-      //     artist: "",
-      //     title: "",
-      //     artist_original: "",
-      //     title_original: "",
-      //     yt_id: "",
-      //     preview_point: 0,
-      //     owner: user,
-      //     beatmaps: [],
-      //   },
-      //   diffname: "",
-      // });
   }, []);
 
   useEffect(() => {

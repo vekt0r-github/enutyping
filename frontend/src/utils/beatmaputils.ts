@@ -13,7 +13,17 @@ export const GAME_FPS = 60;
 export const processBeatmap = (beatmap : Beatmap, config: Config) => {
   let lines : LineData[] = [];
   if (!beatmap.content) { return; } // idk man
-  const objects = beatmap.content.split(/\r?\n/);
+  const [timing, content] = 
+    beatmap.content
+      .substring('ishpytoing file format v1\n\n[TimingPoints]'.length)
+      .split('\n\n[Lines]\n');
+  const timing_points = timing.split(/\r?\n/).map(point => {
+    const [time, bpm] = point.split(',').map(s => parseInt(s));
+    return {time, bpm};
+  });
+  beatmap.timing_points = timing_points;
+
+  const objects = content.split(/\r?\n/);
   let line : LineData | undefined = undefined;
   let endTime : number | undefined = undefined;
   for (const obj_str of objects) {
@@ -56,7 +66,14 @@ export const processBeatmap = (beatmap : Beatmap, config: Config) => {
  * @returns string containing new content field
  */
 export const writeBeatmap = (beatmap : Beatmap) => {
-  let content = [];
+  let content = [
+    'ishpytoing file format v1', '',
+    '[TimingPoints]',
+  ];
+  for (const {time, bpm} of beatmap.timing_points) {
+    content.push(`${time},${bpm}`);
+  }
+  content.push('', '[Lines]');
   for (const line of beatmap.lines) {
     content.push(`L,${line.startTime},${line.lyric}`);
     for (const syllable of line.syllables) {

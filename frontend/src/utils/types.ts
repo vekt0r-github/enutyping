@@ -90,16 +90,22 @@ export type LineData = {
   }[],
 };
 
+export type TimingPoint = {
+  time: number,
+  bpm: number,
+};
+
 export type BeatmapMetadata = {
   id: number | string;
   diffname: string;
-}
+};
 
 export type Beatmap = {
   id: number;
   beatmapset: Beatmapset;
   diffname: string;
   content: string;
+  timing_points: TimingPoint[];
   lines: LineData[]; // processed content
   endTime?: number; // also processed
   kpm?: number;

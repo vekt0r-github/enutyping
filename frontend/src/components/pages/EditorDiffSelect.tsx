@@ -270,7 +270,7 @@ const EditorDiffSelect = ({ user, config } : Props) => {
               e.preventDefault();
               createMapset();
             }}>
-              <Line as="h2" size="1.5em" margin="0.75em 0 1em 0">Enter Beatmap Information:</Line>
+              <Line as="h2" size="1.5em" margin="0.75em 0 1em 0">Enter Mapset Metadata:</Line>
               {([
                 {field: "yt_id", label: "YouTube Video ID", description: "11 character video code"},
                 {field: "artist_original", label: "Artist", active: artistRoman, setActive: setArtistRoman},
