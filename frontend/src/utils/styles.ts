@@ -100,3 +100,12 @@ export const SongsContainer = styled.div`
   justify-content: center;
   margin: 0 var(--s);
 `;
+
+export const BasicContainer = styled.div`
+  width: 100%;
+  max-width: 1296px; // 0.675 ratio
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 1.5rem;
+  padding-left: 1.5rem;
+`;
