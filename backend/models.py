@@ -144,7 +144,13 @@ def init_db():
     db_session.commit()
 
 
-test_map_content = '''L,0,きんいろモザイク　きんいろなんです　深夜づぇ　てぃえぇぇぇぁぇぃぅぇぉぁぉ　んなってっしゃじょん
+test_map_content = '''ishpytoing file format v1
+
+[TimingPoints]
+1040,130
+
+[Lines]
+L,0,きんいろモザイク　きんいろなんです　深夜づぇ　てぃえぇぇぇぁぇぃぅぇぉぁぉ　んなってっしゃじょん
 S,500,きんいろもざいく
 S,4000,きん
 S,5000,いろ
@@ -161,7 +167,13 @@ S,20000,ヵゕ
 E,21000
 '''
 
-content = '''L,500,ぷるーん
+content = '''ishpytoing file format v1
+
+[TimingPoints]
+500,170
+
+[Lines]
+L,500,ぷるーん
 S,500,ぷ
 S,544,るーん
 L,2617,わらび餅　ぷり
@@ -221,7 +233,13 @@ S,15985,ぷ
 S,16029,りーん
 E,18014'''
 
-flos_content = '''L,4138,Daphne, Ficus, Iris, Maackia
+flos_content = '''ishpytoing file format v1
+
+[TimingPoints]
+4138,118
+
+[Lines]
+L,4138,Daphne, Ficus, Iris, Maackia
 S,4646,daph
 S,4900,ne
 S,5663,fi
@@ -844,7 +862,13 @@ S,272104,flos
 E,272612'''
 
 
-yorunicontent = '''L,0,沈むように溶けていくように
+yorunicontent = '''ishpytoing file format v1
+
+[TimingPoints]
+1040,130
+
+[Lines]
+L,0,沈むように溶けていくように
 S,0,しずむようにとけてゆくように
 L,8000,二人だけの空が広がる夜に
 S,8000,ふたりだけのそらがひろがるように
