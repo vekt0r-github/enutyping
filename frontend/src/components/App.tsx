@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
 import NavBar from "@/components/modules/NavBar";
+import Volume from "@/components/modules/Volume";
 import Home from "@/components/pages/Home";
 import Login from "@/components/pages/Login";
 import SongSelect from "@/components/pages/SongSelect";
@@ -83,9 +84,11 @@ const App = ({} : Props) => {
         <NavBar
           handleLogout={handleLogout}
           user={user}
-          volume={volume}
-          setVolume={(v: number) => { setConfig({ ...config, volume: v }); }}
         />
+				<Volume
+					volume={volume}
+					setVolume={(v: number) => { setConfig({ ...config, volume: v }); }}
+				/>
         <Content>
           <Routes>
             <Route path="/" element={

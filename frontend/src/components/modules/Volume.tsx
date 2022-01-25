@@ -53,6 +53,7 @@ const SliderOuterContainer = styled.div`
   background-color: var(--clr-secondary-light);
   border: 2px solid var(--clr-secondary-dim);
   border-radius: var(--s);
+	bottom: calc(var(--container-height) + var(--container-width) * 2 - var(--s));
   animation: fadeIn var(--tt-short);
   @keyframes fadeIn { from { opacity: 0; } };
 `;
@@ -115,7 +116,9 @@ const Container = styled.div`
   --container-height: 220px;
   width: var(--container-width);
   height: var(--container-width);
-  position: relative;
+  position: fixed;
+	bottom: var(--s);
+	right: var(--s);
   z-index: 0;
   & > ${SliderOuterContainer} { display: none; }
   &:hover > ${SliderOuterContainer},

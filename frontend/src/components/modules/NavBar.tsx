@@ -1,8 +1,6 @@
 import React from "react";
 import { Link as RouterLink, NavLink } from "react-router-dom";
 
-import Volume from "@/components/modules/Volume";
-
 import { User, Config } from "@/utils/types";
 
 import styled from 'styled-components';
@@ -12,12 +10,15 @@ import { BasicContainer, Link, Line } from '@/utils/styles';
 type Props = {
   handleLogout: () => void,
   user: User | null,
-  volume: number,
-  setVolume: (newVolume: number) => void,
 }
 
 const Outer = styled.div`
   background-color: var(--clr-primary-light);
+  display: flex;
+	position: fixed;
+	width: 100%;
+  height: var(--content-offset);
+  z-index: 1;
 `;
 
 const NavContainer = styled(BasicContainer)`
@@ -67,7 +68,8 @@ const Button = styled(NavBarLink)`
   height: auto;
 `;
 
-const NavBar = ({ handleLogout, user, volume, setVolume } : Props) => (
+
+const NavBar = ({ handleLogout, user } : Props) => (
   <Outer>
   <NavContainer>
     <NavLeft>
@@ -80,10 +82,6 @@ const NavBar = ({ handleLogout, user, volume, setVolume } : Props) => (
       </>}
     </NavLeft>
     <NavRight>
-      <Volume
-        volume={volume}
-        setVolume={setVolume}
-      />
       {user ? 
         <>
           <Line size="1.25em" margin="0 0 0 var(--s)">Welcome, {user.name}!</Line>
