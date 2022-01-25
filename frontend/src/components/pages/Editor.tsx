@@ -18,8 +18,8 @@ type Props = {
   config: Config,
 };
 
-enum Status { LOADING, LOADED, INVALID, NO_PERMS, CREATED_DIFF };
-const { LOADING, LOADED, INVALID, NO_PERMS, CREATED_DIFF } = Status;
+enum Status { LOADING, LOADED, SUBMITTING, INVALID, NO_PERMS, CREATED_DIFF };
+const { LOADING, LOADED, SUBMITTING, INVALID, NO_PERMS, CREATED_DIFF } = Status;
 
 type BeatmapState = {
   status: Status,
@@ -56,8 +56,13 @@ const Editor = ({ user, config } : Props) => {
     });
   };
   const {status, beatmap} = state;
-  
+
   const saveBeatmap = () => {
+    setState((state) => ({...state, status: SUBMITTING}))
+  }
+  
+  useEffect(() => {
+    if (state.status !== SUBMITTING) { return; }
     if (!beatmap) { return; }
     if (!beatmap.content.length || !beatmap.diffname.length) { return; }
     if (isNewMap) {
@@ -85,7 +90,7 @@ const Editor = ({ user, config } : Props) => {
         })
         .catch((err) => console.log(err));
     }
-  };
+  }, [state]);
   
   useEffect(() => {
     if (!isNewMap) {
@@ -111,8 +116,8 @@ const Editor = ({ user, config } : Props) => {
             id: -1,
             beatmapset: beatmapset,
             diffname: "",
-            content: "ishpytoing file format v1\n\n[TimingPoints]\n\n[Lines]\n",
-            timing_points: [],
+            content: "ishpytoing file format v1\n\n[TimingPoints]\n\n\n[Lines]\n",
+            timingPoints: [],
             lines: [],
           }));
         }

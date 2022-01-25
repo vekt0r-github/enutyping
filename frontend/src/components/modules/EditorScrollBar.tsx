@@ -1,6 +1,6 @@
-import React from "react";
+import React, { Fragment } from "react";
 
-import { LineData } from "@/utils/types";
+import { LineData, TimingPoint } from "@/utils/types";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -10,6 +10,7 @@ type Props = {
   currTime: number,
   setCurrTime: (newTime: number) => void,
   lines: LineData[]; // only need the static data
+  timingPoints: TimingPoint[],
   endTime?: number,
   length: number,
 }
@@ -78,10 +79,22 @@ const LineMarker = styled.div.attrs<{pos: number}>(({pos}) => ({
   },
 }))<{pos: number}>`
   position: absolute;
-  top: calc((var(--slider-width) - 30px) / 2);
+  top: calc(var(--slider-width) - 17px);
   width: 1px;
-  height: 30px;
+  height: 17px;
   background-color: black;
+`;
+
+const SyllableMarker = styled(LineMarker)`
+  top: calc(var(--slider-width) - 12px);
+  height: 12px;
+  background-color: green;
+`;
+
+const TimingMarker = styled(LineMarker)`
+  top: 0;
+  height: 17px;
+  background-color: red;
 `;
 
 const EndMarker = styled(LineMarker)`
@@ -90,14 +103,29 @@ const EndMarker = styled(LineMarker)`
   height: 34px;
 `;
 
-const EditorScrollBar = ({ currTime, setCurrTime, lines, endTime, length } : Props) => {
+const EditorScrollBar = ({ currTime, setCurrTime, lines, timingPoints, endTime, length } : Props) => {
   const handleScrub = (e : React.ChangeEvent<HTMLInputElement>) => {
     setCurrTime(parseInt(e.target.value));
   };
+  const calcPos = (time : number) => time / length;
 
+  const formattedTime = ((time : number) => {
+    const ms = Math.round(time % 1000);
+    time = (time - ms) / 1000;
+    const ss = Math.round(time % 60);
+    time = (time - ss) / 60;
+    const mm = Math.round(time % 60);
+    time = (time - mm) / 60;
+    const hh = Math.round(time);
+    let tstr = `${ms}`.padStart(3, '0');
+    tstr = `${ss}:`.padStart(3, '0') + tstr;
+    tstr = `${mm}:`.padStart(3, '0') + tstr;
+    return hh ? `${hh}:` + tstr : tstr;
+  })(currTime);
+  
   return (
     <SliderOuterContainer>
-      <SliderLabel as="label" htmlFor="editor-timeline-slider-container">{currTime}</SliderLabel>
+      <SliderLabel as="label" htmlFor="editor-timeline-slider-container">{formattedTime}</SliderLabel>
       <SliderContainer id="editor-timeline-slider-container">
         <SliderBody />
         <SliderFill
@@ -110,10 +138,14 @@ const EditorScrollBar = ({ currTime, setCurrTime, lines, endTime, length } : Pro
           value={currTime}
           onChange={handleScrub} 
         />
-        {lines.map((line) =>
-          <LineMarker key={line.startTime} pos={line.startTime / length} />
-        )} 
-        {endTime ? <EndMarker key={endTime} pos={endTime / length} /> : null}
+        {timingPoints.map((point) => <TimingMarker key={`T${point.time}`} pos={calcPos(point.time)} />)}
+        {lines.map((line) => <Fragment key={`L${line.startTime}`}>
+          <LineMarker pos={calcPos(line.startTime)} />
+          {line.syllables.map((syllable) => 
+            <SyllableMarker key={`S${syllable.time}`} pos={calcPos(syllable.time)}/>
+          )}
+        </Fragment>)} 
+        {endTime ? <EndMarker key={`E${endTime}`} pos={calcPos(endTime)} /> : null}
       </SliderContainer>
     </SliderOuterContainer>
   );

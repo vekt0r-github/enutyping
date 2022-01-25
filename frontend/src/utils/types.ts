@@ -105,7 +105,7 @@ export type Beatmap = {
   beatmapset: Beatmapset;
   diffname: string;
   content: string;
-  timing_points: TimingPoint[];
+  timingPoints: TimingPoint[];
   lines: LineData[]; // processed content
   endTime?: number; // also processed
   kpm?: number;

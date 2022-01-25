@@ -25,11 +25,11 @@ const GameVideo = ({ yt_id, status, currTime, startGame, volume } : Props) => {
 
   useEffect(() => {
     if (!player || !currTime) { return; }
-    const threshold = 0.5; // number of seconds before video corrects itself
+    const TOLERANCE_THRESHOLD = 0.3; // number of seconds before video corrects itself
     // only seek when manually changed in editor
     if (status === GameStatus.PAUSED) {
       seek();
-    } else if (Math.abs(currTime / 1000 - player.getCurrentTime()) > threshold) {
+    } else if (Math.abs(currTime / 1000 - player.getCurrentTime()) > TOLERANCE_THRESHOLD) {
       seek();
     }
   }, [currTime]);
