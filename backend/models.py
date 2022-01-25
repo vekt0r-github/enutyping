@@ -89,6 +89,7 @@ def init_db():
     objects = [
         User(id=1234, name='ppfarmer', avatar_url='https://avatars.githubusercontent.com/u/34809632'),
         User(id=4321, name='songenjoyer', avatar_url='https://avatars.githubusercontent.com/u/1700346'),
+        User(id="8484892osu", name='vekt0r', avatar_url='https://a.ppy.sh/8484892?1594621695.jpeg'),
         # TODO: Add durations to the beatmapsets, choose what unit you want but make it consistent
         Beatmapset(id=727, 
             owner_id=1234,
