@@ -2,33 +2,31 @@ import React from "react";
 
 import { User } from "@/utils/types";
 
-import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, SubBox } from '@/utils/styles';
+import { Navigate } from "react-router-dom";
 
 type Props = {
   user: User | null,
 };
 
-const InfoBox = styled(MainBox)`
-  max-width: 300px;
-`;
-
 const Home = ({ user } : Props) => {
+  if (user) {
+    return <Navigate to="/play" replace={true} />
+  }
+
   return (
     <>
-      <h1>Home</h1>
-      <h2>Skill Issue</h2>
-      {user ?
-        <p>You are logged in as {user.name} with id {user.id}</p>
-        :
-        <p>You are not logged in.</p>}
-      <InfoBox>
-        Game where you Type Things
-        <SubBox>
-          after all this time we still have no content on the front page
-        </SubBox>
-      </InfoBox>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', maxWidth: '60vw', alignItems: 'center' }}>
+        <div style={{ gridColumn: 1}}>
+          <>
+            <h1>Type your favorite songs as you listen</h1>
+            <p>I love Yorushika</p>
+          </>
+        </div>
+        <div style={{ gridColumn: 2}}>
+          <img width="600" height="600" src="https://cdn.discordapp.com/attachments/576471113069101078/935427255897833592/unknown.png" />
+        </div>
+      </div>
     </>
   );
 }

@@ -69,8 +69,10 @@ const App = ({} : Props) => {
   };
 
   const handleLogout = () => {
-    setUser(null);
-    post("/api/logout");
+    post("/api/logout").then(() => {
+      setUser(null);
+      window.location.assign('/');
+    });
   };
 
   if (user === undefined) { return <Loading />; }

@@ -27,7 +27,7 @@ def index(path):
 @app.route('/api/logout', methods = ['POST'])
 def logout():
     session.pop('user', None)
-    return redirect('/')
+    return { 'success': True }
 
 @app.route('/api/unauthorized/')
 def unauthorized():

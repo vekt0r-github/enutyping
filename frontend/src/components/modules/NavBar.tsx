@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { Link as RouterLink, NavLink } from "react-router-dom";
 
 import Volume from "@/components/modules/Volume";
 
@@ -64,8 +64,7 @@ const InvertedButton = styled(Button)`
 const NavBar = ({ handleLogout, user, volume, setVolume } : Props) => (
   <NavContainer>
     <NavHalf>
-      Logo
-      <NavBarLink as={NavLink} to="/">Home</NavBarLink>
+      <RouterLink to="/">Logo</RouterLink>
       <NavBarLink as={NavLink} to="/play">Play</NavBarLink>
       {user && <>
         <NavBarLink as={NavLink} to="/edit">Create</NavBarLink>
