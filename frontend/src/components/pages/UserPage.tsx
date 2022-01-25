@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 
 import { get } from "@/utils/functions";
 import { Beatmap, Score, User, UserStats, Config } from "@/utils/types";
-import { MainBox, SubBox } from '@/utils/styles';
+import { MainBox, SubBox, InfoBox, InfoEntry } from '@/utils/styles';
 
 
 import styled from 'styled-components';
@@ -23,24 +23,6 @@ const UserInfoContainer = styled.div`
   flex-direction: row;
   justify-content: center;
   min-width: 90%;
-`;
-
-const InfoBox = styled(SubBox)<{width: number}>`
-  display: flex;
-  flex-direction: column;
-  width: ${(props) => props.width}%;
-  margin: var(--s);
-  justify-content: center;
-`;
-
-const InfoEntry = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-`;
-
-const SpanRight = styled.span`
-  text-align: right;
 `;
 
 const UserAvatar = styled.img`

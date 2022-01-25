@@ -101,6 +101,20 @@ export const SongsContainer = styled.div`
   margin: 0 var(--s);
 `;
 
+export const InfoBox = styled(SubBox)<{width: number}>`
+  display: flex;
+  flex-direction: column;
+  width: ${(props) => props.width}%;
+  margin: var(--s);
+  justify-content: center;
+`;
+
+export const InfoEntry = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+`;
+
 export const BasicContainer = styled.div`
   width: 100%;
   max-width: 1296px; // 0.675 ratio
