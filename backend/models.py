@@ -68,11 +68,12 @@ class Score(Base):
     key_accuracy = Column(Float)
     kana_accuracy = Column(Float)
     time_unix = Column(Integer)
+    speed_modification = Column(Float)
 
     user = relationship('User', back_populates='scores')
     beatmap = relationship('Beatmap', back_populates='scores')
 
-    def __init__(self, user_id, beatmap_id, score, key_accuracy, kana_accuracy, time_unix, id = None):
+    def __init__(self, user_id, beatmap_id, score, key_accuracy, kana_accuracy, time_unix, speed_modification, id = None):
         self.user_id = user_id
         self.beatmap_id = beatmap_id
         self.score = score
@@ -80,6 +81,7 @@ class Score(Base):
         self.kana_accuracy = kana_accuracy
         self.time_unix = time_unix
         self.id = id
+        self.speed_modification = speed_modification
 
 def init_db():
     from database import db_session, engine
@@ -147,11 +149,11 @@ def init_db():
             beatmapset_id=1338, \
             diffname="Complete", \
             content=turing_content),
-        Score(user_id=1234, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), score=727),
-        Score(user_id=1234, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), score=123),
-        Score(user_id=4321, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), score=72727),
-        Score(user_id=4321, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), score=72726),
-        Score(user_id=4321, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), score=72725),
+        Score(user_id=1234, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, score=727),
+        Score(user_id=1234, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, score=123),
+        Score(user_id=4321, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, score=72727),
+        Score(user_id=4321, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, score=72726),
+        Score(user_id=4321, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, score=72725),
     ]
 
     db_session.bulk_save_objects(objects)
