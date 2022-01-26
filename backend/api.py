@@ -156,6 +156,7 @@ def add_beatmap(user_id):
     beatmapset_id
     diffname
     content
+    kpm
     '''
     json_data = request.get_json()
     if not json_data:
@@ -165,7 +166,7 @@ def add_beatmap(user_id):
     except ValidationError as err:
         return err.messages, 400
 
-    bms_id, diffname, content = itemgetter('beatmapset_id', 'diffname', 'content')(data)
+    bms_id, diffname, content, kpm = itemgetter('beatmapset_id', 'diffname', 'content', 'kpm')(data)
 
     exists_subq = Beatmapset.query.filter(
             Beatmapset.owner_id == user_id,
@@ -174,7 +175,7 @@ def add_beatmap(user_id):
     if not exists:
         return 'Beatmapset does not exist or you do not own it!', 400
 
-    beatmap = Beatmap(beatmapset_id=bms_id, diffname=diffname, content=content)
+    beatmap = Beatmap(beatmapset_id=bms_id, diffname=diffname, content=content, kpm=kpm)
     db_session.add(beatmap)
     db_session.commit()
 

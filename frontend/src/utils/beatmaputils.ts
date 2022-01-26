@@ -74,6 +74,7 @@ export const writeBeatmap = (beatmap : Beatmap) => {
   for (const {time, bpm} of beatmap.timingPoints) {
     content.push(`${time},${bpm}`);
   }
+  if (!beatmap.timingPoints.length) { content.push(''); }
   content.push('', '[Lines]');
   for (const line of beatmap.lines) {
     content.push(`L,${line.startTime},${line.lyric}`);

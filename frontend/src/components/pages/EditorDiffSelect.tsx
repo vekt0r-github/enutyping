@@ -111,7 +111,7 @@ const Diff = styled(MainBox)`
   }
 `;
 
-const NewDiff = styled(Diff)`
+export const NewDiff = styled(Diff)`
   align-self: center;
   font-size: 1em;
   font-family: "Open Sans";

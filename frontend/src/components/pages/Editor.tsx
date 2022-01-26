@@ -1,11 +1,10 @@
 import React, { useEffect, useState }  from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams, useSearchParams } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
 import EditorArea from "@/components/modules/EditorArea";
 import MapInfoDisplay from "@/components/modules/MapInfoDisplay";
 import EditorShortcutsDisplay from "@/components/modules/EditorShortcutsDisplay";
-
 
 import { get, post, put } from "@/utils/functions";
 import { User, Config, Beatmap } from "@/utils/types";
@@ -15,6 +14,7 @@ import { withParamsAsKey } from "@/utils/componentutils";
 import styled from 'styled-components';
 import '@/utils/styles.css';
 import { MainBox, Line, Sidebar, GamePageContainer, Link } from '@/utils/styles';
+import { NewDiff } from "@/components/pages/EditorDiffSelect";
 
 type Props = {
   user: User | null,
@@ -49,6 +49,8 @@ const Editor = ({ user, config } : Props) => {
 
   const { mapId, mapsetId } = useParams();
   const isNewMap = (mapId === "new");
+  const [searchParams] = useSearchParams();
+  const copyOf = searchParams.get('copy');
 
   const [state, setState] = useState<BeatmapState>({ status: LOADING });
   const processAndLoad = (beatmap : (oldBeatmap?: Beatmap) => Beatmap | undefined) => {
@@ -72,6 +74,7 @@ const Editor = ({ user, config } : Props) => {
       const data = {
         beatmapset_id: mapsetId,
         diffname: diffname,
+        kpm: kpm,
         content: beatmap.content,
       }
       post('/api/beatmaps', data)
@@ -96,19 +99,26 @@ const Editor = ({ user, config } : Props) => {
   }, [state]);
   
   useEffect(() => {
-    if (!isNewMap) {
-      get(`/api/beatmaps/${mapId}`).then((beatmap) => {
+    if (!isNewMap || copyOf) { // load existing diff
+      const loadMapId = isNewMap ? copyOf : mapId;
+      get(`/api/beatmaps/${loadMapId}`).then((beatmap) => {
         if (!beatmap || !beatmap.id || beatmap.beatmapset.id != mapsetId) {
           setState({ status: INVALID }); // map not found or param is wrong
         } else if (beatmap.beatmapset.owner.id !== user.id) {
           setState({ status: NO_PERMS }); // user doesn't own mapset
         } else {
+          if (isNewMap) {
+            beatmap = { ...beatmap,
+              id: -1,
+              diffname: "",
+            };
+          }
           processAndLoad(() => beatmap);
         }
       }).catch((err) => {
         setState({ status: INVALID }); // map not found or param is wrong
       });
-    } else {
+    } else { // create actual new diff
       get(`/api/beatmapsets/${mapsetId}`).then((beatmapset) => {
         if (!beatmapset || !beatmapset.id) {
           setState({ status: INVALID }); // mapset not found
@@ -171,6 +181,10 @@ const Editor = ({ user, config } : Props) => {
               />}
             kpm={kpm}
           />
+          {!isNewMap ? <NewDiff as={Link} to={`/edit/${mapsetId}/new?copy=${mapId}`}>
+            <Line size="3.5em" margin="-3px 12px 0 0" style={{'width': '40px'}}>+</Line>
+            <Line size="1em">Create a Copy</Line>
+          </NewDiff> : null}
         </Sidebar>
         <EditorArea
           user={user}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 
 import GameAreaDisplay from "@/components/modules/GameAreaDisplay";
 import EditorTimeline from "@/components/modules/EditorTimeline";
@@ -122,12 +122,15 @@ const makeStateAt = (lines: LineData[], config: Config, currTime?: number, statu
 
 
 const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) => {
+  const [searchParams] = useSearchParams();
+  const copyOf = searchParams.get('copy');
+  
   const {lines, timingPoints} = beatmap;
   const makeState = (currTime?: number, status?: GameStatus) => makeStateAt(lines as LineData[], config, currTime, status);
   const [gameState, setGameState] = useState<GameState>(makeState());
   const set = makeSetFunc(setGameState);
   const [seekingTo, setSeekingTo] = useState<number>();
-  const [editingState, setEditingState] = useState<EditingState>({ status: NOT, unsaved: false });
+  const [editingState, setEditingState] = useState<EditingState>({ status: NOT, unsaved: copyOf ? true : false });
 
   const {status, offset, currTime, stats} = gameState;
 	const [availableSpeeds, setAvailableSpeeds] = useState<number[]>([1]);
@@ -253,7 +256,7 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
       }
     } else { // finish editing timing point
       const bpm = parseFloat(editingState.content!);
-      if (isNaN(bpm)) { return; }
+      if (isNaN(bpm) || bpm > 3000) { return; }
       if (!timingPoints.length) {
         timingPoints.push({ time, bpm });
       } else {

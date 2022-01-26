@@ -77,7 +77,7 @@ const EditorShortcutsDisplay = ({  } : Props) => {
         const [key, inst, desc] = line;
         const active = i === curr;
         return (
-          <InfoEntry>
+          <InfoEntry key={i}>
             <InfoLabel>{key}: </InfoLabel>
             <InfoInst>{inst}</InfoInst>
             {desc ? <>
