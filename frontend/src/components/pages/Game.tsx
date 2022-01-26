@@ -17,6 +17,7 @@ import {
   Line, Link, SubBox, Sidebar, 
   GamePageContainer, 
 } from '@/utils/styles';
+import SpeedSelect from "../modules/SpeedSelect";
 
 type Props = {
   user: User | null,
@@ -76,16 +77,20 @@ const Game = ({ user, config } : Props) => {
     <>
       <h1>{artist} - {title} [{diffname}]</h1>
       <GamePageContainer>
-        <MapInfoDisplay 
-          title={title}
-          artist={artist}
-          source={source!}
-          diffname={diffname}
-					speed={speed}
-					setSpeed={setSpeed}
-					availableSpeeds={availableSpeeds}
-          kpm={kpm}
-        />
+        <Sidebar>
+          <MapInfoDisplay 
+            title={title}
+            artist={artist}
+            source={source!}
+            diffname={diffname}
+            kpm={kpm}
+          />
+          <SpeedSelect
+            speed={speed}
+            setSpeed={setSpeed}
+            availableSpeeds={availableSpeeds}
+          />
+        </Sidebar>
         <GameArea
           user={user}
           beatmap={map}

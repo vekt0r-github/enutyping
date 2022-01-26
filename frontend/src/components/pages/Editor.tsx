@@ -157,19 +157,21 @@ const Editor = ({ user, config } : Props) => {
     <>
       <h1>Editing: {artist} - {title} [{diffname}]</h1>
       <GamePageContainer>
-        <MapInfoDisplay 
-          title={title}
-          artist={artist}
-          source={source!}
-          diffname={
-            <DiffName
-              value={diffname}
-              onChange={(e : React.ChangeEvent<HTMLInputElement>) => {
-                setDiffname(e.target.value);
-              }}
-            />}
-          kpm={kpm}
-        />
+        <Sidebar>
+          <MapInfoDisplay 
+            title={title}
+            artist={artist}
+            source={source!}
+            diffname={
+              <DiffName
+                value={diffname}
+                onChange={(e : React.ChangeEvent<HTMLInputElement>) => {
+                  setDiffname(e.target.value);
+                }}
+              />}
+            kpm={kpm}
+          />
+        </Sidebar>
         <EditorArea
           user={user}
           beatmap={beatmap}

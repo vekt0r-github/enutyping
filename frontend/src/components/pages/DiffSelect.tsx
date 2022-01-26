@@ -95,11 +95,13 @@ const DiffSelect = ({ config } : Props) => {
     <>
       <h1>{artist} - {title}</h1>
       <GamePageContainer>
-        <MapInfoDisplay 
-          title={title}
-          artist={artist}
-          source={source!}
-        />
+        <Sidebar>
+          <MapInfoDisplay 
+            title={title}
+            artist={artist}
+            source={source!}
+          />
+        </Sidebar>
         <GameContainer>
           <BottomHalf>
             <StatBox />

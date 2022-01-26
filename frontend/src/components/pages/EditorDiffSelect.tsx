@@ -13,7 +13,7 @@ import { withParamsAsKey } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Line, Link, GamePageContainer } from '@/utils/styles';
+import { MainBox, Line, Link, GamePageContainer, Sidebar } from '@/utils/styles';
 
 import { GameContainer, BottomHalf, StatBox, Overlay as GameOverlay } from "@/components/modules/GameAreaDisplay";
 
@@ -262,11 +262,13 @@ const EditorDiffSelect = ({ user, config } : Props) => {
     <>
       <h1>Editing: {artist.length ? artist : "<artist>"} - {title.length ? title : "<title>"}</h1>
       <GamePageContainer>
-        <MapInfoDisplay 
-          title={title}
-          artist={artist}
-          source={yt_id.length ? `https://www.youtube.com/watch?v=${yt_id}` : ''}
-        />
+        <Sidebar>
+          <MapInfoDisplay 
+            title={title}
+            artist={artist}
+            source={yt_id.length ? `https://www.youtube.com/watch?v=${yt_id}` : ''}
+          />
+        </Sidebar>
         <GameContainer>
           <BottomHalf>
             <StatBox />
