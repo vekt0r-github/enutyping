@@ -116,7 +116,7 @@ const MapsetList = ({ mapsets, config, link } : Props) => {
 												<BlackLine size="1em">{map.diffname}</BlackLine>
 											</>
 											: <>
-                    		<Line size="1em">{map.diffname}</Line>
+                    		<Line size="1em">{map.diffname} ({map.kpm} keys/min)</Line>
 											</>}
                   </Diff>
                 )}
