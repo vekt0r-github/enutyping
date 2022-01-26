@@ -1,6 +1,6 @@
 import { User } from "@/utils/types";
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import '@/utils/styles.css'
@@ -49,7 +49,7 @@ const Name = styled(Line)`
   padding: 1.25rem;
 `;
 
-const Option = styled(Link)`
+const Option = styled.div`
   display: block;
   background-color: var(--clr-darkgrey);
   text-decoration: none;
@@ -70,18 +70,26 @@ const Option = styled(Link)`
 `;
 
 const ProfileButton = ({ user, handleLogout }: Props) => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  const handleClick = (url: string) => {
+    return (() => {
+      navigate(url);
+      setIsOpen(false);
+    })
+  }
 
   return (
     <Container tabIndex={0} onBlur={() => setIsOpen(false)}>
       <ProfileImage onClick={() => setIsOpen(old => !old)} src={user.avatar_url} />
       { isOpen && 
-        <DropdownContainer onBlur={() => setIsOpen(false)}>
+        <DropdownContainer>
           <Dropdown>
             <Name>{user.name}</Name>
-            <Option onClick={() => setIsOpen(false)} to={`/user/${user.id}`}>My Profile</Option>
-            <Option onClick={() => setIsOpen(false)} to="/settings">Settings</Option>
-            <Option as="div" onClick={handleLogout}>Sign Out</Option>
+            <Option onClick={handleClick(`/user/${user.id}`)}>My Profile</Option>
+            <Option onClick={handleClick('/settings')}>Settings</Option>
+            <Option onClick={handleLogout}>Sign Out</Option>
           </Dropdown>
         </DropdownContainer>
       }
