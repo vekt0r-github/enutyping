@@ -151,7 +151,7 @@ export type LineState = {
     position: number, // kana index
     kana: KanaState[],
   }[], 
-  nBuffer: boolean,
+  nBuffer: [number, number] | null,
 };
 
 export type GameState = {

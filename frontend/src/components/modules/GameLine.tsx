@@ -150,11 +150,11 @@ const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : P
       let {position: kPos, kana: kanaList} = syllables[sPos];
       kanaList[kPos] = newKana; // should be safe
       if (suffix === "") {
+        nBuffer = (prefix === "n" && kana.text == "ん") ? [sPos, kPos] : null;
         kPos++;
         syllables[sPos].position = kPos;
         if (!kanaList[kPos]) {sPos++; } 
         // if getKana(position) still undefined, line is over
-        nBuffer = (prefix === "n" && kana.text == "ん");
       }
       return {line, position: sPos, syllables, nBuffer};
     });
@@ -167,7 +167,11 @@ const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : P
     const allowedCharacters = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890-`~ \"'.?!,"; // idk if this is comprehensive
     if(!allowedCharacters.includes(key)) { return; }
     if(key == "n" && nBuffer) {
-      setLineState((s) => ({ ...s, nBuffer: false }));
+      setLineState((s) => {
+        s.nBuffer = null;
+        s.syllables[nBuffer[0]].kana[nBuffer[1]].prefix += "n";
+        return s;
+      });
       return;
     }
     const newKana = resultOfHit(key, sPos);  
