@@ -14,12 +14,12 @@ const CategoryBox = styled(MainBox)`
   justify-content: left;
   align-items: center;
   margin: 30px;
-  margin-bottom: 30px;
-  max-width: 80%;
-  min-width: 80%;
+  max-width: 1200px;
+  min-width: 1200px;
 `;
 
 const CategoryTitle = styled.div`
+  padding-left: 2em;
   min-width: 20%;
 `;
 
