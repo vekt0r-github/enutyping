@@ -1,10 +1,11 @@
 import React, { useEffect, useState }  from "react";
-import { Navigate, useParams, useLocation } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
 import NotFound from "@/components/pages/NotFound";
 import YTVideo from "@/components/modules/YTVideo";
 import MapInfoDisplay from "@/components/modules/MapInfoDisplay";
+import EditorShortcutsDisplay from "@/components/modules/EditorShortcutsDisplay";
 
 import { get, post } from "@/utils/functions";
 import { Config, Beatmapset, User } from "@/utils/types";
@@ -117,13 +118,16 @@ const NewDiff = styled(Diff)`
   font-size: 1em;
   font-family: "Noto Sans";
   border: 0;
-  margin: var(--m) 0 0 0;
   background-color: var(--clr-create);
   cursor: pointer;
   &:hover, &:focus {
     background-color: var(--clr-create-light);
   }
 `;
+
+const FormSubmit = styled(NewDiff)`
+  margin: var(--m) 0 0 0;
+`
 
 const EditorDiffSelect = ({ user, config } : Props) => {
   if (!user) { // include this in every restricted page
@@ -277,9 +281,9 @@ const EditorDiffSelect = ({ user, config } : Props) => {
                 {field: "title_original", label: "Title", active: titleRoman, setActive: setTitleRoman},
               ] as NewSetProps[]).map(formInput)}
               <FormWarning size="1em">Make sure your metadata is correct; you can't change it once you've started mapping!</FormWarning>
-              <NewDiff as="button" type="submit">
+              <FormSubmit as="button" type="submit">
                 <Line size="1em">Create Mapset and Continue</Line>
-              </NewDiff>
+              </FormSubmit>
             </NewSetForm> : <>
               <Line as="h2" size="1.5em" margin="1.5em 0">Select Difficulty:</Line>
               <DiffsContainer>
@@ -296,10 +300,7 @@ const EditorDiffSelect = ({ user, config } : Props) => {
             </>}
           </Overlay>
         </GameContainer>
-        <Sidebar>
-          <h2>Is this still leaderboard</h2>
-          <Line>i have no fucking clue what goes here</Line>
-        </Sidebar>
+        <EditorShortcutsDisplay />
       </GamePageContainer>
     </>
   );

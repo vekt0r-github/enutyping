@@ -278,8 +278,8 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
    * -^ Enter: begin/finish editing a new syllable at current time (cancelled if current time changes)\
    *   - double click on a syllable: also snaps to it, and begins editing
    * -^ Ctrl+Enter: same but for a line
-   * -^ Ctrl+Shift+Enter: place the ending position (maybe button only)
-   * - Ctrl+Shift+P: place the preview point (maybe button only)
+   * -^ E: place the ending position (maybe button only)
+   * - P: place the preview point (maybe button only)
    * - Ctrl+X/C/V: what you think they do (when not editing)
    * -^ Backspace: delete previous syllable, timewise
    * -^ Ctrl+Backspace: same but for a line
@@ -305,25 +305,27 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
         } else { // play/pause
           set('status')((status === GameStatus.PAUSED) ? GameStatus.AUTOPLAYING : GameStatus.PAUSED);
         }
-      } else if (e.code === "KeyT" && !ctrl) {
+      } else if (e.code === "KeyT" && !ctrl) { // place timing point
         e.preventDefault();
         e.stopPropagation();
         const content = isOnTimingPoint(time) ? `${currTimingPoint!.bpm}` : "";
         const newEditingState = { status: TIMING, unsaved: true, time: time, content: content };
         writeFromEditingState(newEditingState);
         setEditingState(newEditingState);
-      } else if (e.code === "KeyU" && !ctrl) {
+      } else if (e.code === "KeyU" && !ctrl) { // delete last timing point
         e.preventDefault();
         e.stopPropagation();
         deleteLastTimingPointBefore(time);
+      } else if (e.code === "KeyE" && !ctrl) { // place game end
+        e.preventDefault();
+        e.stopPropagation();
+        if (editingState.status !== NOT) { return; }
+        if (time <= lastLineOrSyllableTime(lines)) { return; }
+        beatmap.endTime = time;
+        setContent(writeBeatmap(beatmap));
+        setEditingState({ status: NOT, unsaved: true });
       } else if (e.code === "Enter") {
-        if (ctrl && shift) { // place game end
-          if (editingState.status !== NOT) { return; }
-          if (time <= lastLineOrSyllableTime(lines)) { return; }
-          beatmap.endTime = time;
-          setContent(writeBeatmap(beatmap));
-          setEditingState({ status: NOT, unsaved: true });
-        } else if (editingState.status === NOT) { // begin editing something
+        if (editingState.status === NOT) { // begin editing something
           if (ctrl) { // edit line
             if (index === lines.length) { return; }
             const content = indexValid(index) && isOnLine(time) ? lines[index].lyric : "";

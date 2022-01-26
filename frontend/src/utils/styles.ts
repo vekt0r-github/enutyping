@@ -64,6 +64,7 @@ export const Sidebar = styled(MainBox)`
   flex-shrink: 0;
   box-sizing: content-box;
   margin: 0 var(--s);
+  padding: var(--s) var(--m);
 `;
 
 export const GamePageContainer = styled.div`

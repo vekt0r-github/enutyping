@@ -4,6 +4,8 @@ import { Navigate, useParams } from "react-router-dom";
 import Loading from "@/components/modules/Loading";
 import EditorArea from "@/components/modules/EditorArea";
 import MapInfoDisplay from "@/components/modules/MapInfoDisplay";
+import EditorShortcutsDisplay from "@/components/modules/EditorShortcutsDisplay";
+
 
 import { get, post, put } from "@/utils/functions";
 import { User, Config, Beatmap } from "@/utils/types";
@@ -174,14 +176,15 @@ const Editor = ({ user, config } : Props) => {
           saveBeatmap={saveBeatmap}
           config={config}
         />
-        <Sidebar as="form" onSubmit={(e : React.FormEvent<HTMLFormElement>) => {
+        <EditorShortcutsDisplay />
+        {/* <Sidebar as="form" onSubmit={(e : React.FormEvent<HTMLFormElement>) => {
             saveBeatmap();
             e.preventDefault();
           }}>
           <h2>Beatmap File</h2>
           <GameFile value={content} readOnly={true} />
           <button type='submit'>SUbSMIT</button>
-        </Sidebar>
+        </Sidebar> */}
       </GamePageContainer>
     </>
   );
