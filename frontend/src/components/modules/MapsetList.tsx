@@ -111,7 +111,7 @@ const MapsetList = ({ mapsets, config, link } : Props) => {
                     color={(map.id === "new") ? "create" : "secondary"}
                     key={map.id}
                   >
-                    {(map.id === "new") ? <Line size="2.5em" margin="-4px 8px 0 0">+</Line> : null}
+                    {(map.id === "new") ? <Line size="2.5em" margin="-1.5px 8px 0 0">+</Line> : null}
                     <Line size="1em">{map.diffname}</Line>
                   </Diff>
                 )}

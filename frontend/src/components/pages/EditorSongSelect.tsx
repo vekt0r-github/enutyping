@@ -76,7 +76,7 @@ const EditorSongSelect = ({ user, config } : Props) => {
         {(filteredMapsets === undefined) ? <Loading /> :
           <>
             <NewMapset as={Link} to='/edit/new'>
-              <Line size="6em" margin="-11px 20px 0 0">+</Line>
+              <Line size="6em" margin="-5px 20px 0 0">+</Line>
               <Line as="h2" size="1.5em">Create New Mapset</Line>
             </NewMapset>
             <MapsetList 

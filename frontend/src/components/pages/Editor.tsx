@@ -39,7 +39,7 @@ const GameFile = styled.textarea`
 const DiffName = styled.input`
   width: 170px;
   font-size: 1em;
-  font-family: "Noto Sans";
+  font-family: "Open Sans";
 `;
 
 const Editor = ({ user, config } : Props) => {

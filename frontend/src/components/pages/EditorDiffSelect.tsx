@@ -53,7 +53,7 @@ const NewSetLabel = styled.label<{size: string}>`
 
 const NewSetInput = styled.input`
   font-size: 1em;
-  font-family: "Noto Sans";
+  font-family: "Open Sans";
   width: 200px;
 `;
 
@@ -116,7 +116,7 @@ const Diff = styled(MainBox)`
 const NewDiff = styled(Diff)`
   align-self: center;
   font-size: 1em;
-  font-family: "Noto Sans";
+  font-family: "Open Sans";
   border: 0;
   background-color: var(--clr-create);
   cursor: pointer;
@@ -297,7 +297,7 @@ const EditorDiffSelect = ({ user, config } : Props) => {
                   </Diff>
                 )}
                 <NewDiff as={Link} to={`/edit/${mapset.id}/new`}>
-                  <Line size="3.5em" margin="-7px 12px 0 0" style={{'width': '40px'}}>+</Line>
+                  <Line size="3.5em" margin="-3px 12px 0 0" style={{'width': '40px'}}>+</Line>
                   <Line size="1em">Create New Difficulty</Line>
                 </NewDiff>
               </DiffsContainer>
