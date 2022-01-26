@@ -73,10 +73,10 @@ const ProfileButton = ({ user, handleLogout }: Props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return (
-    <Container>
+    <Container tabIndex={0} onBlur={() => setIsOpen(false)}>
       <ProfileImage onClick={() => setIsOpen(old => !old)} src={user.avatar_url} />
       { isOpen && 
-        <DropdownContainer>
+        <DropdownContainer onBlur={() => setIsOpen(false)}>
           <Dropdown>
             <Name>{user.name}</Name>
             <Option onClick={() => setIsOpen(false)} to={`/user/${user.id}`}>My Profile</Option>
