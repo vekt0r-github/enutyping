@@ -40,10 +40,38 @@ const Content = styled.div`
   align-items: center;
 `;
 
+const MobileContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+`;
+
+const MobileLogo = styled.div`
+  font-family: var(--ff-logo);
+  font-size: 2rem;
+  text-decoration: none;
+  color: var(--mauve);
+`;
+
 const App = ({} : Props) => {
   const [user, setUser] = useState<User | null>();
   const [config, setConfig] = useState<Config>(defaultConfig);
+
+  const [width, setWidth] = useState<number>(window.innerWidth);
+
   const { volume, offset, kanaSpellings } = config;
+
+  function handleWindowSizeChange() {
+      setWidth(window.innerWidth);
+  }
+  useEffect(() => {
+      window.addEventListener('resize', handleWindowSizeChange);
+      return () => {
+          window.removeEventListener('resize', handleWindowSizeChange);
+      }
+  }, []);
 
   useEffect(() => {
     get("/api/whoami").then((user) => {
@@ -77,6 +105,19 @@ const App = ({} : Props) => {
   };
 
   if (user === undefined) { return <Loading />; }
+
+  const isMobile = width <= 1296;
+  if (isMobile) {
+    return (
+      <MobileContainer>
+        <MobileLogo>enuTyping</MobileLogo>
+        <h3>
+          Device Not Supported
+        </h3>
+        <div>enuTyping is only for wide computers. sorry!</div>
+      </MobileContainer>
+    )
+  }
 
   return (
     <>
