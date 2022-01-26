@@ -1,5 +1,7 @@
 ## enuTyping
 
+Hosted at https://enutyping.timmy.moe
+
 # Python modules used
 ```
 certifi==2021.10.8
