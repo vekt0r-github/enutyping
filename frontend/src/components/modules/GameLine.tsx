@@ -17,7 +17,7 @@ type Props = {
   config: Config,
 }
 
-enum ActiveStatus { PAST, PRESENT, FUTURE };
+enum ActiveStatus { MISSED, PAST, PRESENT, FUTURE };
 
 const LineContainer = styled.div`
   width: 100%;
@@ -67,6 +67,13 @@ const SyllableBottomText = styled(SyllableTopText)`
 const CharText = styled.span<{active: ActiveStatus}>`
   ${(props) => {
     switch (props.active) {
+      case ActiveStatus.MISSED:
+        return css`
+          color: var(--clr-warn);
+          opacity: 0.5;
+          background-color: transparent;
+          z-index: 1;
+        `;
       case ActiveStatus.PAST:
         return css`
           color: var(--clr-medgrey);
@@ -106,14 +113,19 @@ const Tick = styled.div<{active?: ActiveStatus}>`
 `;
 
 const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : Props) => {
-  const {line, position, syllables, nBuffer} = lineState;
+  const {line, syllables, nBuffer} = lineState;
+  const sPos = lineState.position;
   const {startTime, endTime, lyric} = line;
   const latestActiveSyllable = timeToSyllableIndex(line.syllables, currTime) - 1;
 
-  const getKana = (pos : LineState['position']) : KanaState | undefined => syllables[pos[0]]?.kana[pos[1]];
+  const getKana = (sPos: number) : KanaState | undefined => {
+    const syllable = syllables[sPos];
+    if (!syllable) { return; }
+    return syllable.kana[syllable.position];
+  }
 
-  const resultOfHit = (key : string, pos : LineState['position']) : KanaState | undefined => {
-    const curKana = getKana(pos);
+  const resultOfHit = (key : string, sPos: number) : KanaState | undefined => {
+    const curKana = getKana(sPos);
     if (!curKana) return;
     const {kana, prefix, minKeypresses} = curKana;
     const newPrefix = prefix + key;
@@ -123,17 +135,19 @@ const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : P
     return {kana: kana, prefix: newPrefix, suffix: newSuffix, minKeypresses: minKeypresses};
   }
 
-  const handleCorrectKeypress = (position : LineState['position'], newKana : KanaState) => {
+  const handleCorrectKeypress = (sPos: number, newKana : KanaState) => {
     const {kana, prefix, suffix, minKeypresses} = newKana;
     setLineState(({line, syllables, nBuffer}) => {
-      syllables[position[0]].kana[position[1]] = newKana; // should be safe
+      let {position: kPos, kana: kanaList} = syllables[sPos];
+      kanaList[kPos] = newKana; // should be safe
       if (suffix === "") {
-        position[1]++;
-        if (!getKana(position)) { position = [position[0] + 1, 0]; } // carry to next syllable
+        kPos++;
+        syllables[sPos].position = kPos;
+        if (!kanaList[kPos]) {sPos++; } 
         // if getKana(position) still undefined, line is over
         nBuffer = (prefix === "n" && kana.text == "ん");
       }
-      return {line, position: position, syllables, nBuffer};
+      return {line, position: sPos, syllables, nBuffer};
     });
     keyCallback((prefix.length <= minKeypresses) ? 1 : 0, 0, suffix === "");
   }
@@ -146,11 +160,11 @@ const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : P
       setLineState((s) => ({ ...s, nBuffer: false }));
       return;
     }
-    const newKana = resultOfHit(e.key, position);  
+    const newKana = resultOfHit(e.key, sPos);  
     if (!newKana) { // key is not the next char
-      let newPosition = position;
-      while (newPosition[0] < latestActiveSyllable) {
-        newPosition = [newPosition[0] + 1, 0]; // next syllable
+      let newPosition = sPos;
+      while (newPosition < latestActiveSyllable) {
+        newPosition++; // next syllable
         const testNewKana = resultOfHit(e.key, newPosition);
         if (testNewKana) {
           handleCorrectKeypress(newPosition, testNewKana);
@@ -159,7 +173,7 @@ const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : P
       }
       keyCallback(0, 1, false);
     } else { // key works as the next char
-      handleCorrectKeypress(position, newKana);
+      handleCorrectKeypress(sPos, newKana);
     }
   };
 
@@ -171,25 +185,39 @@ const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : P
   }, [lineState, currTime]); // any change in state affects the listener
 
   const joinKana = (kana : KanaState[]) => "".concat.apply("", kana.map(k => k.kana.text));
-  let syllableList = syllables.map(({time, text, kana}, index) => {
+  let syllableList = syllables.map(({time, text, position: kPos, kana}, index) => {
     let active;
     let topContent : JSX.Element;
     let bottomContent : JSX.Element;
-    const {PAST, PRESENT, FUTURE} = ActiveStatus;
-    if (index !== position[0]) {
-      active = (index < position[0]) ? PAST : FUTURE;
+    const {MISSED, PAST, PRESENT, FUTURE} = ActiveStatus;
+    if (index > sPos) {
+      active = FUTURE;
       topContent = <CharText active={active}>{text}</CharText> 
       bottomContent =
         <CharText active={active}>
           {"".concat.apply("", kana.map(ks => ks.prefix + ks.suffix))}
         </CharText> 
+    } else if (index < sPos) {
+      topContent = (<>
+        <CharText active={PAST}>{joinKana(kana.slice(0, kPos))}</CharText>
+        <CharText active={MISSED}>{joinKana(kana.slice(kPos))}</CharText>
+      </>);
+      let prefixes = ""; // this is pretty implementation dependent
+      let suffixes = ""; // and seems likely to break
+      kana.forEach(ks => {
+        prefixes += ks.prefix;
+        suffixes += ks.suffix;
+      });
+      bottomContent = (<>
+        <CharText active={PAST}>{prefixes}</CharText>
+        <CharText active={MISSED}>{suffixes}</CharText>
+      </>);
     } else {
       active = PRESENT;
-      const kpos = position[1];
       topContent = (<>
-        <CharText active={PAST}>{joinKana(kana.slice(0, kpos))}</CharText>
-        <CharText active={PRESENT}>{joinKana(kana.slice(kpos, kpos+1))}</CharText>
-        <CharText active={FUTURE}>{joinKana(kana.slice(kpos+1))}</CharText>
+        <CharText active={PAST}>{joinKana(kana.slice(0, kPos))}</CharText>
+        <CharText active={PRESENT}>{joinKana(kana.slice(kPos, kPos+1))}</CharText>
+        <CharText active={FUTURE}>{joinKana(kana.slice(kPos+1))}</CharText>
       </>);
       let prefixes = ""; // this is pretty implementation dependent
       let suffixes = ""; // and seems likely to break

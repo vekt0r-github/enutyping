@@ -208,9 +208,10 @@ const makeInitOrLastKanaState = (kana: Kana, last: boolean) => ({
 
 export const makeLineStateAt = (currTime: number, lineData: LineData, config: Config) : LineState => ({
   line: lineData,
-  position: [lineData.syllables.filter(s => s.time < currTime).length, 0],
+  position: lineData.syllables.filter(s => s.time < currTime).length,
   syllables: lineData.syllables.map((syllable, i, arr) => ({
     ...syllable,
+    position: 0,
     kana: parseKana(syllable.text, config, arr[i+1]?.text)
       .map((kana) => makeInitOrLastKanaState(kana, syllable.time < currTime)),
   })),

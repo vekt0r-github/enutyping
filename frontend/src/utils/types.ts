@@ -142,10 +142,11 @@ export type KanaState = {
 
 export type LineState = {
   line: LineData,
-  position: [number, number]; // syllable index, kana index
+  position: number; // syllable index
   syllables: { // yes this is basically a copy of line.syllables but whatever for now
     time: number,
     text: string,
+    position: number, // kana index
     kana: KanaState[],
   }[], 
   nBuffer: boolean,
