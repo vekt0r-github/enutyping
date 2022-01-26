@@ -40,7 +40,7 @@ const Dropdown = styled.div`
   border-radius: 6px;
   min-width: 150px;
   overflow: hidden;
-  background-color: var(--clr-primary-dim);
+  background-color: var(--clr-secondary-dim);
   color: var(--clr-grey);
 `;
 

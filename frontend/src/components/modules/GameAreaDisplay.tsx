@@ -84,7 +84,7 @@ export const Overlay = styled.div`
   left: 0;
   top: 0;
   background-color: #0006;
-  color: white;
+  color: var(--white);
   display: flex;
   flex-direction: column;
   justify-content: center;
