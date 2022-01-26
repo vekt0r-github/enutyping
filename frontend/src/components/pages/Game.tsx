@@ -58,7 +58,9 @@ const Game = ({ user, config } : Props) => {
         processBeatmap(beatmap, config); // mutates
         setMap(beatmap);
       }
-    });
+    }).catch(() => {
+      setMap(null);
+    });;
   };
   useEffect(refreshBeatmap, []);
 

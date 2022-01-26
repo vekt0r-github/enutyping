@@ -65,6 +65,8 @@ const DiffSelect = ({ config } : Props) => {
         setMapset(null); // mapset not found
       }
       setMapset(beatmapset);
+    }).catch(() => {
+      setMapset(null);
     });
   }, []);
 
