@@ -57,6 +57,8 @@ export const Sidebar = styled(MainBox)`
   min-width: 300px;
   max-width: 400px;
   height: var(--game-height);
+	padding-top: 0px;
+	padding-bottom: 0px;
   flex-basis: 300px;
   flex-grow: 1;
   flex-shrink: 0;

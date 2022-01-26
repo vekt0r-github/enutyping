@@ -12,7 +12,7 @@ import { computeLineKPM, makeSetFunc, timeToLineIndex } from '@/utils/beatmaputi
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { SubBox, Line } from '@/utils/styles';
+import { SubBox, Line, InfoBox, InfoEntry } from '@/utils/styles';
 
 type Props = {
   user: User | null,
@@ -57,8 +57,22 @@ export const BottomHalf = styled(TopHalf)`
 export const StatBox = styled(SubBox)`
   flex-basis: 0;
   flex-grow: 1;
-  height: auto;
+  height: 300px;
   margin: var(--s);
+	margin-top: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+`;
+
+const ResultsContainer = styled.div`
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+  background-color: var(--clr-primary-light);
+	width: 100%;
+	height: 100%;
+	align-items: center;
+	justify-content: space-between;
 `;
 
 export const Overlay = styled.div`
@@ -125,72 +139,97 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, 
   const isActive = [GameStatus.PLAYING, GameStatus.PAUSED, GameStatus.AUTOPLAYING].includes(status) &&
     (currTime !== undefined) && (currIndex !== undefined) && (currIndex > -1) && (currIndex < lines.length);
   const isPlayingGame = isActive && status === GameStatus.PLAYING;
+
+  const scoreInfoPairs: [string, string | number | JSX.Element | undefined][] = [
+    ["Correct Keystrokes", hits],
+    ["Incorrect Keystrokes", misses],
+    ["Kana Typed", kanaHits],
+    ["Kana Missed", kanaMisses],
+    ["Keystroke Accuracy", keyAcc.toFixed(2)],
+		["Kana Accuracy", kanaAcc.toFixed(2)],
+  ];
+
+  const scoreInfoEntries = scoreInfoPairs.map((entry: [string, string | number | JSX.Element | undefined]) => (
+    <InfoEntry key={entry[0]}>
+      <span><b>{entry[0]}:</b></span>
+      <span>{entry[1]}</span>
+    </InfoEntry>
+  ));
   
   return (
     <GameContainer>
-      <TopHalf>
-        {isActive ? <>
-          <GameLine // current line
-            key={currIndex}
-            currTime={currTime}
-            lineState={lines[currIndex]}
-            setLineState={(makeNewLineState) => { set('lines')((oldLines) => {
-              oldLines[currIndex] = makeNewLineState(oldLines[currIndex]);
-              return oldLines;
-            }); }}
-            keyCallback={keyCallback}
-            config={config}
-          />
-          <LyricLine>{lines[currIndex].line.lyric}</LyricLine>
-        </> : null}
-        {status === GameStatus.SUBMITTING ?
-          <h2>Submitting score...</h2>
-          : null}
-        {status === GameStatus.ENDED ?
-          <h2>YOUR SCORE IS {score}</h2>
-          : null} 
-      </TopHalf>
-      <BottomHalf>
-        <StatBox>
-          <p>Keypress Acc: {keyAcc.toFixed(2)}</p>
-          <p>Kana Acc: {kanaAcc.toFixed(2)}</p>
-          <p>Score: {score}</p>
-          <p>KPM: {KPM}</p>
-        </StatBox>
-        <GameVideo
-          yt_id={beatmap.beatmapset.yt_id}
-          status={status}
-          currTime={currTime}
-          startGame={() => startGame(totalOffset)}
-          volume={volume}
-        />
-        <StatBox>
-          <p>Beatmap KPM: {Math.round(beatmap.kpm ?? 0)}</p>
-          <p>Line KPM: {isPlayingGame ? 
-            (Math.round(computeLineKPM(lines[currIndex].line)))
-            : "N/A"}</p>
-        </StatBox>
-      </BottomHalf>
-      {status === GameStatus.UNSTARTED ? 
-        <Overlay>
-          {!user && <>
-            <Warning>
-              <Line size="1.5em">Warning: You are not logged in, and your score will not be submitted.</Line>
-            </Warning>
-            <Line size="0.5em">&nbsp;</Line>
-          </>}
-          <Line size="1.5em">Press Space to play</Line>
-          <Line size="1em">Press Esc to exit during a game</Line>
-          <Line size="0.5em">&nbsp;</Line>
-          <Line size="1em">Set map offset:&nbsp;
-            <input defaultValue={offset} onChange={(e) => {
-              const intValue = parseInt(e.target.value)
-              if (!isNaN(intValue)) { setOffset(intValue); }
-            }}></input>
-          </Line>
-          <Line size="1em">(Put negative offset if you think syllables are late; positive if you think they're early)</Line>
-        </Overlay>
-        : null}
+				<> 
+					<TopHalf>
+						{isActive ? <>
+							<GameLine // current line
+								key={currIndex}
+								currTime={currTime}
+								lineState={lines[currIndex]}
+								setLineState={(makeNewLineState) => { set('lines')((oldLines) => {
+									oldLines[currIndex] = makeNewLineState(oldLines[currIndex]);
+									return oldLines;
+								}); }}
+								keyCallback={keyCallback}
+								config={config}
+							/>
+							<LyricLine>{lines[currIndex].line.lyric}</LyricLine>
+						</> : null}
+						{status === GameStatus.SUBMITTING ?
+							<h2>Submitting score...</h2>
+							: null}
+					</TopHalf>
+					<BottomHalf>
+						<StatBox>
+							<p>Keypress Acc: {keyAcc.toFixed(2)}</p>
+							<p>Kana Acc: {kanaAcc.toFixed(2)}</p>
+							<p>Score: {score}</p>
+							<p>KPM: {KPM}</p>
+						</StatBox>
+						<GameVideo
+							yt_id={beatmap.beatmapset.yt_id}
+							status={status}
+							currTime={currTime}
+							startGame={() => startGame(totalOffset)}
+							volume={volume}
+						/>
+						<StatBox>
+							<p>Beatmap KPM: {Math.round(beatmap.kpm ?? 0)}</p>
+							<p>Line KPM: {isPlayingGame ? 
+								(Math.round(computeLineKPM(lines[currIndex].line)))
+								: "N/A"}</p>
+						</StatBox>
+					</BottomHalf>
+					{status === GameStatus.UNSTARTED ? 
+						<Overlay>
+							{!user && <>
+								<Warning>
+									<Line size="1.5em">Warning: You are not logged in, and your score will not be submitted.</Line>
+								</Warning>
+								<Line size="0.5em">&nbsp;</Line>
+							</>}
+							<Line size="1.5em">Press Space to play</Line>
+							<Line size="1em">Press Esc to exit during a game</Line>
+							<Line size="0.5em">&nbsp;</Line>
+							<Line size="1em">Set map offset:&nbsp;
+								<input defaultValue={offset} onChange={(e) => {
+									const intValue = parseInt(e.target.value)
+									if (!isNaN(intValue)) { setOffset(intValue); }
+								}}></input>
+							</Line>
+							<Line size="1em">(Put negative offset if you think syllables are late; positive if you think they're early)</Line>
+						</Overlay>
+						: null}
+					{status === GameStatus.ENDED ?
+						<ResultsContainer>
+							<h1><u>RESULTS</u></h1>
+							<h1>Final Score: {score}</h1>
+							<InfoBox width={90}>
+									{scoreInfoEntries}
+							</InfoBox>
+						</ResultsContainer>
+						: null} 
+
+				</>
     </GameContainer>
   );
 }

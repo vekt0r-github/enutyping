@@ -34,6 +34,7 @@ const LBEntry = styled(SubBox)`
   align-items: center;
   justify-content: space-between;
   min-width: 80%;
+	margin: var(--s);
 `;
 
 const UserAvatar = styled.img`
