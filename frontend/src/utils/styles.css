@@ -85,6 +85,8 @@ input, select {
 	color: var(--white);
 	margin: var(--s);
 	border: none;
+  font-size: 1em;
+  font-family: var(--ff-body);
 }
 
 /* Chrome, Safari, Edge, Opera */

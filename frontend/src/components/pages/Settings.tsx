@@ -30,7 +30,7 @@ const SettingContainer = styled.div`
 `;
 
 const SettingBox = styled(SubBox)`
-  margin: 30px;
+  margin: var(--m);
 `;
 
 const KanaContainer = styled.div`
@@ -40,7 +40,7 @@ const KanaContainer = styled.div`
 `;
 
 const KanaBox = styled.div`
-  margin: 30px;
+  margin: var(--s);
 `;
 
 const SettingTitle = styled.span`
