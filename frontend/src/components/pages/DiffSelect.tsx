@@ -118,8 +118,6 @@ const DiffSelect = ({ config } : Props) => {
           </Overlay>
         </GameContainer>
         <Sidebar>
-          <h2>Is this still leaderboard</h2>
-          <Line>i have no fucking clue what goes here</Line>
         </Sidebar>
       </GamePageContainer>
     </>

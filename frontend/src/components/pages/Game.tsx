@@ -23,7 +23,10 @@ type Props = {
   config: Config,
 };
 
+const MAX_NUM_LEADERBOARD = 6;
+
 const LBContainer = styled.div`
+  width: 90%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -34,13 +37,14 @@ const LBEntry = styled(SubBox)`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  min-width: 80%;
+  min-width: 100%;
 	margin: var(--s);
 `;
 
 const UserAvatar = styled.img`
   width:30px;
 `;
+
 
 const Game = ({ user, config } : Props) => {
   const { mapId, mapsetId } = useParams();
@@ -93,7 +97,7 @@ const Game = ({ user, config } : Props) => {
         <Sidebar>
           <h2>Leaderboard</h2>
           <LBContainer>
-            { map?.scores?.map((score) =>
+            { map?.scores?.slice(0, MAX_NUM_LEADERBOARD).map((score) =>
               // XXX: hmm is this okay to be optional?
               <LBEntry key={score.id}>
                 <Link to={`/user/${score.user?.id}`}>
@@ -102,7 +106,7 @@ const Game = ({ user, config } : Props) => {
                 <Link to={`/user/${score.user?.id}`}>
                   {score.user?.name + ":"}
                 </Link>
-                {score.score} pts<b>({score.speed_modification}x)</b>
+                {`${score.score} pts (${score.speed_modification}x)`}
               </LBEntry>
             )}
           </LBContainer>
