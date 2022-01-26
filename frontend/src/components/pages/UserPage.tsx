@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { get } from "@/utils/functions";
 import { Beatmap, Score, User, UserStats, Config } from "@/utils/types";
 import { MainBox, SubBox, InfoBox, InfoEntry } from '@/utils/styles';
-
+import { withParamsAsKey } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 
@@ -141,4 +141,4 @@ const UserPage = ({ yourUser, config }: Props) => {
   );
 };
 
-export default UserPage;
+export default withParamsAsKey(UserPage);

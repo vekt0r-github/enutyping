@@ -10,6 +10,7 @@ import EditorShortcutsDisplay from "@/components/modules/EditorShortcutsDisplay"
 import { get, post, put } from "@/utils/functions";
 import { User, Config, Beatmap } from "@/utils/types";
 import { getArtist, getTitle, processBeatmap } from '@/utils/beatmaputils';
+import { withParamsAsKey } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -190,16 +191,4 @@ const Editor = ({ user, config } : Props) => {
   );
 }
 
-const EditorWithKey = (props : Props) => {
-  const params = useParams();
-  // etc... other react-router-dom v6 hooks
-
-  return (
-    <Editor
-      key={`${params.mapsetId}-${params.mapId}`}
-      {...props}
-    />
-  );
-};
-
-export default EditorWithKey;
+export default withParamsAsKey(Editor);

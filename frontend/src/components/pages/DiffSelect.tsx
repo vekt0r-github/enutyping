@@ -9,6 +9,7 @@ import MapInfoDisplay from "@/components/modules/MapInfoDisplay";
 import { get } from "@/utils/functions";
 import { Config, Beatmapset } from "@/utils/types";
 import { getArtist, getTitle } from "@/utils/beatmaputils"
+import { withParamsAsKey } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -127,4 +128,4 @@ const DiffSelect = ({ config } : Props) => {
   );
 }
 
-export default DiffSelect;
+export default withParamsAsKey(DiffSelect);

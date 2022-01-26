@@ -2,7 +2,6 @@ import React, { useEffect, useState }  from "react";
 import { Navigate, useParams } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
-import NotFound from "@/components/pages/NotFound";
 import YTVideo from "@/components/modules/YTVideo";
 import MapInfoDisplay from "@/components/modules/MapInfoDisplay";
 import EditorShortcutsDisplay from "@/components/modules/EditorShortcutsDisplay";
@@ -10,10 +9,11 @@ import EditorShortcutsDisplay from "@/components/modules/EditorShortcutsDisplay"
 import { get, post } from "@/utils/functions";
 import { Config, Beatmapset, User } from "@/utils/types";
 import { getArtist, getTitle, makeSetFunc } from "@/utils/beatmaputils"
+import { withParamsAsKey } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Line, Link, Sidebar, GamePageContainer } from '@/utils/styles';
+import { MainBox, Line, Link, GamePageContainer } from '@/utils/styles';
 
 import { GameContainer, BottomHalf, StatBox, Overlay as GameOverlay } from "@/components/modules/GameAreaDisplay";
 
@@ -181,9 +181,12 @@ const EditorDiffSelect = ({ user, config } : Props) => {
       get(`/api/beatmapsets/${mapsetId}`).then((beatmapset) => {
         if (!beatmapset || !beatmapset.id) {
           setStatus(INVALID); // mapset not found
+        } else if (beatmapset.owner.id !== user.id) {
+          setStatus(INVALID); // no perms
+        } else {
+          setMapset(beatmapset);
+          setStatus(LOADED);
         }
-        setMapset(beatmapset);
-        setStatus(LOADED);
       });
     } else {
       setStatus(LOADED);
@@ -203,8 +206,9 @@ const EditorDiffSelect = ({ user, config } : Props) => {
     }
   }, []); // may eventually depend on other things
 
+  const Invalid = <p>This beatmapset doesn't exist, or you don't have the permissions to edit it. <Link to="/edit/new">Create a new one?</Link></p>;
   if (status === GOBACK) { return <Navigate to={`/edit`} replace={true} />; }
-  if (status === INVALID) { return <NotFound />; }
+  if (status === INVALID) { return Invalid; }
   if (status === LOADING || !mapset) { return <Loading />; }
   if (status === CREATED_SET) { return <Navigate to={`/edit/${mapset.id}/new`} replace={true} />; }
   const {yt_id, preview_point, owner, beatmaps} = mapset;
@@ -306,4 +310,4 @@ const EditorDiffSelect = ({ user, config } : Props) => {
   );
 }
 
-export default EditorDiffSelect;
+export default withParamsAsKey(EditorDiffSelect);

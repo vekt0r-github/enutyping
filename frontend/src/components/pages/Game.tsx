@@ -9,6 +9,7 @@ import MapInfoDisplay from "@/components/modules/MapInfoDisplay";
 import { get } from "@/utils/functions";
 import { User, Config, Beatmap } from "@/utils/types";
 import { getArtist, getTitle, processBeatmap } from '@/utils/beatmaputils';
+import { withParamsAsKey } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -102,4 +103,4 @@ const Game = ({ user, config } : Props) => {
   );
 }
 
-export default Game;
+export default withParamsAsKey(Game);

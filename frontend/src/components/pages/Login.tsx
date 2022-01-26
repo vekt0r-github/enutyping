@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
 
-import { User } from "@/utils/types";
 import OAuthButton from "@/components/modules/OAuthButton";
+
+import { User } from "@/utils/types";
+import { withParamsAsKey } from "@/utils/componentutils";
 
 import GoogleSVG from "@/public/images/google_logo.svg"
 import GithubSVG from "@/public/images/github-mark.svg"
@@ -56,4 +58,4 @@ const Login = ({ handleLogin, user } : Props) => {
   )
 }
 
-export default Login;
+export default withParamsAsKey(Login);
