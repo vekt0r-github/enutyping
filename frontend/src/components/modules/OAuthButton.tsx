@@ -19,8 +19,8 @@ const Container = styled.div`
   display: flex;
   border: 2px solid;
   border-radius: var(--s);
-  margin: 1em;
-  padding: 0.75rem;
+  margin-top: 1em;
+  padding: 1.35rem;
   background-color: white;
 `;
 
@@ -29,9 +29,10 @@ const Text = styled.div`
   justify-content: center;
   align-content: center;
   flex-direction: column;
-  margin-left: 1em;
   text-decoration: none;
   color: black;
+  font-family: 'Roboto';
+  padding-left: 2.7em;
 `;
 
 const OAuthButton = ({ text, link, svgUrl, width }: Props) => {
