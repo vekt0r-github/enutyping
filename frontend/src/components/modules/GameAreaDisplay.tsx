@@ -148,6 +148,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
     (adjustedTime !== undefined) && (currIndex !== undefined) && (currIndex > -1) && (currIndex < lines.length);
   const isPlayingGame = isActive && status === GameStatus.PLAYING;
 
+  const scoreMultiplier = Math.pow(speed, 1/speed);
   const scoreInfoPairs: [string, string | number | JSX.Element | undefined][] = [
     ["Correct Keystrokes", hits],
     ["Incorrect Keystrokes", misses],

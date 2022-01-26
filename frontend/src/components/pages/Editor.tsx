@@ -88,6 +88,7 @@ const Editor = ({ user, config } : Props) => {
     } else {
       const data = {
         diffname: diffname,
+        kpm: kpm,
         content: beatmap.content,
       }
       put(`/api/beatmaps/${mapId}`, data)
