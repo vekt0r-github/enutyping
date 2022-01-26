@@ -95,6 +95,11 @@ export const Overlay = styled.div`
   }
 `;
 
+const OffsetInput = styled.input`
+  font-size: 1em;
+  font-family: "Open Sans";
+`;
+
 const Warning = styled.div`
   background-color: var(--clr-warn);
   padding: var(--s) 0;
@@ -203,18 +208,16 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, 
 						<Overlay>
 							{!user && <>
 								<Warning>
-									<Line size="1.5em">Warning: You are not logged in, and your score will not be submitted.</Line>
+									<Line size="1.5em" margin="0 0 0.5em 0">Warning: You are not logged in, and your score will not be submitted.</Line>
 								</Warning>
-								<Line size="0.5em">&nbsp;</Line>
 							</>}
 							<Line size="1.5em">Press Space to play</Line>
-							<Line size="1em">Press Esc to exit during a game</Line>
-							<Line size="0.5em">&nbsp;</Line>
+							<Line size="1em" margin="0 0 0.5em 0">Press Esc to exit during a game</Line>
 							<Line size="1em">Set map offset:&nbsp;
-								<input defaultValue={offset} onChange={(e) => {
+								<OffsetInput size={3} defaultValue={offset} onChange={(e) => {
 									const intValue = parseInt(e.target.value)
 									if (!isNaN(intValue)) { setOffset(intValue); }
-								}}></input>
+								}}></OffsetInput>
 							</Line>
 							<Line size="1em">(Put negative offset if you think syllables are late; positive if you think they're early)</Line>
 						</Overlay>
