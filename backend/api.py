@@ -267,8 +267,8 @@ def new_score(user_id):
     except ValidationError as err:
         return err.messages, 400
     print(data)
-    bid, score, key_accuracy, kana_accuracy = itemgetter('beatmap_id', 'score', 'key_accuracy', 'kana_accuracy')(data)
-    s = Score(beatmap_id=bid, user_id=user_id, score=score, key_accuracy=key_accuracy, kana_accuracy=kana_accuracy, time_unix=int(time()))
+    bid, score, key_accuracy, kana_accuracy, speed_modification = itemgetter('beatmap_id', 'score', 'key_accuracy', 'kana_accuracy', 'speed_modification')(data)
+    s = Score(beatmap_id=bid, user_id=user_id, score=score, key_accuracy=key_accuracy, kana_accuracy=kana_accuracy, time_unix=int(time()), speed_modification=speed_modification)
     user = User.query.filter_by(id=user_id).first()
     if not user:
        return 'Invalid User', 400

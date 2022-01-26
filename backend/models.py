@@ -149,6 +149,20 @@ def init_db():
             beatmapset_id=1338, \
             diffname="Complete", \
             content=turing_content),
+        Beatmapset(id=6789, \
+            owner_id="1234", \
+            artist='Bo en', \
+            title='My Time', \
+            artist_original='Bo en', \
+            title_original='My Time', \
+            yt_id='erzgjfU271g', \
+            preview_point=0, \
+            duration=105000),
+        Beatmap(id=2730, \
+            beatmapset_id=6789, \
+            diffname="sampai_'s Fun Time", \
+            content=my_time_content),
+
         Score(user_id=1234, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, score=727),
         Score(user_id=1234, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, score=123),
         Score(user_id=4321, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, score=72727),
@@ -159,6 +173,142 @@ def init_db():
     db_session.bulk_save_objects(objects)
     db_session.commit()
 
+my_time_content = '''ishpytoing file format v1
+
+[TimingPoints]
+380,199
+
+[Lines]
+L,380,Close
+S,380,close
+L,3094,Your eyes, you'll be here soon
+S,3094,your
+S,3998,eyes
+S,4903,youll
+S,5807,be
+S,6712,here
+S,7616,soon
+L,10631,一二三四五分
+S,10631,い
+S,10782,ち
+S,10933,に
+S,11234,さん
+S,12139,し
+S,13043,ご
+S,13948,ふー
+S,14852,ん
+L,17867,時々本当に寝たい
+S,17867,と
+S,18018,き
+S,18169,ど
+S,18320,き
+S,18470,ほん
+S,19375,とう
+S,20279,に
+S,21184,ね
+S,22089,たい
+L,25104,でもこの後できない
+S,25104,で
+S,25254,も
+S,25405,こ
+S,25556,の
+S,25707,あ
+S,26611,と
+S,27516,で
+S,28420,き
+S,29325,ない
+L,30229,おやすみ
+S,30229,お
+S,31134,や
+S,32038,す
+S,32943,み
+L,33847,おやすみ
+S,33847,お
+S,34752,や
+S,35656,す
+S,36561,み
+L,37465,おやすみ
+S,37465,お
+S,38370,や
+S,39274,す
+S,40179,み
+L,41084,おやすみ
+S,41084,お
+S,41988,や
+S,42893,すー
+L,43797,おやすみ、おやすみ
+S,43797,お
+S,44099,や
+S,44400,す
+S,44702,み
+S,45003,お
+S,45606,や
+S,45908,す
+S,46058,み
+L,46511,Close your eyes and you'll leave this dream
+S,46511,close
+S,46963,your
+S,47415,eyes
+S,47717,and
+S,48018,youll
+S,48320,leave
+S,48772,this
+S,49224,dream
+L,51033,おやすみおやすみ
+S,51033,お
+S,51335,や
+S,51636,す
+S,51938,み
+S,52239,お
+S,52842,ya
+S,53295,su
+S,53747,mi
+L,54199,I know that it's hard to do
+S,54199,i
+S,54651,know
+S,54953,that
+S,55254,its
+S,55556,hard
+S,56008,to
+S,56460,do
+L,57365,[Instrumental]
+L,72742,おやすみおやすみ
+S,72742,お
+S,73043,や
+S,73345,す
+S,73646,み
+S,73948,お
+S,74551,や
+S,74852,す
+S,75003,み
+L,75455,Close your eyes and you'll leave this dream
+S,75455,close
+S,75908,your
+S,76360,eyes
+S,76661,and
+S,76963,youll
+S,77264,leave
+S,77717,this
+S,78169,dream
+L,79978,おやすみおやすみ
+S,79978,お
+S,80279,や
+S,80581,す
+S,80883,み
+S,81184,お
+S,81787,や
+S,82239,す
+S,82692,み
+L,83144,I know that it's hard to do
+S,83144,i
+S,83596,know
+S,83898,that
+S,84199,its
+S,84501,hard
+S,84953,to
+S,85405,do
+E,85556
+'''
 
 test_map_content = '''ishpytoing file format v1
 

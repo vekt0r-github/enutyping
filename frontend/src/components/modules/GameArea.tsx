@@ -127,7 +127,7 @@ const GameArea = ({ user, beatmap, config, speed, afterGameEnd, setAvailableSpee
       // Do not provide user_id as the backend should have stored in session
       score: Math.round(stats.score),
       key_accuracy: stats.hits / (stats.hits + stats.misses),
-			speed_modification: speed,
+			speed_modification: speed ?? 1,
       kana_accuracy: stats.kanaHits / stats.totalKana
     }
     post('/api/scores', data).then((score) => {
