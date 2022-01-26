@@ -28,9 +28,9 @@
   --clr-create-light: var(--teal);
   --clr-warn: var(--red);
   --clr-neutral: var(--black1);
-  --clr-link: var(--white);
+  --clr-link: var(--yellow);
   --clr-link-hover: var(--maroon);
-  --clr-highlight: var(--yellow);
+  --clr-highlight: var(--red);
   --clr-darkgrey: #d4d4d4;
   --clr-medgrey: #e0e0e0;
   --clr-grey: #f7f7f7;

@@ -106,7 +106,7 @@ const UserPage = ({ yourUser, config }: Props) => {
     return (
       <>
         <InfoEntry>
-          <span><b>{artist}-{title}</b> [{beatmap.diffname}]</span>
+          <span><b>{artist} - {title}</b> [{beatmap.diffname}]</span>
           <span><b>{score.score}</b> points (<b>{score.speed_modification}x</b> speed)</span>
         </InfoEntry>
         <InfoEntry>
