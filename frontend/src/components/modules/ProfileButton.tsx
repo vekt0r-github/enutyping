@@ -37,6 +37,9 @@ const DropdownContainer = styled.div`
 `;
 
 const Dropdown = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   border-radius: 6px;
   min-width: 150px;
   overflow: hidden;
@@ -53,9 +56,11 @@ const Option = styled.div`
   display: block;
   background-color: var(--clr-darkgrey);
   text-decoration: none;
+  text-align: center;
   color: black;
   cursor: pointer;
   padding: 0.6125rem 1.85rem;
+  min-width: 100%;
   &:hover {
     background-color: var(--clr-grey);
   };
