@@ -21,7 +21,7 @@ const Outer = styled.div`
 
 const NavContainer = styled(BasicContainer)`
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
 `;
 
 const NavInner = styled.div`
@@ -32,6 +32,12 @@ const NavInner = styled.div`
 
 const NavLeft = styled(NavInner)`
   justify-content: flex-start;
+  text-align: center;
+  align-items: center;
+`;
+
+const NavMiddle = styled(NavInner)`
+  justify-content: center;
   text-align: center;
   align-items: center;
 `;
@@ -75,11 +81,11 @@ const NavBar = ({ handleLogout, user } : Props) => (
   <NavContainer>
     <NavLeft>
       <RouterLink to="/">Logo</RouterLink>
-      <NavBarLink as={NavLink} to="/play">play</NavBarLink>
-      {user && <>
-        <NavBarLink as={NavLink} to="/edit">create</NavBarLink>
-      </>}
     </NavLeft>
+    <NavMiddle>
+      <NavBarLink as={NavLink} to="/play">play</NavBarLink>
+      <NavBarLink as={NavLink} to="/edit">create</NavBarLink>
+    </NavMiddle>
     <NavRight>
       {user ? 
         <ProfileButton user={user} handleLogout={handleLogout} />
