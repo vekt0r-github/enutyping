@@ -41,6 +41,7 @@ class BeatmapSchema(Schema):
     beatmapset_id = fields.Int(load_only=True)
     diffname = fields.Str()
     content = fields.Str()
+    kpm = fields.Float()
 
 beatmap_schema = BeatmapSchema()
 beatmaps_schema = BeatmapSchema(many=True)
@@ -55,7 +56,7 @@ class BeatmapsetSchema(Schema):
     preview_point = fields.Int()
     duration = fields.Int()
     owner = fields.Nested(UserSchema(only=("name", "id")), dump_only=True)
-    beatmaps = fields.Nested(BeatmapSchema(only=("diffname", "id")), many=True, dump_only=True)
+    beatmaps = fields.Nested(BeatmapSchema(only=("diffname", "id", "kpm")), many=True, dump_only=True)
 
 beatmapset_schema = BeatmapsetSchema()
 beatmapsets_schema = BeatmapsetSchema(many=True)

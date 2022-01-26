@@ -99,6 +99,7 @@ export type TimingPoint = {
 export type BeatmapMetadata = {
   id: number | string;
   diffname: string;
+  kpm: number;
 };
 
 export type Beatmap = {

@@ -4,11 +4,19 @@ import MapsetList from "@/components/modules/MapsetList";
 import Loading from "@/components/modules/Loading";
 
 import { get } from "@/utils/functions";
-import { Config, Beatmapset } from "@/utils/types";
+import { Config, Beatmapset, Beatmap, BeatmapMetadata } from "@/utils/types";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
 import { SearchBar, SongsContainer } from '@/utils/styles';
+
+const SearchContainer = styled.div`
+  display: flex;
+	flex-direction: row;
+	justify-content: center;
+  align-items: center;
+  min-width: 100%;
+`;
 
 type Props = {
   config: Config,
@@ -17,12 +25,15 @@ type Props = {
 const SongSelect = ({ config } : Props) => {
   const [mapsets, setMapsets] = useState<Beatmapset[]>();
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [KPMUpperBound, setKPMUpperBound] = useState<number>(1000);
 
   const filteredMapsets = mapsets?.filter((set: Beatmapset) => {  
     const lowercaseQuery = searchQuery.toLowerCase();
     return JSON.stringify(set).toLowerCase().includes(lowercaseQuery);
+  }).filter((set: Beatmapset) => {
+    return set.beatmaps.some((b: Beatmap | BeatmapMetadata) => (b.kpm && b.kpm < KPMUpperBound))
   });
-  
+
   useEffect(() => {
     get("/api/beatmapsets").then((res) => {
       const beatmapsets = res.beatmapsets;
@@ -37,7 +48,11 @@ const SongSelect = ({ config } : Props) => {
   return (
     <>
       <h1>Song Select</h1>
-      <SearchBar value={searchQuery} placeholder={"Search for a mapset:"} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} />
+      <SearchContainer>
+				<SearchBar value={searchQuery} placeholder={"Search for a mapset:"} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} />
+        <span><b>Filter: KPM {"<"}</b></span>
+        <input type="number" value={KPMUpperBound} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setKPMUpperBound(parseInt(e.target.value))}/>
+      </SearchContainer>
       <SongsContainer>
         {(filteredMapsets === undefined) ? <Loading /> :
           <MapsetList 

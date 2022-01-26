@@ -89,7 +89,7 @@ export const GamePageContainer = styled.div`
 
 export const SearchBar = styled.input`
   font-size: 18px;
-  width: 80%;
+  min-width: 60%;
   max-width: 500px;
   margin: var(--s);
 `;

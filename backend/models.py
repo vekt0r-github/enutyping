@@ -36,11 +36,13 @@ class Beatmap(Base):
     content = deferred(Column(UnicodeText))
 
     beatmapset = relationship('Beatmapset', back_populates='beatmaps')
+    kpm = Column(Float)
 
-    def __init__(self, beatmapset_id, diffname, content, id = None):
+    def __init__(self, beatmapset_id, diffname, content, kpm, id = None):
         self.beatmapset_id = beatmapset_id
         self.diffname = diffname
         self.content = content
+        self.kpm = kpm
         self.id = id
 
 class Beatmapset(Base):
@@ -105,7 +107,8 @@ def init_db():
         Beatmap(id=727, \
             beatmapset_id=727, \
             diffname="sampai_'s ear damage", \
-            content=content),
+            content=content,
+            kpm=401),
         Beatmapset(id=1337, 
             owner_id=4321,
             artist='Nekomata Okayu', \
@@ -118,7 +121,8 @@ def init_db():
         Beatmap(id=1337, \
             beatmapset_id=1337, \
             diffname="Lythrum", \
-            content=flos_content),
+            content=flos_content,
+            kpm=273),
         Beatmapset(id=272, 
             owner_id=4321,
             artist='YOASOBI', \
@@ -131,11 +135,13 @@ def init_db():
         Beatmap(id=272, \
             beatmapset_id=272, \
             diffname="夜にこｃｋ", \
-            content=yorunicontent),
+            content=yorunicontent,
+            kpm=381),
         Beatmap(id=2727, \
             beatmapset_id=272, \
             diffname="dev map ん～", \
-            content=test_map_content),
+            content=test_map_content,
+            kpm=189),
         Beatmapset(id=1338, 
             owner_id="8484892osu",
             artist='Minato Aqua & Nekomata Okayu', \
@@ -148,7 +154,8 @@ def init_db():
         Beatmap(id=2729, \
             beatmapset_id=1338, \
             diffname="Complete", \
-            content=turing_content),
+            content=turing_content,
+            kpm=427),
         Beatmapset(id=6789, \
             owner_id="1234", \
             artist='Bo en', \
@@ -161,7 +168,8 @@ def init_db():
         Beatmap(id=2730, \
             beatmapset_id=6789, \
             diffname="sampai_'s Fun Time", \
-            content=my_time_content),
+            content=my_time_content,
+            kpm=196),
 
         Score(user_id=1234, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, score=727),
         Score(user_id=1234, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, score=123),
