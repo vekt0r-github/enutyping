@@ -17,8 +17,8 @@ export const SubBox = styled(Box)`
 `;
 
 export const Link = styled(RouterLink)`
-  color: var(--clr-link);
   text-decoration: none;
+	color: var(--clr-link);
   cursor: pointer;
   &:hover {
     color: var(--clr-link-hover);
@@ -64,7 +64,6 @@ export const Sidebar = styled(MainBox)`
   flex-shrink: 0;
   box-sizing: content-box;
   margin: 0 var(--s);
-  padding: var(--s) var(--m);
 `;
 
 export const GamePageContainer = styled.div`

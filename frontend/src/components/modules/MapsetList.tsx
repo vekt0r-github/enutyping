@@ -23,10 +23,9 @@ const SetLink = styled(MainBox)`
   width: 100%;
   height: 100%;
   background-color: transparent;
-  color: black;
+  color: var(--lavender);
   display: flex;
   box-sizing: border-box;
-  &:hover { color: black; }
 `;
 
 const DiffsContainer = styled.div`
@@ -43,12 +42,10 @@ const Diff = styled(SubBox)<{color: string}>`
   padding: 1px var(--s);
   & + & { margin-top: var(--xs); }
   box-sizing: border-box;
-  color: black;
   transition: var(--tt-short);
   z-index: 1;
   &:hover {
     background-color: ${({color}) => `var(--clr-${color}-light)`};
-    color: black;
   }
 `;
 
@@ -71,7 +68,6 @@ const SongBox = styled(MainBox)`
   max-width: 480px;
   margin: var(--s);
   box-sizing: content-box;
-  color: black;
   position: relative;
   &:hover, &:focus {
     z-index: 1;

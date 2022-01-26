@@ -20,6 +20,12 @@ const ProfileImage = styled.img`
   width: 60px;
   height: 60px;
   border-radius: 50%;
+	cursor: pointer;
+	padding: 3px;
+	&:hover {
+		padding: 0px;
+		border: 3px solid var(--clr-link-hover);
+	}
 `;
 
 const DropdownContainer = styled.div`

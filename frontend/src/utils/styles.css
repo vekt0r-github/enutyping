@@ -14,21 +14,25 @@
 * much after initial creation.
 */
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400&display=swap");
+@import "./catppuchin.css";
+
 :root {
   /* yoru ni kakeru colors */
-  --clr-primary-dim: #0e6183;
-  --clr-primary: #4d8fa8;
-  --clr-primary-light: #a1c3d1;
-  --clr-secondary-dim: #1e8897;
-  --clr-secondary: #58aeb9;
-  --clr-secondary-light: #9fd0d6;
-  --clr-create: #5ac073;
-  --clr-create-light: #9ad4a9;
-  --clr-warn: #d82d30;
-  --clr-neutral: #e7dfdb;
-  --clr-link: #123bb6;
-  --clr-link-hover: #7991da;
-  --clr-highlight: #f8f7b0bb;
+  --clr-primary-dim: var(--black2);
+  --clr-primary: var(--black4);
+  --clr-primary-light: var(--gray0);
+  --clr-secondary-dim: var(--gray0);
+  --clr-secondary: var(--gray1);
+  --clr-secondary-light: var(--gray2);
+  --clr-create: var(--green);
+  --clr-create-light: var(--teal);
+  --clr-warn: var(--red);
+  --clr-neutral: var(--black1);
+  --clr-link: var(--white);
+  --clr-link-hover: var(--maroon);
+  --clr-highlight: var(--yellow);
   --clr-darkgrey: #d4d4d4;
   --clr-medgrey: #e0e0e0;
   --clr-grey: #f7f7f7;
@@ -57,6 +61,7 @@ html, body, #root {
   width: 100%;
   height: 100%;
   font-family: var(--ff-body);
+	color: var(--white);
   background-color: var(--clr-neutral);
 }
 
@@ -72,4 +77,12 @@ html {
 
 h1, h2, h3 {
   font-family: var(--ff-heading);
+	color: var(--white);
+}
+
+input, select {
+	background-color: var(--clr-primary);
+	color: var(--white);
+	margin: var(--s);
+	border: none;
 }

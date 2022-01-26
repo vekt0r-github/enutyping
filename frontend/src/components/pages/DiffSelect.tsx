@@ -40,13 +40,11 @@ const Diff = styled(MainBox)`
   height: 60px;
   display: flex;
   align-items: center;
-  color: black;
   transition: var(--tt-short);
   padding: 0 var(--l);
   margin: var(--m);
   border-radius: var(--m);
   &:hover, &:focus {
-    color: black;
     background-color: var(--clr-primary-light);
   }
 `;
