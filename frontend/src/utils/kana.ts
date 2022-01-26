@@ -24,6 +24,7 @@ export const kanaRespellings = {
 };
 
 const getRomanizations = (kana: string, config: Config) : string[] => {
+  kana = kana.toLowerCase();
   function hasKey<O>(obj: O, key: PropertyKey): key is keyof O {
     return key in obj; // fix ts error even though this looks stupid
   }

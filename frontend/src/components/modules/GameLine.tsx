@@ -163,18 +163,19 @@ const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : P
 
   const handleKeyPress = (e: KeyboardEvent) => {
     if (["Escape"].includes(e.key)) { return; } // GameArea is handling it
+    const key = e.key.toLowerCase();
     const allowedCharacters = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890-`~ \"'.?!,"; // idk if this is comprehensive
-    if(!allowedCharacters.includes(e.key)) { return; }
-    if(e.key == "n" && nBuffer) {
+    if(!allowedCharacters.includes(key)) { return; }
+    if(key == "n" && nBuffer) {
       setLineState((s) => ({ ...s, nBuffer: false }));
       return;
     }
-    const newKana = resultOfHit(e.key, sPos);  
+    const newKana = resultOfHit(key, sPos);  
     if (!newKana) { // key is not the next char
       let newPosition = sPos;
       while (newPosition < latestActiveSyllable) {
         newPosition++; // next syllable
-        const testNewKana = resultOfHit(e.key, newPosition);
+        const testNewKana = resultOfHit(key, newPosition);
         if (testNewKana) {
           handleCorrectKeypress(newPosition, testNewKana);
           return;

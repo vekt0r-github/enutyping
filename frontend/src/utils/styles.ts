@@ -119,6 +119,7 @@ export const InfoEntry = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  margin: 2px 0;
 `;
 
 export const BasicContainer = styled.div`
