@@ -15,7 +15,7 @@ const SearchContainer = styled.div`
 	flex-direction: row;
 	justify-content: center;
   align-items: center;
-  min-width: 100%;
+  min-width: 1000px;
 `;
 
 type Props = {

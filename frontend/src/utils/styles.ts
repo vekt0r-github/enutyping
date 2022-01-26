@@ -92,9 +92,9 @@ export const GamePageContainer = styled.div`
 
 export const SearchBar = styled.input`
   font-size: 18px;
-  min-width: 60%;
+  min-width: 40%;
   max-width: 500px;
-  margin: var(--s);
+  margin: var(--m);
 `;
 
 export const SongsContainer = styled.div`
