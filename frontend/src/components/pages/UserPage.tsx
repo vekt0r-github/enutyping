@@ -138,7 +138,7 @@ const UserPage = ({ yourUser, config }: Props) => {
       <UserBanner>
         <NameAndProfile>
           <UserAvatar src={user.avatar_url} />
-          <h2>{user.name}</h2>
+          <h2 style={{paddingLeft: "0.5em"}}>{user.name}</h2>
         </NameAndProfile>
         <StatBox>
             {userStatsElements}
