@@ -122,6 +122,7 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
   const [editingState, setEditingState] = useState<EditingState>({ status: NOT, unsaved: false });
 
   const {status, offset, currTime, stats} = gameState;
+	const [availableSpeeds, setAvailableSpeeds] = useState<number[]>([1]);
   const currIndex = (currTime !== undefined) ? timeToLineIndex(lines, currTime) : undefined; 
   const isEditing = [GameStatus.PAUSED, GameStatus.AUTOPLAYING].includes(status);
   const isTesting = status === GameStatus.PLAYING;
@@ -506,7 +507,7 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
   }, [beatmap.content]);
 
   const keyCallback = (hit: number, miss: number, endKana: boolean) => {
-    set('stats')((oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana));
+    set('stats')((oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana, 1));
   };
 
   if (status === GameStatus.GOBACK) {
@@ -542,6 +543,8 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
         gameState={displayGameState}
         keyCallback={isTesting ? keyCallback : () => {}}
         setGameState={isTesting ? setGameState : () => {}}
+				speed={1}
+				setAvailableSpeeds={setAvailableSpeeds}
         config={config}
       />
       {/* a few absolutely positioned components to overlay */}

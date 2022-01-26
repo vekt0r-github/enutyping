@@ -57,12 +57,16 @@ const Game = ({ user, config } : Props) => {
   };
   useEffect(refreshBeatmap, []);
 
+	const [availableSpeeds, setAvailableSpeeds] = useState<number[]>([1]);
+	const [speed, setSpeed] = useState<number>(1);
+
   const [map, setMap] = useState<Beatmap | null>();
   if (map === undefined) { return <Loading />; }
   if (map === null) { return <NotFound />; }
   const {beatmapset, diffname, lines, kpm, scores} = map;
   const {yt_id, source, preview_point, owner, beatmaps} = beatmapset;
   const [artist, title] = [getArtist(beatmapset, config), getTitle(beatmapset, config)];
+
 
   return (
     <>
@@ -73,6 +77,9 @@ const Game = ({ user, config } : Props) => {
           artist={artist}
           source={source!}
           diffname={diffname}
+					speed={speed}
+					setSpeed={setSpeed}
+					availableSpeeds={availableSpeeds}
           kpm={kpm}
         />
         <GameArea
@@ -80,6 +87,8 @@ const Game = ({ user, config } : Props) => {
           beatmap={map}
           config={config}
           afterGameEnd={refreshBeatmap}
+					speed={speed}
+					setAvailableSpeeds={setAvailableSpeeds}
         />
         <Sidebar>
           <h2>Leaderboard</h2>
@@ -93,7 +102,7 @@ const Game = ({ user, config } : Props) => {
                 <Link to={`/user/${score.user?.id}`}>
                   {score.user?.name + ":"}
                 </Link>
-                {score.score}
+                {score.score} pts<b>({score.speed_modification}x)</b>
               </LBEntry>
             )}
           </LBContainer>

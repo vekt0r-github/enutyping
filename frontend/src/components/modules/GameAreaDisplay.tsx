@@ -20,7 +20,9 @@ type Props = {
   gameState: GameState, // data in gameState.lines is a superset of beatmap.lines
   setGameState: React.Dispatch<React.SetStateAction<GameState>>,
   keyCallback: (hit: number, miss: number, endKana: boolean) => void,
+	setAvailableSpeeds: React.Dispatch<React.SetStateAction<number[]>>,
   config: Config,
+	speed: number,
 };
 
 export const GameContainer = styled.div`
@@ -105,7 +107,7 @@ const Warning = styled.div`
   padding: var(--s) 0;
 `;
 
-const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, config } : Props) => {
+const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableSpeeds, speed, keyCallback, config } : Props) => {
   const set = makeSetFunc(setGameState);
 
   const { volume } = config;
@@ -115,7 +117,8 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, 
 
   const {status, currTime, lines, stats} = gameState;
   const {hits, misses, kanaHits, kanaMisses, score} = stats;
-  const currIndex = (currTime !== undefined) ? timeToLineIndex(beatmap.lines, currTime) : undefined;
+	const adjustedTime = currTime ? currTime * speed : currTime;
+  const currIndex = (adjustedTime !== undefined) ? timeToLineIndex(beatmap.lines, adjustedTime) : undefined;
 
   const startGame = (offset: number) => {
     if (status !== GameStatus.STARTQUEUED) { return; }
@@ -142,7 +145,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, 
   }
 
   const isActive = [GameStatus.PLAYING, GameStatus.PAUSED, GameStatus.AUTOPLAYING].includes(status) &&
-    (currTime !== undefined) && (currIndex !== undefined) && (currIndex > -1) && (currIndex < lines.length);
+    (adjustedTime !== undefined) && (currIndex !== undefined) && (currIndex > -1) && (currIndex < lines.length);
   const isPlayingGame = isActive && status === GameStatus.PLAYING;
 
   const scoreInfoPairs: [string, string | number | JSX.Element | undefined][] = [
@@ -168,7 +171,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, 
 						{isActive ? <>
 							<GameLine // current line
 								key={currIndex}
-								currTime={currTime}
+								currTime={adjustedTime}
 								lineState={lines[currIndex]}
 								setLineState={(makeNewLineState) => { set('lines')((oldLines) => {
 									oldLines[currIndex] = makeNewLineState(oldLines[currIndex]);
@@ -187,20 +190,22 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, 
 						<StatBox>
 							<p>Keypress Acc: {keyAcc.toFixed(2)}</p>
 							<p>Kana Acc: {kanaAcc.toFixed(2)}</p>
-							<p>Score: {score}</p>
+							<p>Score: {Math.round(score)}</p>
 							<p>KPM: {KPM}</p>
 						</StatBox>
 						<GameVideo
 							yt_id={beatmap.beatmapset.yt_id}
 							status={status}
-							currTime={currTime}
+							currTime={adjustedTime}
 							startGame={() => startGame(totalOffset)}
+							setAvailableSpeeds={setAvailableSpeeds}
+							speed={speed}
 							volume={volume}
 						/>
 						<StatBox>
-							<p>Beatmap KPM: {Math.round(beatmap.kpm ?? 0)}</p>
+							<p>Beatmap KPM: {Math.round((beatmap.kpm ?? 0) * speed)}</p>
 							<p>Line KPM: {isPlayingGame ? 
-								(Math.round(computeLineKPM(lines[currIndex].line)))
+								(Math.round(computeLineKPM(lines[currIndex].line) * speed))
 								: "N/A"}</p>
 						</StatBox>
 					</BottomHalf>
@@ -225,7 +230,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, keyCallback, 
 					{status === GameStatus.ENDED ?
 						<ResultsContainer>
 							<h1><u>RESULTS</u></h1>
-							<h1>Final Score: {score}</h1>
+							<h1>Final Score: {Math.round(score)}</h1>
 							<InfoBox width={90}>
 									{scoreInfoEntries}
 							</InfoBox>

@@ -172,12 +172,12 @@ export const computeLineKana = (line: LineData) => {
   return totalKana;
 };
 
-export const updateStatsOnKeyPress = (oldStats: GameState['stats'], hit: number, miss: number, endKana: boolean) => {
+export const updateStatsOnKeyPress = (oldStats: GameState['stats'], hit: number, miss: number, endKana: boolean, scoreMultiplier: number) => {
   return { ...oldStats,
-    hits: oldStats.hits + hit,
-    misses: oldStats.misses + miss,
-    kanaHits: oldStats.kanaHits + (endKana ? 1 : 0),
-    score: oldStats.score + 10 * hit - 5 * miss,
+    hits: oldStats.hits + hit * scoreMultiplier,
+    misses: oldStats.misses + miss * scoreMultiplier,
+    kanaHits: oldStats.kanaHits + (endKana ? 1 : 0) * scoreMultiplier,
+    score: oldStats.score + (10 * hit - 5 * miss) * scoreMultiplier,
   };
 };
 

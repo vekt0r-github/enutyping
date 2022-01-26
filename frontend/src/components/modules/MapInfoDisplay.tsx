@@ -9,6 +9,9 @@ type Props = {
   artist: string,
   source: string,
   diffname?: string | JSX.Element,
+	availableSpeeds?: number[],
+	speed?: number,
+	setSpeed?: React.Dispatch<React.SetStateAction<number>>,
   kpm?: number,
 };
 
@@ -22,7 +25,7 @@ const OverflowSpan = styled.span`
 	text-overflow: ellipsis;
 `;
 
-const MapInfoDisplay = ({ title, artist, diffname, kpm, source } : Props) => {
+const MapInfoDisplay = ({ title, artist, diffname, kpm, availableSpeeds, speed, setSpeed, source } : Props) => {
 
   const mapInfoPairs: [string, string | number | JSX.Element | undefined][] = [
     ["Title", title],
@@ -41,12 +44,31 @@ const MapInfoDisplay = ({ title, artist, diffname, kpm, source } : Props) => {
     </InfoEntry>
   ));
 
+	const speedSelect = speed && setSpeed && (
+		<>
+			<select value={speed} onChange={(e) => setSpeed(Number.parseFloat(e.target.value))}>
+				{(availableSpeeds ?? [1]).map((s: number) => 
+					<option key={s} value={s}>{s}x</option>
+				)}
+			</select>
+		</>
+	);
+
   return (
     <Sidebar>
       <h2>Map Information</h2>
 			<InfoBox width={90}>
 				{mapInfoElements}
 			</InfoBox>
+			{speed && <>
+				<h2>Map Modifications</h2>
+				<InfoBox width={90}>
+					<InfoEntry>
+						<span><b>Map Playback Speed: </b>{speedSelect}</span>
+					</InfoEntry>
+					<p>Use this to change how fast the map is (slower is easier, faster is harder)!</p>
+				</InfoBox>
+			</>}
     </Sidebar>
   );
 }

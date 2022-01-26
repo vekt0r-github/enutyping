@@ -25,7 +25,9 @@ type Props = {
   user: User | null,
   beatmap: Beatmap,
   config: Config,
+	speed: number,
   afterGameEnd: () => void,
+	setAvailableSpeeds: React.Dispatch<React.SetStateAction<number[]>>,
 };
 
 const initStatsState = () => ({
@@ -37,7 +39,7 @@ const initStatsState = () => ({
   score: 0,
 });
 
-const makeInitState = (lines: LineData[], config: Config) : GameState => ({
+const makeInitState = (lines: LineData[], config: Config, speed: number) : GameState => ({
   status: GameStatus.UNSTARTED,
   offset: 0,
   currTime: undefined, // maintained via timer independent of video
@@ -45,8 +47,8 @@ const makeInitState = (lines: LineData[], config: Config) : GameState => ({
   stats: initStatsState(),
 });
 
-const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
-  const initState = () => makeInitState(beatmap.lines as LineData[], config);
+const GameArea = ({ user, beatmap, config, speed, afterGameEnd, setAvailableSpeeds } : Props) => {
+  const initState = () => makeInitState(beatmap.lines as LineData[], config, speed);
 
   const [gameState, setGameState] = useState<GameState>(initState());
   const set = makeSetFunc(setGameState);
@@ -56,7 +58,8 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
   // const [duration, setDuration] = useState<number>(Infinity);
 
   const {status, offset, currTime, lines, stats} = gameState;
-  const currIndex = (currTime !== undefined) ? timeToLineIndex(beatmap.lines, currTime) : undefined;
+	const scoreMultiplier = Math.pow(speed, 1 / speed);
+  const currIndex = (currTime !== undefined) ? timeToLineIndex(beatmap.lines, currTime * speed) : undefined;
 
   const prepareStartGame = () => {
     if (status !== GameStatus.UNSTARTED) { return; }
@@ -101,7 +104,7 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
     const gameStartTime = new Date().getTime() + offset;
     const intervalId = setInterval(() => {
       set('currTime')(new Date().getTime() - gameStartTime);
-    }, 1000 / GAME_FPS);
+    }, 1000 / (GAME_FPS));
     return () => {
       clearInterval(intervalId);
     };
@@ -122,8 +125,9 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
     const data = {
       beatmap_id: beatmap.id,
       // Do not provide user_id as the backend should have stored in session
-      score: stats.score,
+      score: Math.round(stats.score),
       key_accuracy: stats.hits / (stats.hits + stats.misses),
+			speed_modification: speed,
       kana_accuracy: stats.kanaHits / stats.totalKana
     }
     post('/api/scores', data).then((score) => {
@@ -140,7 +144,7 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
   }, [status]); // may eventually depend on other things
 
   const keyCallback = (hit: number, miss: number, endKana: boolean) => {
-    set('stats')((oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana));
+    set('stats')((oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana, scoreMultiplier));
   }
 
   if (status === GameStatus.GOBACK) {
@@ -154,6 +158,8 @@ const GameArea = ({ user, beatmap, config, afterGameEnd } : Props) => {
       gameState={gameState}
       keyCallback={keyCallback}
       setGameState={setGameState}
+			setAvailableSpeeds={setAvailableSpeeds}
+			speed={speed}
       config={config}
     />
   );

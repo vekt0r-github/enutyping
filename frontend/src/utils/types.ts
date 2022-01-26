@@ -71,6 +71,7 @@ export type Score = {
   key_accuracy: number;
   kana_accuracy: number;
   time_unix: number;
+	speed_modification: number;
   user?: User;
 }
 

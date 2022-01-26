@@ -14,18 +14,24 @@ type Props = {
   currTime?: number,
   startGame: () => void,
   volume: number,
+	setAvailableSpeeds: React.Dispatch<React.SetStateAction<number[]>>,
+	speed: number
 }
 
-const GameVideo = ({ yt_id, status, currTime, startGame, volume } : Props) => {
+const GameVideo = ({ yt_id, status, currTime, startGame, setAvailableSpeeds, speed, volume } : Props) => {
   if (!yt_id) { return null; }
 
   const [player, setPlayer] = useState<YT.Player>();
   const [playing, setPlaying] = useState<boolean>(false); // not stopped (playing or paused)
   const seek = () => player && currTime && player.seekTo(currTime / 1000, true);
 
+	useEffect(() => {
+		player?.setPlaybackRate(speed);
+	}, [speed]);
+
   useEffect(() => {
     if (!player || !currTime) { return; }
-    const TOLERANCE_THRESHOLD = 0.3; // number of seconds before video corrects itself
+    const TOLERANCE_THRESHOLD = Math.max(0.3, 0.3 * speed); // number of seconds before video corrects itself
     // only seek when manually changed in editor
     if (status === GameStatus.PAUSED) {
       seek();
@@ -49,6 +55,7 @@ const GameVideo = ({ yt_id, status, currTime, startGame, volume } : Props) => {
 
   const onReady = (e : YT.PlayerEvent) => {
     setPlayer(e.target);
+		setAvailableSpeeds(e.target.getAvailablePlaybackRates());
   };
 
   const onStateChange = (e : YT.OnStateChangeEvent) => {
@@ -59,7 +66,11 @@ const GameVideo = ({ yt_id, status, currTime, startGame, volume } : Props) => {
       startGame();
     } else if (playing && status === GameStatus.PAUSED) { 
       player?.pauseVideo();
-    }
+    } else if(playing) {
+			setAvailableSpeeds([e.target.getPlaybackRate()]);
+		} else if(!playing) {	
+			setAvailableSpeeds(e.target.getAvailablePlaybackRates());
+		}
   };
 
   return (
@@ -70,6 +81,7 @@ const GameVideo = ({ yt_id, status, currTime, startGame, volume } : Props) => {
       options={{
         onReady: onReady,
         onStateChange: onStateChange,
+				playbackRate: speed,
       }}
     />
   );

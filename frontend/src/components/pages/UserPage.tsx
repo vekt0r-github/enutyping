@@ -107,7 +107,7 @@ const UserPage = ({ yourUser, config }: Props) => {
       <>
         <InfoEntry>
           <span><b>{artist}-{title}</b> [{beatmap.diffname}]</span>
-          <span><b>{score.score}</b> points</span>
+          <span><b>{score.score}</b> points (<b>{score.speed_modification}x</b> speed)</span>
         </InfoEntry>
         <InfoEntry>
           <span>Played at {new Date(score.time_unix * 1000).toLocaleString()}</span>
