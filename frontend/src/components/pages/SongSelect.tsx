@@ -25,13 +25,13 @@ type Props = {
 const SongSelect = ({ config } : Props) => {
   const [mapsets, setMapsets] = useState<Beatmapset[]>();
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [KPMUpperBound, setKPMUpperBound] = useState<number>(1000);
+  const [KPMUpperBound, setKPMUpperBound] = useState<number>();
 
   const filteredMapsets = mapsets?.filter((set: Beatmapset) => {  
     const lowercaseQuery = searchQuery.toLowerCase();
     return JSON.stringify(set).toLowerCase().includes(lowercaseQuery);
   }).filter((set: Beatmapset) => {
-    return set.beatmaps.some((b: Beatmap | BeatmapMetadata) => (b.kpm && b.kpm < KPMUpperBound))
+    return KPMUpperBound ? set.beatmaps.some((b: Beatmap | BeatmapMetadata) => (b.kpm && b.kpm < KPMUpperBound)) : true;
   });
 
   useEffect(() => {
@@ -51,7 +51,7 @@ const SongSelect = ({ config } : Props) => {
       <SearchContainer>
 				<SearchBar value={searchQuery} placeholder={"Search for a mapset:"} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} />
         <span><b>Filter: KPM {"<"}</b></span>
-        <input type="number" value={KPMUpperBound} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setKPMUpperBound(parseInt(e.target.value))}/>
+        <input type="number" value={KPMUpperBound} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setKPMUpperBound(e.target.value ? parseInt(e.target.value) : undefined)}/>
       </SearchContainer>
       <SongsContainer>
         {(filteredMapsets === undefined) ? <Loading /> :

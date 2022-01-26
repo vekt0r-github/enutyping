@@ -125,7 +125,7 @@ export type Beatmapset = { // example
   preview_point: number;
   duration: number;
   owner: User;
-  beatmaps: Beatmap[] | BeatmapMetadata[];
+  beatmaps: (Beatmap | BeatmapMetadata)[];
 }
 
 export enum GameStatus { 

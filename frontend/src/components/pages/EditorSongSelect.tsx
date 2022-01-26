@@ -46,7 +46,8 @@ const EditorSongSelect = ({ user, config } : Props) => {
 
   const newDiff = () => ({
     id: "new",
-    diffname: "Create New Difficulty"
+    diffname: "Create New Difficulty",
+    kpm: 0
   });
 
   const filteredMapsets = mapsets?.filter((set: Beatmapset) => {  

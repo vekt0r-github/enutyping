@@ -2,7 +2,7 @@ import React, { useState }  from "react";
 
 import YTThumbnail from "@/components/modules/YTThumbnail";
 
-import { Config, Beatmapset } from "@/utils/types";
+import { Config, Beatmapset, Beatmap, BeatmapMetadata } from "@/utils/types";
 
 import { getArtist, getTitle } from "@/utils/beatmaputils";
 
@@ -90,7 +90,7 @@ const MapsetList = ({ mapsets, config, link } : Props) => {
     <>
       {mapsets?.map((mapset) => {
         const {yt_id, preview_point, owner, beatmaps} = mapset;
-        const diffCount = beatmaps.filter((map) => map.id !== "new").length;
+        const diffCount = beatmaps.filter((map: Beatmap | BeatmapMetadata) => (map.id !== "new")).length;
         return (
           <SongBox key={mapset.id}>
             <HoverContainer>
