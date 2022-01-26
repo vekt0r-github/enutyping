@@ -239,7 +239,6 @@ export const withOverlapOffsets = (lineState : LineState, fontSize : number) : a
     const {text, time, kana} = syllable;
     const roman = getCurrentRomanization(kana);
     const width = Math.max(getTextWidth(text), getTextWidth(roman)) * fontSize + padding;
-    console.log(text, roman, width)
     const pos = getVisualPosition(time, lineState.line) * 800; // i love hardcoding
     syllable.pos = pos;
     syllable.offset = Math.max(rightmost - pos, 0);

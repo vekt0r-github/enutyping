@@ -192,16 +192,29 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
     setContent(writeBeatmap(beatmap));
     setEditingState({ status: NOT, unsaved: true });
   }
+
+  const deleteSyllable = (syllables : LineData['syllables'], sIndex : number) => {
+    if (sIndex < 0 || sIndex >= syllables.length) { return; }
+    syllables.splice(sIndex, 1);
+    setContent(writeBeatmap(beatmap));
+    setEditingState({ status: NOT, unsaved: true });
+  }
   
   const deleteLastSyllableBefore = (time : number) => { // only works within current line
     const index = timeToLineIndex(lines, time);
     if (!indexValid(index)) { return; }
     const syllables = lines[index].syllables;
     const sIndex = timeToSyllableIndex(syllables, time);
-    if (sIndex === 0) { return; }
-    syllables.splice(sIndex - 1, 1);
-    setContent(writeBeatmap(beatmap));
-    setEditingState({ status: NOT, unsaved: true });
+    deleteSyllable(syllables, sIndex - 1);
+  }
+
+  const deleteNextSyllableAfter = (time : number) => { // only works within current line
+    const index = timeToLineIndex(lines, time);
+    if (!indexValid(index)) { return; }
+    const syllables = lines[index].syllables;
+    let sIndex = timeToSyllableIndex(syllables, time);
+    if (isOnSyllable(time)) { sIndex--; }
+    deleteSyllable(syllables, sIndex);
   }
 
   const deleteLastTimingPointBefore = (time : number) => {
@@ -280,6 +293,7 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
    * ^ means implemented
    * -^ Space: play/pause
    * -^ Ctrl+Space: enter testing mode
+   * -^ Ctrl+S: save
    * -^ T: place timing point
    * -^ U: delete last timing point
    * -^ Up/Down: snap to nearest beat
@@ -295,6 +309,7 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
    * - Ctrl+X/C/V: what you think they do (when not editing)
    * -^ Backspace: delete previous syllable, timewise
    * -^ Ctrl+Backspace: same but for a line
+   * -^ Delete: delete next syllable, timewise
    * -^ Esc: exit testing mode or go back
    */
   const onKeyPress = (e: KeyboardEvent) => {
@@ -367,6 +382,11 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
         } else {
           deleteLastSyllableBefore(time);
         }
+      } else if (e.code === "Delete") { // delete the next something
+        if (editingState.status !== NOT) { return; } // probably a mistake
+        if (ctrl) {} else {
+          deleteNextSyllableAfter(time);
+        }
       } else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
         e.preventDefault();
         e.stopPropagation();
@@ -433,10 +453,8 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
         if (editingState.status !== NOT) {
           writeFromEditingState(editingState);
         } 
-        console.log(beatmap)
         if (!beatmap) { return; }
         if (!beatmap.content.length || !beatmap.diffname.length) { return; }
-        console.log("WHWO")
         saveBeatmap();
         setEditingState({ status: NOT, unsaved: false });
       } else if (e.code.startsWith("Bracket") && !ctrl) { // adjust beat snap divisor
