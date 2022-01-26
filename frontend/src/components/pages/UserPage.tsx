@@ -148,7 +148,7 @@ const UserPage = ({ yourUser, config }: Props) => {
       <div>
         <h2>Recent Scores</h2>
         <Scores>
-          { (scores && scores.length > 0) &&
+          { (scores && scores.length > 0) ?
             <>
               {scores.map((score, i) =>
                 <InfoBox width={100} key={score.id}>
@@ -156,6 +156,8 @@ const UserPage = ({ yourUser, config }: Props) => {
                 </InfoBox>
               )}
             </>
+            :
+            <p>No recent plays for this player!</p>
           }
         </Scores>
       </div>
