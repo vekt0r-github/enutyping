@@ -232,7 +232,7 @@ export const getVisualPosition = (currTime: number, lineData: LineData) => {
 export const withOverlapOffsets = (lineState : LineState, fontSize : number) : any => {
   // mutates but probably fine :3
   // font size is in em
-  const padding = 4; // px
+  const padding = 2; // px
   let rightmost = 0;
   lineState.syllables.forEach((syllable : any) => {
     const {text, time, kana} = syllable;

@@ -196,7 +196,7 @@ const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : P
 
   const joinKana = (kana : KanaState[]) => "".concat.apply("", kana.map(k => k.kana.text));
   let syllablesWithOffsets : (typeof syllables[number] & {pos: number, offset: number})[] = 
-    withOverlapOffsets(lineState, 1.125).syllables;
+    withOverlapOffsets(lineState, Math.pow(1.125, 2)).syllables;
   let syllableList = syllablesWithOffsets.map(({time, text, position: kPos, kana, pos, offset}, index) => {
     let active;
     let topContent : JSX.Element;
