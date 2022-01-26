@@ -106,7 +106,7 @@ const App = ({} : Props) => {
 
   if (user === undefined) { return <Loading />; }
 
-  const isMobile = width <= 1296;
+  const isMobile = width <= 768;
   if (isMobile) {
     return (
       <MobileContainer>
