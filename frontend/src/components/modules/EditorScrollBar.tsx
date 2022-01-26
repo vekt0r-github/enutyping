@@ -22,7 +22,7 @@ const SliderOuterContainer = styled(EditorTimelineBox)`
 
 const SliderLabel = styled(Line)`
   text-align: right;
-  width: 80px;
+  width: 110px;
   padding-right: var(--s);
   font-size: 1.125em;
   pointer-events: none;

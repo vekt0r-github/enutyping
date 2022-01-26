@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
-import { Line, Link, Sidebar } from '@/utils/styles';
+import { Line, SubBox, Sidebar } from '@/utils/styles';
 
 type Props = {
 
@@ -11,12 +11,13 @@ type Props = {
 const info = [
   [`Space`, `Play/Pause`],
   [`←↑→↓`, `Navigate the timeline`],
+  [`Ctrl+S`, `Save beatmap`],
   [`T`, `Place a timing point`, `Make sure your timing is correct! Look up the BPM of your song, navigate to the first downbeat, and place your timing point.`],
   [`U`, `Delete last timing point`],
   [`[ and ]`, `Change beat snap divisor`, `Each white tick in the timeline is one beat, and the colored lines are subdivisions.`],
-  [`Ctrl+Enter`, `Place a new line`, `...whenever a line of lyrics starts, and enter the lyrics in the box. You can join or split lines to make the beatmap more readable!`],
+  [`Ctrl+Enter`, `Place a new line`, `Place a line whenever a line of lyrics starts, and enter the lyrics in the textbox. You can join or split lines to make the beatmap more readable!`],
   [`Ctrl+⌫`, `Delete the previous line`],
-  [`Enter`, `Place a new syllable`, `...with the exact kana or letters you want the player to type at the current time. `],
+  [`Enter`, `Place a new syllable`, `Write the exact kana or letters you want the player to type at the current time. `],
   [`⌫`, `Delete the previous syllable`],
   [`Ctrl+←↑→↓`, `Navigate to nearest lines/syllables`],
   [`E`, `Set beatmap's end time`, `This is when your last line ends.`],
@@ -45,16 +46,21 @@ const InfoInst = styled(Line)`
   white-space: normal;
 `
 
-const InfoDesc = styled(Line)`
-  position: relative;
+const InfoDesc = styled(SubBox)`
+  position: absolute;
+  left: var(--s);
+  top: 24px;
+  width: calc(100% - 3*var(--s));
   white-space: normal;
+  font-size: 0.8em;
+  z-index: 1;
 `
 
 const InfoToggle = styled.div<{active: boolean}>`
   cursor: pointer;
   position: absolute;
   user-select: none;
-  left: -10px;
+  left: -2px;
   top: 0;
   ${({active}) => active ? css`
     transform: rotate(0.25turn);
@@ -73,13 +79,11 @@ const EditorShortcutsDisplay = ({  } : Props) => {
         return (
           <InfoEntry>
             <InfoLabel>{key}: </InfoLabel>
-            <div>
-              <InfoInst>{inst}</InfoInst>
-              {desc ? <>
-                <InfoToggle active={active} onClick={() => setCurr(c => c === i ? undefined : i)}>&gt;</InfoToggle>
-                {active ? <InfoDesc size="0.8em">{desc}</InfoDesc> : null}
-              </> : null}
-            </div>
+            <InfoInst>{inst}</InfoInst>
+            {desc ? <>
+              <InfoToggle active={active} onClick={() => setCurr(c => c === i ? undefined : i)}>&gt;</InfoToggle>
+              {active ? <InfoDesc>{desc}</InfoDesc> : null}
+            </> : null}
           </InfoEntry>
         )
       })}
