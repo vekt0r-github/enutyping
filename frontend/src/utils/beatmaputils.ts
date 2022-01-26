@@ -165,7 +165,7 @@ export const computeBeatmapKPM = (map: Beatmap) => {
     keypresses += computeLineKeypresses(line);
     drainTime += (line.endTime - line.startTime) / MS_IN_MINUTE;
   });
-  return drainTime ? keypresses / drainTime : 0;
+  return drainTime ? Math.round(keypresses / drainTime) : 0;
 };
 
 export const computeLineKana = (line: LineData) => {
