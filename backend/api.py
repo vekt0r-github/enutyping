@@ -100,6 +100,7 @@ def update_beatmap(user_id, beatmap_id):
     ----
     diffname
     content
+    kpm
     '''
     json_data = request.get_json()
     if not json_data:
@@ -109,7 +110,7 @@ def update_beatmap(user_id, beatmap_id):
     except ValidationError as err:
         return err.messages, 400
 
-    diffname, content = itemgetter('diffname', 'content')(data)
+    diffname, content, kpm = itemgetter('diffname', 'content', 'kpm')(data)
 
     beatmap = Beatmap.query.get(beatmap_id)
     if not beatmap:
@@ -125,6 +126,7 @@ def update_beatmap(user_id, beatmap_id):
 
     beatmap.content = content
     beatmap.diffname = diffname
+    beatmap.kpm = kpm
     db_session.commit()
     res = beatmap_schema.dump(beatmap)
     return res
