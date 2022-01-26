@@ -13,7 +13,7 @@
 * do rigorous styling. You shoud not need to change this file
 * much after initial creation.
 */
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Open+Sans&display=swap');
 @import "./catppuchin.css";
 
 :root {
@@ -35,6 +35,7 @@
   --clr-medgrey: #e0e0e0;
   --clr-grey: #f7f7f7;
 
+  --ff-logo: "Fredoka One";
   --ff-heading: "Open Sans";
   --ff-body: "Open Sans";
 

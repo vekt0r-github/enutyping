@@ -13,6 +13,13 @@ type Props = {
   user: User | null,
 }
 
+const Logo = styled(RouterLink)`
+  font-family: var(--ff-logo);
+  font-size: 2rem;
+  text-decoration: none;
+  color: var(--mauve);
+`;
+
 const Outer = styled.div`
   background-color: var(--clr-primary-light);
 	position: fixed;
@@ -67,20 +74,11 @@ const NavBarLink = styled(Link)`
   }
 `;
 
-const Button = styled(NavBarLink)`
-  border: 3px solid var(--clr-link);
-  border-radius: var(--xs);
-  padding: var(--xs) var(--m);
-  margin: var(--s);
-  height: auto;
-`;
-
-
 const NavBar = ({ handleLogout, user } : Props) => (
   <Outer>
   <NavContainer>
     <NavLeft>
-      <RouterLink to="/">Logo</RouterLink>
+      <Logo to="/">enuTyping</Logo>
     </NavLeft>
     <NavMiddle>
       <NavBarLink as={NavLink} to="/play">play</NavBarLink>
