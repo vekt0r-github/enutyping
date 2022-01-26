@@ -3,34 +3,54 @@ import { useParams } from "react-router-dom";
 
 import { get } from "@/utils/functions";
 import { Beatmap, Score, User, UserStats, Config } from "@/utils/types";
-import { MainBox, SubBox, InfoBox, InfoEntry } from '@/utils/styles';
+import { InfoBox, InfoEntry } from '@/utils/styles';
 import { withParamsAsKey } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 
 import Loading from "../modules/Loading";
 
-const SideBox = styled(MainBox)`
+const StatBox = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin: var(--s);
-  min-width: 50%;
+  min-width: 500px;
+  justify-content: center;
+  border-radius: var(--s);
+  padding: 1em;
+  background-color: var(--clr-secondary);
 `;
 
-const UserInfoContainer = styled.div`
+const NameAndProfile = styled.div`
+  flex: 1;
   display: flex;
   flex-direction: row;
-  justify-content: center;
-  min-width: 90%;
 `;
 
 const UserAvatar = styled.img`
   width: 150px;
   margin: var(--s);
+  border-radius: 25%;
 `;
 
+const UserBanner = styled.div`
+  border-radius: var(--s);
+  background-color: var(--clr-primary);
+  display: flex;
+  margin: var(--s);
+  min-width: 1200px;
+  padding: 1rem;
+  margin-top: 2em;
+`;
 
+const Scores = styled.div`
+  display: flex;
+  flex-direction: column;
+  background-color: var(--clr-primary);
+  min-width: 1200px;
+  padding: 1rem;
+  align-items: center;
+  border-radius: var(--s);
+`;
 
 type Props = {
   yourUser: User | null,
@@ -98,7 +118,7 @@ const UserPage = ({ yourUser, config }: Props) => {
   };
 
   const userInfoPairs = [
-    ["Username", user.name],
+    // ["Username", user.name],
     ["Join Date", new Date(stats.join_time * 1000).toDateString()],
     ["Overall Kana Accuracy", (stats.kana_accuracy * 100).toFixed(2)],
     ["Overall Key Accuracy", (stats.key_accuracy * 100).toFixed(2)],
@@ -115,28 +135,30 @@ const UserPage = ({ yourUser, config }: Props) => {
 
   return (
     <>
-      <UserAvatar src={user.avatar_url} />
-      <h1>{user.name}</h1>
-      <UserInfoContainer>
-        <SideBox>
-          <h2>User Statistics</h2>
-          <InfoBox width={50}>
+      <UserBanner>
+        <NameAndProfile>
+          <UserAvatar src={user.avatar_url} />
+          <h2>{user.name}</h2>
+        </NameAndProfile>
+        <StatBox>
             {userStatsElements}
-          </InfoBox>
-        </SideBox>
-        <SideBox>
-          <h2>Recent Scores</h2>
+        </StatBox>
+      </UserBanner>
+
+      <div>
+        <h2>Recent Scores</h2>
+        <Scores>
           { (scores && scores.length > 0) &&
             <>
               {scores.map((score, i) =>
-                <InfoBox width={90} key={score.id}>
+                <InfoBox width={100} key={score.id}>
                   {scoreBeatmaps[i] ? prettyScore(score, scoreBeatmaps[i]): "Couldn't load map"} 
                 </InfoBox>
               )}
             </>
           }
-        </SideBox>
-      </UserInfoContainer>
+        </Scores>
+      </div>
     </>
   );
 };
