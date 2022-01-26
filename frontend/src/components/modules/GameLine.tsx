@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import ProgressBar from "@/components/modules/ProgressBar";
 
 import { Config, KanaState, LineState } from '@/utils/types'
-import { getVisualPosition, timeToSyllableIndex } from "@/utils/beatmaputils";
+import { getCurrentRomanization, getVisualPosition, timeToSyllableIndex, withOverlapOffsets } from "@/utils/beatmaputils";
 
 import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
@@ -21,7 +21,7 @@ enum ActiveStatus { MISSED, PAST, PRESENT, FUTURE };
 
 const LineContainer = styled.div`
   width: 100%;
-  height: 80px;
+  height: 120px;
   /* background-color: var(--clr-grey); */
 `;
 
@@ -35,7 +35,7 @@ const Timeline = styled.div`
 const TimelineBar = styled.div`
   width: 100%;
   position: absolute;
-  top: 28px;
+  top: 42px;
   left: 0;
 `;
 
@@ -52,16 +52,10 @@ const Syllable = styled.span.attrs<SyllableProps>(({pos}) =>({
   font-size: 1.125em;
 `;
 
-const SyllableTopText = styled.span`
+const SyllableText = styled(Syllable)`
   position: absolute;
-  left: 0;
-  top: 0;
   width: fit-content;
   white-space: nowrap;
-`;
-
-const SyllableBottomText = styled(SyllableTopText)`
-  top: 40px;
 `;
 
 const CharText = styled.span<{active: ActiveStatus}>`
@@ -99,13 +93,28 @@ const CharText = styled.span<{active: ActiveStatus}>`
   }}
 `;
 
+// middle is 42 + 8 = 50px;
+type ConnectorProps = { offset: string, flip: boolean };
+const Connector = styled.div.attrs<ConnectorProps>(({offset, flip}) =>({
+  style: {
+    width: offset,
+    top: flip ? '32px' : '44px',
+    background: `linear-gradient(to top ${flip ? 'left' : 'right'}, #0000 calc(50% - 1.5px), black calc(50% - 0.75px), black calc(50% + 0.75px), #0000 calc(50% + 1.5px) )`
+  },
+}))<ConnectorProps>`
+  position: absolute;
+  left: 4px;
+  height: 12px;
+  z-index: 1;
+`;
+
 const Tick = styled.div<{active?: ActiveStatus}>`
   width: 2px;
-  height: 16px;
+  height: 24px;
   position: absolute;
   content: "";
   left: 4px;
-  top: 22px;
+  top: 32px;
   z-index: 1;
   background-color: ${(props) => 
     props.active === ActiveStatus.PAST ? 'var(--clr-darkgrey)' : 'black'
@@ -185,7 +194,9 @@ const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : P
   }, [lineState, currTime]); // any change in state affects the listener
 
   const joinKana = (kana : KanaState[]) => "".concat.apply("", kana.map(k => k.kana.text));
-  let syllableList = syllables.map(({time, text, position: kPos, kana}, index) => {
+  let syllablesWithOffsets : (typeof syllables[number] & {pos: number, offset: number})[] = 
+    withOverlapOffsets(lineState, 1.125).syllables;
+  let syllableList = syllablesWithOffsets.map(({time, text, position: kPos, kana, pos, offset}, index) => {
     let active;
     let topContent : JSX.Element;
     let bottomContent : JSX.Element;
@@ -195,7 +206,7 @@ const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : P
       topContent = <CharText active={active}>{text}</CharText> 
       bottomContent =
         <CharText active={active}>
-          {"".concat.apply("", kana.map(ks => ks.prefix + ks.suffix))}
+          {getCurrentRomanization(kana)}
         </CharText> 
     } else if (index < sPos) {
       topContent = (<>
@@ -237,9 +248,12 @@ const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : P
         key={index}
         pos={[`${timeRatio * 100}%`, '0']}
       >
-        <SyllableTopText>{topContent}</SyllableTopText>
-        <Tick active={active}/>
-        <SyllableBottomText>{bottomContent}</SyllableBottomText>
+        <SyllableText pos={[`${offset}px`, "0"]}>{topContent}</SyllableText>
+        {offset >= 2 ? <>
+          <Connector offset={`${offset}px`} flip={false} />
+          <Connector offset={`${offset}px`} flip={true} />
+        </> : <Tick active={active}/>}
+        <SyllableText pos={[`${offset}px`, "60px"]}>{bottomContent}</SyllableText>
       </Syllable>
     );
   });

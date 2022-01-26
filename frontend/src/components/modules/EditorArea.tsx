@@ -61,36 +61,44 @@ const TimelineMessageBox = styled(EditorTimelineBox)`
 const LineInput = styled.input`
   position: absolute;
   font-size: 1.5em;
+  font-family: "Open Sans";
   box-sizing: border-box;
-  top: 150px; // empirical; subject to change
+  width: 600px;
+  text-align: center;
+  top: 182px; // empirical; subject to change
 `;
 
 const SyllableInput = styled(LineInput).attrs<{pos: number}>(({pos}) =>({
   style: {
-    left: `calc(var(--s) + ${pos} * (100% - 2*var(--s)))`,
+    left: `calc(${pos} * (100% - 2*var(--s)))`,
   },
 }))<{pos: number}>`
   font-size: 1.125em;
-  top: 70px; // empirical; subject to change
+  width: 60px;
+  text-align: left;
+  top: 66px; // empirical; subject to change
 `;
 
 const TimingDisplay = styled.div`
   position: absolute;
   font-size: 1.25em;
-  top: 200px;
+  top: 250px;
   left: 20px;
 `;
 
 const TimingInput = styled(LineInput)`
-  font-size: 1.25em;
-  position: static;
+  font-size: 1em;
+  width: 100px;
+  text-align: left;
+  left: 119px;
+  top: -11px;
 `;
 
 const UnsavedWarning = styled(Line)`
   background-color: var(--clr-warn);
   color: var(--clr-grey);
   position: absolute;
-  top: 250px;
+  top: 300px;
 `;
 
 const initStatsState = () => ({
@@ -107,7 +115,7 @@ const makeStateAt = (lines: LineData[], config: Config, currTime?: number, statu
   status: status ?? GameStatus.PAUSED,
   offset: 0,
   currTime: currTime ?? 0, // maintained via timer independent of video
-  lines: lines.map((lineData) => makeLineStateAt(currTime ?? 0, lineData, config)),
+  lines: lines.map((lineData) => makeLineStateAt(currTime ?? 0, lineData, config, true)),
   stats: initStatsState(),
 });
 

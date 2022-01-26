@@ -1,5 +1,6 @@
-import { Beatmap, Beatmapset, LineData, defaultConfig, Config, GameState, Kana, LineState, TimingPoint } from '@/utils/types';
+import { Beatmap, Beatmapset, LineData, defaultConfig, Config, GameState, Kana, LineState, TimingPoint, KanaState } from '@/utils/types';
 import { computeMinKeypresses, parseKana } from '@/utils/kana';
+import getTextWidth from "@/utils/widths";
 
 export const MS_IN_MINUTE = 60000;
 
@@ -199,6 +200,9 @@ export const makeSetFunc = <State>(setState : (state : State | ((oldState: State
   }
 );
 
+export const getCurrentRomanization = (kana : KanaState[]) => 
+  "".concat.apply("", kana.map(ks => ks.prefix + ks.suffix))
+
 const makeInitOrLastKanaState = (kana: Kana, last: boolean) => ({ 
   kana: kana, 
   prefix: last ? kana.romanizations[0] : "", 
@@ -206,19 +210,39 @@ const makeInitOrLastKanaState = (kana: Kana, last: boolean) => ({
   minKeypresses: computeMinKeypresses(kana.text) 
 });
 
-export const makeLineStateAt = (currTime: number, lineData: LineData, config: Config) : LineState => ({
+export const makeLineStateAt = (currTime: number, lineData: LineData, config: Config, editor = false) : LineState => ({
   line: lineData,
   position: lineData.syllables.filter(s => s.time < currTime).length,
-  syllables: lineData.syllables.map((syllable, i, arr) => ({
-    ...syllable,
-    position: 0,
-    kana: parseKana(syllable.text, config, arr[i+1]?.text)
-      .map((kana) => makeInitOrLastKanaState(kana, syllable.time < currTime)),
-  })),
+  syllables: lineData.syllables.map((syllable, i, arr) => {
+    const kana = parseKana(syllable.text, config, arr[i+1]?.text)
+      .map((kana) => makeInitOrLastKanaState(kana, syllable.time < currTime))
+    return {...syllable,
+      position: (editor && currTime >= syllable.time) ? kana.length : 0,
+      kana: kana,
+    }
+  }),
   nBuffer: false,
 });
 
 export const getVisualPosition = (currTime: number, lineData: LineData) => {
   const {startTime, endTime} = lineData;
   return (currTime - startTime) / (endTime - startTime);
+}
+
+export const withOverlapOffsets = (lineState : LineState, fontSize : number) : any => {
+  // mutates but probably fine :3
+  // font size is in em
+  const padding = 4; // px
+  let rightmost = 0;
+  lineState.syllables.forEach((syllable : any) => {
+    const {text, time, kana} = syllable;
+    const roman = getCurrentRomanization(kana);
+    const width = Math.max(getTextWidth(text), getTextWidth(roman)) * fontSize + padding;
+    console.log(text, roman, width)
+    const pos = getVisualPosition(time, lineState.line) * 800; // i love hardcoding
+    syllable.pos = pos;
+    syllable.offset = Math.max(rightmost - pos, 0);
+    rightmost = pos + syllable.offset + width;
+  });
+  return lineState;
 }
