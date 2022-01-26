@@ -222,7 +222,7 @@ export const makeLineStateAt = (currTime: number, lineData: LineData, config: Co
       kana: kana,
     }
   }),
-  nBuffer: false,
+  nBuffer: null,
 });
 
 export const getVisualPosition = (currTime: number, lineData: LineData) => {
