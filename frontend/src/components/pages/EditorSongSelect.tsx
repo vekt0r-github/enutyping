@@ -9,7 +9,7 @@ import { User, Config, Beatmapset, BeatmapMetadata } from "@/utils/types";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Link, Line, SearchBar, SongsContainer } from '@/utils/styles';
+import { MainBox, Link, Line, BlackLine, SearchBar, SongsContainer } from '@/utils/styles';
 
 type Props = {
   user: User | null,
@@ -34,6 +34,7 @@ const NewMapset = styled(MainBox)`
     color: black;
   }
 `;
+
 
 const EditorSongSelect = ({ user, config } : Props) => {
   if (!user) { // include this in every restricted page
@@ -77,7 +78,7 @@ const EditorSongSelect = ({ user, config } : Props) => {
           <>
             <NewMapset as={Link} to='/edit/new'>
               <Line size="6em" margin="-5px 20px 0 0">+</Line>
-              <Line as="h2" size="1.5em">Create New Mapset</Line>
+              <BlackLine as="h2" size="1.5em">Create New Mapset</BlackLine>
             </NewMapset>
             <MapsetList 
               mapsets={filteredMapsets} 

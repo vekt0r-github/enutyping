@@ -8,7 +8,7 @@ import { getArtist, getTitle } from "@/utils/beatmaputils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, SubBox, Link, Line } from '@/utils/styles';
+import { MainBox, SubBox, Link, Line, BlackLine } from '@/utils/styles';
 
 type Props = {
   mapsets: Beatmapset[],
@@ -111,8 +111,13 @@ const MapsetList = ({ mapsets, config, link } : Props) => {
                     color={(map.id === "new") ? "create" : "secondary"}
                     key={map.id}
                   >
-                    {(map.id === "new") ? <Line size="2.5em" margin="-1.5px 8px 0 0">+</Line> : null}
-                    <Line size="1em">{map.diffname}</Line>
+                    {(map.id === "new") ? <>
+												<BlackLine size="2.5em" margin="-1.5px 8px 0 0">+</BlackLine>
+												<BlackLine size="1em">{map.diffname}</BlackLine>
+											</>
+											: <>
+                    		<Line size="1em">{map.diffname}</Line>
+											</>}
                   </Diff>
                 )}
               </DiffsContainer>

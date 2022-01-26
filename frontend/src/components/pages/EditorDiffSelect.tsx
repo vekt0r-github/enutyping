@@ -102,13 +102,11 @@ const Diff = styled(MainBox)`
   height: 60px;
   display: flex;
   align-items: center;
-  color: black;
   transition: var(--tt-short);
   padding: 0 var(--l);
   margin: var(--m);
   border-radius: var(--m);
   &:hover, &:focus {
-    color: black;
     background-color: var(--clr-primary-light);
   }
 `;
@@ -119,9 +117,11 @@ const NewDiff = styled(Diff)`
   font-family: "Open Sans";
   border: 0;
   background-color: var(--clr-create);
+	color: black;
   cursor: pointer;
   &:hover, &:focus {
     background-color: var(--clr-create-light);
+		color: black;
   }
 `;
 

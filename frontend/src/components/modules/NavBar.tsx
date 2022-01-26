@@ -15,6 +15,7 @@ type Props = {
 
 const Outer = styled.div`
   background-color: var(--clr-primary-light);
+	position: fixed;
 	width: 100%;
 `;
 

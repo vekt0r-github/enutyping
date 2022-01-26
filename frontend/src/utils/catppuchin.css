@@ -32,6 +32,7 @@
     --black3_hsl:    249,  18%,  22%;
     --black4_hsl:    254,  12%,  36%;
     --gray0_hsl:     247,   8%,  46%;
+		--gray05_hsl:    261,   9%,  53%;
     --gray1_hsl:     274,  11%,  59%;
     --gray2_hsl:     285,  10%,  75%;
     --white_hsl:     220,  38%,  89%;
@@ -59,6 +60,7 @@
     --black3:        hsl(var(--black3_hsl));
     --black4:        hsl(var(--black4_hsl));
     --gray0:         hsl(var(--gray0_hsl));
+		--gray05:        hsl(var(--gray05_hsl));
     --gray1:         hsl(var(--gray1_hsl));
     --gray2:         hsl(var(--gray2_hsl));
     --white:         hsl(var(--white_hsl));

@@ -12,6 +12,16 @@ type Props = {
   kpm?: number,
 };
 
+const NoWrapSpan = styled.span`
+	white-space: nowrap;
+	margin-right: var(--s);
+`;
+const OverflowSpan = styled.span`
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+`;
+
 const MapInfoDisplay = ({ title, artist, diffname, kpm, source } : Props) => {
 
   const mapInfoPairs: [string, string | number | JSX.Element | undefined][] = [
@@ -26,8 +36,8 @@ const MapInfoDisplay = ({ title, artist, diffname, kpm, source } : Props) => {
 
   const mapInfoElements = mapInfoPairs.map((entry: [string, string | number | JSX.Element | undefined]) => (
     <InfoEntry key={entry[0]}>
-      <span><b>{entry[0]}:</b></span>
-      <span>{entry[1]}</span>
+      <NoWrapSpan><b>{entry[0]}:</b></NoWrapSpan>
+      <OverflowSpan>{entry[1]}</OverflowSpan>
     </InfoEntry>
   ));
 

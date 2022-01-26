@@ -22,8 +22,8 @@
   --clr-primary: var(--black4);
   --clr-primary-light: var(--gray0);
   --clr-secondary-dim: var(--gray0);
-  --clr-secondary: var(--gray1);
-  --clr-secondary-light: var(--gray2);
+  --clr-secondary: var(--gray05);
+  --clr-secondary-light: var(--gray1);
   --clr-create: var(--green);
   --clr-create-light: var(--teal);
   --clr-warn: var(--red);

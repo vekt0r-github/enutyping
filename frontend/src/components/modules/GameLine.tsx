@@ -76,7 +76,7 @@ const CharText = styled.span<{active: ActiveStatus}>`
         `;
       case ActiveStatus.PRESENT:
         return css`
-          color: var(--clr-link);
+          color: black;
           background-color: var(--clr-highlight);
           box-shadow: 2px 2px 5px #aaa;
           z-index: 3;

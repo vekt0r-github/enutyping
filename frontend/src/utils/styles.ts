@@ -42,6 +42,10 @@ export const Line = styled.span<{
   text-overflow: ellipsis;
 `;
 
+export const BlackLine = styled(Line)`
+	color: black;
+`;
+
 export const EditorTimelineBox = styled.div`
   width: 100%;
   height: 40px;
