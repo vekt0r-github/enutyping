@@ -1,5 +1,4 @@
 import React from "react"
-import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 import '@/utils/styles.css';
@@ -19,9 +18,10 @@ const StyledLink = styled.a`
 const Container = styled.div`
   display: flex;
   border: 2px solid;
-  border-radius: 5px;
+  border-radius: var(--s);
   margin: 1em;
   padding: 0.75rem;
+  background-color: white;
 `;
 
 const Text = styled.div`
@@ -31,6 +31,7 @@ const Text = styled.div`
   flex-direction: column;
   margin-left: 1em;
   text-decoration: none;
+  color: black;
 `;
 
 const OAuthButton = ({ text, link, svgUrl, width }: Props) => {
