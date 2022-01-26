@@ -2,11 +2,21 @@ import React, { useEffect, useState } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
 
 import { User } from "@/utils/types";
+import OAuthButton from "@/components/modules/OAuthButton";
+
+import GoogleSVG from "@/public/images/google_logo.svg"
+import GithubSVG from "@/public/images/github-mark.svg"
+import OsuSVG from "@/public/images/osu_logo.svg"
+import styled from "styled-components";
 
 type Props = {
   handleLogin: (code: string|null, state: string|null, oauthprovider: string) => void,
   user: User | null,
 }
+
+const Container = styled.div`
+  align-items: left;
+`
 
 const Login = ({ handleLogin, user } : Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -36,25 +46,11 @@ const Login = ({ handleLogin, user } : Props) => {
       { isLoading ? (
         <p>Loading...</p>
       ): (
-        <p>Login options:&nbsp;
-          <ul>
-            <li>
-              <a href="/api/login/github/request">
-                Log in with GitHub
-              </a>
-            </li>
-            <li>
-              <a href="/api/login/osu/request">
-                Log in with osu!
-              </a>
-            </li>
-            <li>
-              <a href="/api/login/google/request">
-                Log in with Google
-              </a>
-            </li>
-          </ul>
-        </p>
+        <Container>
+          <OAuthButton text="Sign in with Github" link="/api/login/github/request" svgUrl={GithubSVG} width={45} />
+          <OAuthButton text="Sign in with Google" link="/api/login/google/request" svgUrl={GoogleSVG} width={45} />
+          <OAuthButton text="Sign in with osu!" link="/api/login/osu/request" svgUrl={OsuSVG} width={50} />
+        </Container>
       )}
     </>
   )
