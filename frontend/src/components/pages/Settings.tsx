@@ -47,6 +47,18 @@ const SettingTitle = styled.span`
   font-weight: bold;
 `;
 
+const ChangeNameBox = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const NameSuccessMessage = styled.div`
+  color: var(--green);
+`;
+
+const NameErrorMessage = styled.div`
+  color: var(--red);
+`;
 
 type Props = {
   user: User | null,
@@ -123,18 +135,26 @@ const SettingsPage = ({ user, yourUser, setYourUser, initConfig, setGlobalConfig
     })
   }
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleSubmit();
+    }
+  }
+
   const editUser = (
     <>
     { (user && yourUser && user.id == yourUser.id) &&
       <>
-        <form>
-          <label>Requested Name: </label>
-          <input value={requestedName}
-                 onChange={handleChange}
-          />
-          <input onClick={handleSubmit} type="button" value="Submit" />
-          {errorMessage && <div>{errorMessage}</div>}
-        </form>
+        <ChangeNameBox>
+            <label>Requested Name: </label>
+            <input value={requestedName}
+                   onChange={handleChange}
+                   onKeyDown={handleKeyDown}
+            />
+            <input onClick={handleSubmit} type="button" value="Submit" />
+        </ChangeNameBox>
+        {errorMessage === "Success!" && <NameSuccessMessage>{errorMessage}</NameSuccessMessage>}
+        {(errorMessage && errorMessage !== "Success!") && <NameErrorMessage>{errorMessage}</NameErrorMessage>}
       </>
     }
     </>
