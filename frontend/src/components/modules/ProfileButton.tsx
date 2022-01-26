@@ -75,7 +75,7 @@ const ProfileButton = ({ user, handleLogout }: Props) => {
             <Name>{user.name}</Name>
             <Option onClick={() => setIsOpen(false)} to={`/user/${user.id}`}>My Profile</Option>
             <Option onClick={() => setIsOpen(false)} to="/settings">Settings</Option>
-            <Option as="div" onClick={handleLogout}>Logout</Option>
+            <Option as="div" onClick={handleLogout}>Sign Out</Option>
           </Dropdown>
         </DropdownContainer>
       }
