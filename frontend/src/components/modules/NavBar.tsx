@@ -6,6 +6,7 @@ import { User, Config } from "@/utils/types";
 import styled from 'styled-components';
 import '@/utils/styles.css';
 import { BasicContainer, Link, Line } from '@/utils/styles';
+import ProfileButton from "./ProfileButton";
 
 type Props = {
   handleLogout: () => void,
@@ -14,15 +15,10 @@ type Props = {
 
 const Outer = styled.div`
   background-color: var(--clr-primary-light);
-  display: flex;
-	position: fixed;
 	width: 100%;
-  height: var(--content-offset);
-  z-index: 1;
 `;
 
 const NavContainer = styled(BasicContainer)`
-  // background-color: var(--clr-primary-light);
   display: grid;
   grid-template-columns: 1fr 1fr;
 `;
@@ -41,6 +37,10 @@ const NavLeft = styled(NavInner)`
 
 const NavRight = styled(NavInner)`
   justify-content: flex-end;
+  &:before {
+    content: "";
+    height: 75px;
+  }
 `;
 
 const NavBarLink = styled(Link)`
@@ -77,16 +77,12 @@ const NavBar = ({ handleLogout, user } : Props) => (
       <NavBarLink as={NavLink} to="/play">play</NavBarLink>
       {user && <>
         <NavBarLink as={NavLink} to="/edit">create</NavBarLink>
-        <NavBarLink as={NavLink} to={`/user/${user.id}`}>account</NavBarLink>
-        <NavBarLink as={NavLink} to="/settings">settings</NavBarLink>
       </>}
     </NavLeft>
     <NavRight>
       {user ? 
-        <>
-          <Line size="1.25em" margin="0 0 0 var(--s)">Welcome, {user.name}!</Line>
-          <Button as="span" onClick={handleLogout}>Logout</Button>
-        </> :
+        <ProfileButton user={user} handleLogout={handleLogout} />
+        :
         <>
           <NavBarLink as={NavLink} to="/login">sign in</NavBarLink>
         </>}
