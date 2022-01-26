@@ -108,39 +108,58 @@ const Tick = styled.div<{active?: ActiveStatus}>`
 const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : Props) => {
   const {line, position, syllables, nBuffer} = lineState;
   const {startTime, endTime, lyric} = line;
-  const minPosition = timeToSyllableIndex(line.syllables, currTime) - 1;
+  const latestActiveSyllable = timeToSyllableIndex(line.syllables, currTime) - 1;
 
   const getKana = (pos : LineState['position']) : KanaState | undefined => syllables[pos[0]]?.kana[pos[1]];
+
+  const resultOfHit = (key : string, pos : LineState['position']) : KanaState | undefined => {
+    const curKana = getKana(pos);
+    if (!curKana) return;
+    const {kana, prefix, minKeypresses} = curKana;
+    const newPrefix = prefix + key;
+    const filteredRomanizations = kana.romanizations.filter(s => s.substring(0, newPrefix.length) == newPrefix);
+    if (filteredRomanizations.length == 0) { return; }
+    const newSuffix = filteredRomanizations[0].substring(newPrefix.length);
+    return {kana: kana, prefix: newPrefix, suffix: newSuffix, minKeypresses: minKeypresses};
+  }
+
+  const handleCorrectKeypress = (position : LineState['position'], newKana : KanaState) => {
+    const {kana, prefix, suffix, minKeypresses} = newKana;
+    setLineState(({line, syllables, nBuffer}) => {
+      syllables[position[0]].kana[position[1]] = newKana; // should be safe
+      if (suffix === "") {
+        position[1]++;
+        if (!getKana(position)) { position = [position[0] + 1, 0]; } // carry to next syllable
+        // if getKana(position) still undefined, line is over
+        nBuffer = (prefix === "n" && kana.text == "ん");
+      }
+      return {line, position: position, syllables, nBuffer};
+    });
+    keyCallback((prefix.length <= minKeypresses) ? 1 : 0, 0, suffix === "");
+  }
 
   const handleKeyPress = (e: KeyboardEvent) => {
     if (["Escape"].includes(e.key)) { return; } // GameArea is handling it
     const allowedCharacters = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890-`~ \"'.?!,"; // idk if this is comprehensive
     if(!allowedCharacters.includes(e.key)) { return; }
-    let newPosition = position;
-    const curKana = getKana(newPosition);
-    if (!curKana) return;
-    const {kana, prefix, minKeypresses} = curKana;
-    const newPrefix = prefix + e.key;
-    const filteredRomanizations = kana.romanizations.filter(s => s.substring(0, newPrefix.length) == newPrefix);
-
     if(e.key == "n" && nBuffer) {
       setLineState((s) => ({ ...s, nBuffer: false }));
-    } else if (filteredRomanizations.length == 0) {
-      keyCallback(0, 1, false);
-    } else {
-      const newSuffix = filteredRomanizations[0].substring(newPrefix.length);
-      const newKana: KanaState = {kana: kana, prefix: newPrefix, suffix: newSuffix, minKeypresses: minKeypresses};
-      setLineState(({line, syllables, nBuffer}) => {
-        syllables[newPosition[0]].kana[newPosition[1]] = newKana; // should be safe
-        if (newSuffix === "") {
-          newPosition[1]++;
-          if (!getKana(newPosition)) { newPosition = [newPosition[0] + 1, 0]; } // carry to next syllable
-          // if getKana(position) still undefined, line is over
-          nBuffer = (newPrefix === "n" && newKana.kana.text == "ん");
+      return;
+    }
+    const newKana = resultOfHit(e.key, position);  
+    if (!newKana) { // key is not the next char
+      let newPosition = position;
+      while (newPosition[0] < latestActiveSyllable) {
+        newPosition = [newPosition[0] + 1, 0]; // next syllable
+        const testNewKana = resultOfHit(e.key, newPosition);
+        if (testNewKana) {
+          handleCorrectKeypress(newPosition, testNewKana);
+          return;
         }
-        return {line, position: newPosition, syllables, nBuffer};
-      });
-      keyCallback((newPrefix.length <= minKeypresses) ? 1 : 0, 0, newSuffix === "");
+      }
+      keyCallback(0, 1, false);
+    } else { // key works as the next char
+      handleCorrectKeypress(position, newKana);
     }
   };
 
@@ -149,14 +168,7 @@ const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : P
     return () => {
       document.removeEventListener("keydown", handleKeyPress);
     }
-  }, [lineState]); // any change in state affects the listener
-
-  useEffect(() => {
-    setLineState((oldState) => {
-      if (oldState.position[0] >= minPosition) { return oldState; }
-      return { ...oldState, position: [minPosition, 0] }
-    })
-  }, [minPosition]);
+  }, [lineState, currTime]); // any change in state affects the listener
 
   const joinKana = (kana : KanaState[]) => "".concat.apply("", kana.map(k => k.kana.text));
   let syllableList = syllables.map(({time, text, kana}, index) => {
