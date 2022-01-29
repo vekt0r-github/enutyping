@@ -194,7 +194,7 @@ const EditorDiffSelect = ({ user, config } : Props) => {
           setMapset(beatmapset);
           setStatus(LOADED);
         }
-      });
+      }).catch(err => setStatus(INVALID));
     } else {
       setStatus(LOADED);
     }

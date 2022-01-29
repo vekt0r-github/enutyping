@@ -27,6 +27,7 @@ const { LOADING, LOADED, SUBMITTING, INVALID, NO_PERMS, CREATED_DIFF } = Status;
 type BeatmapState = {
   status: Status,
   beatmap?: Beatmap,
+  lastSavedBeatmap?: Beatmap,
 };
 
 const GameFile = styled.textarea`
@@ -54,14 +55,16 @@ const Editor = ({ user, config } : Props) => {
   const copyOf = searchParams.get('copy');
 
   const [state, setState] = useState<BeatmapState>({ status: LOADING });
-  const processAndLoad = (beatmap : (oldBeatmap?: Beatmap) => Beatmap | undefined) => {
+  const processAndLoad = (beatmap : (oldBeatmap?: Beatmap) => Beatmap | undefined, saved = false) => {
     setState((oldState) => {
       const newBeatmap = beatmap(oldState.beatmap);
+      let newBeatmapCopy : Beatmap | undefined;
+      if (saved) { newBeatmapCopy = newBeatmap && {...newBeatmap}; }
       newBeatmap && processBeatmap(newBeatmap, config); // mutates
-      return { status: LOADED, beatmap: newBeatmap }
+      return { status: LOADED, beatmap: newBeatmap, lastSavedBeatmap: newBeatmapCopy ?? oldState.lastSavedBeatmap };
     });
   };
-  const {status, beatmap} = state;
+  const {status, beatmap, lastSavedBeatmap} = state;
 
   const saveBeatmap = () => {
     setState((state) => ({...state, status: SUBMITTING}))
@@ -89,7 +92,7 @@ const Editor = ({ user, config } : Props) => {
       post('/api/beatmaps', data)
         .then((beatmapRes) => {
           setState({
-            status: CREATED_DIFF, 
+            status: CREATED_DIFF, // about to redirect to the below id
             beatmap: { ...beatmap, id: beatmapRes.id}
           });
         })
@@ -101,8 +104,9 @@ const Editor = ({ user, config } : Props) => {
         content: beatmap.content,
       }
       put(`/api/beatmaps/${mapId}`, data)
-        .then(() => {
+        .then((beatmapRes) => {
           // do something to indicate map is saved
+          processAndLoad((beatmap) => beatmap, true);
         })
         .catch((err) => console.log(err));
     }
@@ -123,7 +127,7 @@ const Editor = ({ user, config } : Props) => {
               diffname: "",
             };
           }
-          processAndLoad(() => beatmap);
+          processAndLoad(() => beatmap, true);
         }
       }).catch((err) => {
         setState({ status: INVALID }); // map not found or param is wrong
@@ -142,7 +146,7 @@ const Editor = ({ user, config } : Props) => {
             content: "ishpytoing file format v1\n\n[TimingPoints]\n\n\n[Lines]\n",
             timingPoints: [],
             lines: [],
-          }));
+          }), true);
         }
       }).catch((err) => {
         setState({ status: INVALID }); // map not found or param is wrong
@@ -164,14 +168,16 @@ const Editor = ({ user, config } : Props) => {
   const {yt_id, source, preview_point, owner, beatmaps} = beatmapset;
   const [artist, title] = [getArtist(beatmapset, config), getTitle(beatmapset, config)];
   
-  const setContent = (content : string) => 
+  const setContent = (content : string, saved = false) => 
     processAndLoad((oldBeatmap) => oldBeatmap ? { ...oldBeatmap,
       content: content,
-    } : undefined);
-  const setDiffname = (diffname : string) => 
+    } : undefined, saved);
+  const setDiffname = (diffname : string) => {
+    
     processAndLoad((oldBeatmap) => oldBeatmap ? { ...oldBeatmap,
       diffname: diffname,
     } : undefined);
+  }
 
   return (
     <>
@@ -207,6 +213,7 @@ const Editor = ({ user, config } : Props) => {
         <EditorArea
           user={user}
           beatmap={beatmap}
+          lastSavedBeatmap={lastSavedBeatmap!}
           setContent={setContent}
           saveBeatmap={saveBeatmap}
           config={config}

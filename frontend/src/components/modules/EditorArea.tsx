@@ -32,7 +32,8 @@ import { Line, EditorTimelineBox } from '@/utils/styles';
 type Props = {
   user: User | null,
   beatmap: Beatmap,
-  setContent: (content: string) => void,
+  lastSavedBeatmap: Beatmap,
+  setContent: (content: string, saved?: boolean) => void,
   saveBeatmap: () => void,
   config: Config,
 };
@@ -121,7 +122,7 @@ const makeStateAt = (lines: LineData[], config: Config, currTime?: number, statu
 
 
 
-const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) => {
+const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap, config } : Props) => {
   const [searchParams] = useSearchParams();
   const copyOf = searchParams.get('copy');
   
@@ -316,7 +317,7 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
     if ((editingState.status !== NOT) || 
       ((e.target as Element)?.tagName?.toLowerCase() == 'input' &&
       (e.target as HTMLInputElement)?.type?.toLowerCase() != 'range')) { // in a textbox or whatever
-      if (!["Enter", "Escape"].includes(e.code)) { return; }
+      if (!["Enter", "Escape", "KeyS"].includes(e.code)) { return; }
       if (editingState.status === NOT && ["Enter"].includes(e.code)) { return; }
     }
     const ctrl = e.ctrlKey || e.metaKey;
@@ -554,6 +555,9 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
     });
   }
 
+  // usurping editingState.unsaved for now
+  const saved = beatmap.diffname === lastSavedBeatmap.diffname && beatmap.content === lastSavedBeatmap.content;
+
   return (
     <EditorAreaContainer>
       {isEditing ? <EditorTimeline 
@@ -600,7 +604,7 @@ const EditorArea = ({ user, beatmap, setContent, saveBeatmap, config } : Props) 
             autoFocus={true}
           /> : (currTimingPoint?.bpm ?? "None—press 'T' to set a timing point")}
       </TimingDisplay>
-      {editingState.unsaved ? <UnsavedWarning>*Unsaved Changes*</UnsavedWarning> : null}
+      {!saved ? <UnsavedWarning>*Unsaved Changes* (Ctrl+S to save)</UnsavedWarning> : null}
       {isEditing ? <EditorScrollBar 
         currTime={currTime ?? 0}
         setCurrTime={setSeekingTo}
