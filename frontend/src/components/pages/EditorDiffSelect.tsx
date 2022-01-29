@@ -125,6 +125,13 @@ export const NewDiff = styled(Diff)`
   }
 `;
 
+export const DeleteDiff = styled(NewDiff)`
+  background-color: var(--red);
+  &:hover, &:focus {
+    background-color: var(--maroon);
+  }
+`;
+
 const FormSubmit = styled(NewDiff)`
   margin: var(--m) 0 0 0;
 `

@@ -9,8 +9,10 @@ import { getArtist, getTitle } from "@/utils/beatmaputils";
 import styled from 'styled-components';
 import '@/utils/styles.css';
 import { MainBox, SubBox, Link, Line, BlackLine } from '@/utils/styles';
+import { httpDelete } from "@/utils/functions";
 
 type Props = {
+  getBeatmapsets: () => void,
   mapsets: Beatmapset[],
   config: Config,
   link: (mapsetId: number, mapId?: number|string) => string,
@@ -46,6 +48,7 @@ const Diff = styled(SubBox)<{color: string}>`
   z-index: 1;
   &:hover {
     background-color: ${({color}) => `var(--clr-${color}-light)`};
+    cursor: pointer;
   }
 `;
 
@@ -85,7 +88,14 @@ const Info = styled.div`
   min-width: 0;
 `;
 
-const MapsetList = ({ mapsets, config, link } : Props) => {
+const MapsetList = ({ getBeatmapsets, mapsets, config, link } : Props) => {
+  const handleDeleteBeatmapset = async (mapsetId: number) => {
+    const res = await httpDelete(`/api/beatmapsets/${mapsetId}`);
+    if (res && res.success) {
+      getBeatmapsets();
+    }
+  };
+
   return (
     <>
       {mapsets?.map((mapset) => {
@@ -104,6 +114,7 @@ const MapsetList = ({ mapsets, config, link } : Props) => {
                 </Info>
               </SetLink>
               <DiffsContainer>
+                {/* This map_id === new, delete shit pattern code color is so scuffed wtf */}
                 {beatmaps.map((map) => 
                   <Diff
                     as={Link} 
@@ -115,11 +126,15 @@ const MapsetList = ({ mapsets, config, link } : Props) => {
 												<BlackLine size="2.5em" margin="-1.5px 8px 0 0">+</BlackLine>
 												<BlackLine size="1em">{map.diffname}</BlackLine>
 											</>
-											: <>
+                      : <>
                     		<Line size="1em">{map.diffname} ({Math.round(map.kpm ?? 0)} keys/min)</Line>
 											</>}
                   </Diff>
                 )}
+                <Diff onClick={() => handleDeleteBeatmapset(mapset.id)} color="warn">
+                  <BlackLine size="2.5em" margin="-6px 14px 0 5px">-</BlackLine>
+                  <BlackLine size="1em">Delete Beatmapset</BlackLine>
+                </Diff>
               </DiffsContainer>
             </HoverContainer>
           </SongBox>

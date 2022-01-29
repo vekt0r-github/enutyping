@@ -147,7 +147,7 @@ def delete_beatmap(user_id, beatmap_id):
         return 'Beatmapset does not exist or you do not own it!', 400
     db_session.delete(beatmap)
     db_session.commit()
-    return { 'success': True }
+    return { 'success': True, 'beatmapset_id': bms_id }
 
 @api.route('/beatmaps', methods=['POST'])
 @login_required

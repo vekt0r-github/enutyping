@@ -1,12 +1,12 @@
 import React, { useEffect, useState }  from "react";
-import { Navigate, useParams, useSearchParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
 import EditorArea from "@/components/modules/EditorArea";
 import MapInfoDisplay from "@/components/modules/MapInfoDisplay";
 import EditorShortcutsDisplay from "@/components/modules/EditorShortcutsDisplay";
 
-import { get, post, put } from "@/utils/functions";
+import { get, post, put, httpDelete } from "@/utils/functions";
 import { User, Config, Beatmap } from "@/utils/types";
 import { getArtist, getTitle, processBeatmap } from '@/utils/beatmaputils';
 import { withParamsAsKey } from "@/utils/componentutils";
@@ -14,7 +14,7 @@ import { withParamsAsKey } from "@/utils/componentutils";
 import styled from 'styled-components';
 import '@/utils/styles.css';
 import { MainBox, Line, Sidebar, GamePageContainer, Link } from '@/utils/styles';
-import { NewDiff } from "@/components/pages/EditorDiffSelect";
+import { DeleteDiff, NewDiff } from "@/components/pages/EditorDiffSelect";
 
 type Props = {
   user: User | null,
@@ -47,6 +47,7 @@ const Editor = ({ user, config } : Props) => {
     return <Navigate to='/login' replace={true} />
   }
 
+  const navigate = useNavigate();
   const { mapId, mapsetId } = useParams();
   const isNewMap = (mapId === "new");
   const [searchParams] = useSearchParams();
@@ -65,6 +66,14 @@ const Editor = ({ user, config } : Props) => {
   const saveBeatmap = () => {
     setState((state) => ({...state, status: SUBMITTING}))
   }
+
+  const handleDeleteBeatmap = async () => {
+    setState((state) => ({...state, status: LOADING}))
+    const res = await httpDelete(`/api/beatmaps/${mapId}`) 
+    if (res && res.success && res.beatmapset_id) {
+      navigate(`/edit/${res.beatmapset_id}`)
+    }
+  };
   
   useEffect(() => {
     if (state.status !== SUBMITTING) { return; }
@@ -182,10 +191,18 @@ const Editor = ({ user, config } : Props) => {
               />}
             kpm={kpm}
           />
-          {!isNewMap ? <NewDiff as={Link} to={`/edit/${mapsetId}/new?copy=${mapId}`}>
-            <Line size="3.5em" margin="-3px 12px 0 0" style={{'width': '40px'}}>+</Line>
-            <Line size="1em">Create a Copy</Line>
-          </NewDiff> : null}
+          {!isNewMap ?
+            <>
+              <NewDiff as={Link} to={`/edit/${mapsetId}/new?copy=${mapId}`}>
+                <Line size="3.5em" margin="-3px 12px 0 0" style={{'width': '40px'}}>+</Line>
+                <Line size="1em">Create a Copy</Line>
+              </NewDiff>
+              <DeleteDiff onClick={handleDeleteBeatmap}>
+                <Line size="3.5em" margin="-7px 12px 0 0" style={{'width': '40px'}}>-</Line>
+                <Line size="1em">Delete Beatmap</Line>
+              </DeleteDiff>
+            </>
+          : null }
         </Sidebar>
         <EditorArea
           user={user}

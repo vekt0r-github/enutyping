@@ -44,6 +44,8 @@ const EditorSongSelect = ({ user, config } : Props) => {
   const [mapsets, setMapsets] = useState<Beatmapset[]>();
   const [searchQuery, setSearchQuery] = useState<string>("");
 
+  // Scuffed code 2
+
   const newDiff = () => ({
     id: "new",
     diffname: "Create New Difficulty",
@@ -59,7 +61,7 @@ const EditorSongSelect = ({ user, config } : Props) => {
     ],
   }));
 
-  useEffect(() => {
+  const getBeatmapsets = () => {
     get("/api/beatmapsets", { search: user.id }).then((res) => {
       const beatmapsets = res.beatmapsets;
       if (beatmapsets && beatmapsets.length) {
@@ -68,6 +70,10 @@ const EditorSongSelect = ({ user, config } : Props) => {
         setMapsets([]);
       }
     });
+  };
+
+  useEffect(() => {
+    getBeatmapsets();
   }, []);
   
   return (
@@ -82,6 +88,7 @@ const EditorSongSelect = ({ user, config } : Props) => {
               <BlackLine as="h2" size="1.5em">Create New Mapset</BlackLine>
             </NewMapset>
             <MapsetList 
+              getBeatmapsets={getBeatmapsets}
               mapsets={filteredMapsets} 
               config={config} 
               link={(mapsetId, mapId) => `/edit/${mapsetId}/${mapId??''}`} 

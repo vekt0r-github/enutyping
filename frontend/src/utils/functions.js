@@ -75,3 +75,17 @@ export function put(endpoint, params = {}) {
       throw `PUT request to ${endpoint} failed with error:\n${error}`;
     });
 }
+
+export async function httpDelete(endpoint, params = {}) {
+  try {
+    const res = await fetch(endpoint, {
+        method: "delete",
+        headers: { "Content-type": "application/json" },
+        body: JSON.stringify(params),
+    });
+    return convertToJSON(res);
+  } catch (error) {
+    // give a useful error message
+    throw `DELETE request to ${endpoint} failed with error:\n${error}`;
+  }
+}

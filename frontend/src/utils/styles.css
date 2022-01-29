@@ -27,6 +27,7 @@
   --clr-create: var(--green);
   --clr-create-light: var(--teal);
   --clr-warn: var(--red);
+  --clr-warn-light: var(--maroon);
   --clr-neutral: var(--black1);
   --clr-link: var(--yellow);
   --clr-link-hover: var(--maroon);
