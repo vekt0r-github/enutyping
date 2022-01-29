@@ -131,10 +131,13 @@ const MapsetList = ({ getBeatmapsets, mapsets, config, link } : Props) => {
 											</>}
                   </Diff>
                 )}
-                <Diff onClick={() => handleDeleteBeatmapset(mapset.id)} color="warn">
-                  <BlackLine size="2.5em" margin="-6px 14px 0 5px">-</BlackLine>
-                  <BlackLine size="1em">Delete Beatmapset</BlackLine>
-                </Diff>
+                {/* scuff code due to scuff code */
+                  beatmaps.map(b => b.id).includes("new") &&
+                  <Diff onClick={() => handleDeleteBeatmapset(mapset.id)} color="warn">
+                    <BlackLine size="2.5em" margin="-6px 14px 0 5px">-</BlackLine>
+                    <BlackLine size="1em">Delete Beatmapset</BlackLine>
+                  </Diff>
+                }
               </DiffsContainer>
             </HoverContainer>
           </SongBox>
