@@ -1,6 +1,7 @@
 import React, { useState }  from "react";
 
 import YTThumbnail from "@/components/modules/YTThumbnail";
+import ConfirmPopup from "@/components/modules/ConfirmPopup";
 
 import { Config, Beatmapset, Beatmap, BeatmapMetadata } from "@/utils/types";
 
@@ -42,7 +43,7 @@ const Diff = styled(SubBox)<{color: string}>`
   width: 100%;
   height: 30px;
   padding: 1px var(--s);
-  & + & { margin-top: var(--xs); }
+  & + &, & + div { margin-top: var(--xs); } /* clap point stupid */
   box-sizing: border-box;
   transition: var(--tt-short);
   z-index: 1;
@@ -132,11 +133,21 @@ const MapsetList = ({ getBeatmapsets, mapsets, config, link } : Props) => {
                   </Diff>
                 )}
                 {/* scuff code due to scuff code */
+                // now it's more scuffed yw
                   beatmaps.map(b => b.id).includes("new") &&
-                  <Diff onClick={() => handleDeleteBeatmapset(mapset.id)} color="warn">
-                    <BlackLine size="2.5em" margin="-6px 14px 0 5px">-</BlackLine>
-                    <BlackLine size="1em">Delete Beatmapset</BlackLine>
-                  </Diff>
+                  <ConfirmPopup 
+                    button={<Diff color="warn">
+                    <BlackLine size="2.5em" margin="-8px 14px 0 5px">-</BlackLine>
+                      <BlackLine size="1em">Delete Beatmapset</BlackLine>
+                    </Diff>}
+                    warningText={<>
+                      <Line size="1.25em" margin="1.5em 0 0 0">Are you sure you want to delete this beatmapset:</Line>
+                      <Line size="1.75em" margin="1.5em 0 0 0">{mapset.artist} - {mapset.title}?</Line>
+                      <Line size="1.25em" margin="1.5em 0 0 0">All {diffCount} beatmap(s) will be deleted.</Line>
+                      <Line size="1.25em" margin="1.5em 0 0 0">This action is permanent and cannot be undone.</Line>
+                    </>}
+                    onConfirm={() => handleDeleteBeatmapset(mapset.id)}
+                  />
                 }
               </DiffsContainer>
             </HoverContainer>

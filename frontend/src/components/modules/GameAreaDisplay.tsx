@@ -85,7 +85,7 @@ export const Overlay = styled.div`
   position: absolute;
   left: 0;
   top: 0;
-  background-color: #0006;
+  background-color: var(--clr-overlay);
   color: var(--white);
   display: flex;
   flex-direction: column;

@@ -5,6 +5,7 @@ import Loading from "@/components/modules/Loading";
 import EditorArea from "@/components/modules/EditorArea";
 import MapInfoDisplay from "@/components/modules/MapInfoDisplay";
 import EditorShortcutsDisplay from "@/components/modules/EditorShortcutsDisplay";
+import ConfirmPopup from "@/components/modules/ConfirmPopup";
 
 import { get, post, put, httpDelete } from "@/utils/functions";
 import { User, Config, Beatmap } from "@/utils/types";
@@ -13,8 +14,7 @@ import { withParamsAsKey } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Line, Sidebar, GamePageContainer, Link } from '@/utils/styles';
-import { DeleteDiff, NewDiff } from "@/components/pages/EditorDiffSelect";
+import { MainBox, Line, Sidebar, GamePageContainer, Link, NewButton, DeleteButton } from '@/utils/styles';
 
 type Props = {
   user: User | null,
@@ -199,14 +199,22 @@ const Editor = ({ user, config } : Props) => {
           />
           {!isNewMap ?
             <>
-              <NewDiff as={Link} to={`/edit/${mapsetId}/new?copy=${mapId}`}>
+              <NewButton as={Link} to={`/edit/${mapsetId}/new?copy=${mapId}`}>
                 <Line size="3.5em" margin="-3px 12px 0 0" style={{'width': '40px'}}>+</Line>
                 <Line size="1em">Create a Copy</Line>
-              </NewDiff>
-              <DeleteDiff onClick={handleDeleteBeatmap}>
-                <Line size="3.5em" margin="-7px 12px 0 0" style={{'width': '40px'}}>-</Line>
-                <Line size="1em">Delete Beatmap</Line>
-              </DeleteDiff>
+              </NewButton>
+              <ConfirmPopup 
+                button={<DeleteButton>
+                  <Line size="3.5em" margin="-12px 0px 0 0" style={{'width': '40px'}}>-</Line>
+                  <Line size="1em">Delete Beatmap</Line>
+                </DeleteButton>}
+                warningText={<>
+                  <Line size="1.25em" margin="1.5em 0 0 0">Are you sure you want to delete this beatmap:</Line>
+                  <Line size="1.75em" margin="1.5em">{artist} - {title} [{diffname}]?</Line>
+                  <Line size="1.25em" margin="0">This action is permanent and cannot be undone.</Line>
+                </>}
+                onConfirm={handleDeleteBeatmap}
+              />
             </>
           : null }
         </Sidebar>

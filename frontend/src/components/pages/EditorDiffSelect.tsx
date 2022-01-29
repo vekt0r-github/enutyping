@@ -1,19 +1,20 @@
 import React, { useEffect, useState }  from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
 import YTVideo from "@/components/modules/YTVideo";
 import MapInfoDisplay from "@/components/modules/MapInfoDisplay";
 import EditorShortcutsDisplay from "@/components/modules/EditorShortcutsDisplay";
+import ConfirmPopup from "@/components/modules/ConfirmPopup";
 
-import { get, post } from "@/utils/functions";
+import { get, httpDelete, post } from "@/utils/functions";
 import { Config, Beatmapset, User } from "@/utils/types";
 import { getArtist, getTitle, makeSetFunc } from "@/utils/beatmaputils"
 import { withParamsAsKey } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Line, Link, GamePageContainer, Sidebar } from '@/utils/styles';
+import { MainBox, Line, Link, GamePageContainer, Sidebar, Button, DeleteButton, NewButton } from '@/utils/styles';
 
 import { GameContainer, BottomHalf, StatBox, Overlay as GameOverlay } from "@/components/modules/GameAreaDisplay";
 
@@ -97,42 +98,7 @@ const DiffsContainer = styled.div`
   justify-content: space-evenly;
 `;
 
-const Diff = styled(MainBox)`
-  max-width: 400px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  transition: var(--tt-short);
-  padding: 0 var(--l);
-  margin: var(--m);
-  border-radius: var(--m);
-  &:hover, &:focus {
-    background-color: var(--clr-primary-light);
-  }
-`;
-
-export const NewDiff = styled(Diff)`
-  align-self: center;
-  font-size: 1em;
-  font-family: "Open Sans";
-  border: 0;
-  background-color: var(--clr-create);
-	color: black;
-  cursor: pointer;
-  &:hover, &:focus {
-    background-color: var(--clr-create-light);
-		color: black;
-  }
-`;
-
-export const DeleteDiff = styled(NewDiff)`
-  background-color: var(--red);
-  &:hover, &:focus {
-    background-color: var(--maroon);
-  }
-`;
-
-const FormSubmit = styled(NewDiff)`
+const FormSubmit = styled(NewButton)`
   margin: var(--m) 0 0 0;
 `
 
@@ -141,7 +107,7 @@ const EditorDiffSelect = ({ user, config } : Props) => {
     return <Navigate to='/login' replace={true} />
   }
 
-
+  const navigate = useNavigate();
   const [state, setState] = useState<State>({
     status: LOADING,
     mapset: {
@@ -264,6 +230,13 @@ const EditorDiffSelect = ({ user, config } : Props) => {
   const onPlayerReady = (e : YT.PlayerEvent) => {
     setPlayer(e.target);
   };
+  
+  const handleDeleteBeatmapset = async () => {
+    const res = await httpDelete(`/api/beatmapsets/${mapsetId}`);
+    if (res && res.success) {
+      navigate(`/edit`);
+    }
+  };
 
   return (
     <>
@@ -275,6 +248,23 @@ const EditorDiffSelect = ({ user, config } : Props) => {
             artist={artist}
             source={yt_id.length ? `https://www.youtube.com/watch?v=${yt_id}` : ''}
           />
+          {!isNewMapset ?
+            <>
+              <ConfirmPopup 
+                button={<DeleteButton>
+                  <Line size="3.5em" margin="-12px 0px 0 0" style={{'width': '40px'}}>-</Line>
+                  <Line size="1em">Delete Beatmapset</Line>
+                </DeleteButton>}
+                warningText={<>
+                  <Line size="1.25em" margin="1.5em 0 0 0">Are you sure you want to delete this beatmapset:</Line>
+                  <Line size="1.75em" margin="1.5em 0 0 0">{artist} - {title}?</Line>
+                  <Line size="1.25em" margin="1.5em 0 0 0">All {beatmaps.length} beatmap(s) will be deleted.</Line>
+                  <Line size="1.25em" margin="1.5em 0 0 0">This action is permanent and cannot be undone.</Line>
+                </>}
+                onConfirm={handleDeleteBeatmapset}
+              />
+            </>
+          : null }
         </Sidebar>
         <GameContainer>
           <BottomHalf>
@@ -301,14 +291,14 @@ const EditorDiffSelect = ({ user, config } : Props) => {
               <Line as="h2" size="1.5em" margin="1.5em 0">Select Difficulty:</Line>
               <DiffsContainer>
                 {beatmaps.map((map) => 
-                  <Diff as={Link} to={`/edit/${mapset.id}/${map.id}`} key={map.id}>
+                  <Button as={Link} to={`/edit/${mapset.id}/${map.id}`} key={map.id}>
                     <Line size="1em">{map.diffname}</Line>
-                  </Diff>
+                  </Button>
                 )}
-                <NewDiff as={Link} to={`/edit/${mapset.id}/new`}>
+                <NewButton as={Link} to={`/edit/${mapset.id}/new`}>
                   <Line size="3.5em" margin="-3px 12px 0 0" style={{'width': '40px'}}>+</Line>
                   <Line size="1em">Create New Difficulty</Line>
-                </NewDiff>
+                </NewButton>
               </DiffsContainer>
             </>}
           </Overlay>

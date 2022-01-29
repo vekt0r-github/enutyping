@@ -133,3 +133,38 @@ export const BasicContainer = styled.div`
   padding-right: 1.5rem;
   padding-left: 1.5rem;
 `;
+
+export const Button = styled(MainBox)`
+  max-width: 400px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  transition: var(--tt-short);
+  padding: 0 var(--l);
+  margin: var(--m);
+  border-radius: var(--m);
+  &:hover, &:focus {
+    background-color: var(--clr-primary-light);
+  }
+`;
+
+export const NewButton = styled(Button)`
+  align-self: center;
+  font-size: 1em;
+  font-family: "Open Sans";
+  border: 0;
+  background-color: var(--clr-create);
+	color: black;
+  cursor: pointer;
+  &:hover, &:focus {
+    background-color: var(--clr-create-light);
+		color: black;
+  }
+`;
+
+export const DeleteButton = styled(NewButton)`
+  background-color: var(--red);
+  &:hover, &:focus {
+    background-color: var(--maroon);
+  }
+`;
