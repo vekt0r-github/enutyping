@@ -2,8 +2,8 @@ import React, { useEffect } from "react";
 
 import ProgressBar from "@/components/modules/ProgressBar";
 
-import { Config, KanaState, LineState } from '@/utils/types'
-import { getCurrentRomanization, getVisualPosition, timeToSyllableIndex, withOverlapOffsets } from "@/utils/beatmaputils";
+import { KanaState, LineState } from '@/utils/types'
+import { getCurrentRomanization, getVisualPosition, withOverlapOffsets } from "@/utils/beatmaputils";
 
 import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
@@ -12,9 +12,7 @@ import {} from '@/utils/styles';
 type Props = {
   currTime: number,
   lineState: LineState,
-  setLineState: (makeNewLineState: (oldLineState: LineState) => LineState) => void,
-  keyCallback: (hits: number, misses: number, endKana: boolean) => void,
-  config: Config,
+  keyCallback: (e: KeyboardEvent) => void,
 }
 
 enum ActiveStatus { MISSED, PAST, PRESENT, FUTURE };
@@ -121,80 +119,14 @@ const Tick = styled.div<{active?: ActiveStatus}>`
   };
 `;
 
-const GameLine = ({ currTime, lineState, setLineState, keyCallback, config } : Props) => {
-  const {line, syllables, nBuffer} = lineState;
+const GameLine = ({ currTime, lineState, keyCallback } : Props) => {
+  const {line, syllables} = lineState;
   const sPos = lineState.position;
-  const {startTime, endTime, lyric} = line;
-  const latestActiveSyllable = timeToSyllableIndex(line.syllables, currTime) - 1;
-
-  const getKana = (sPos: number) : KanaState | undefined => {
-    const syllable = syllables[sPos];
-    if (!syllable) { return; }
-    return syllable.kana[syllable.position];
-  }
-
-  const resultOfHit = (key : string, sPos: number) : KanaState | undefined => {
-    const curKana = getKana(sPos);
-    if (!curKana) return;
-    const {kana, prefix, minKeypresses} = curKana;
-    const newPrefix = prefix + key;
-    const filteredRomanizations = kana.romanizations.filter(s => s.substring(0, newPrefix.length) == newPrefix);
-    if (filteredRomanizations.length == 0) { return; }
-    const newSuffix = filteredRomanizations[0].substring(newPrefix.length);
-    return {kana: kana, prefix: newPrefix, suffix: newSuffix, minKeypresses: minKeypresses};
-  }
-
-  const handleCorrectKeypress = (sPos: number, newKana : KanaState) => {
-    const {kana, prefix, suffix, minKeypresses} = newKana;
-    setLineState(({line, syllables, nBuffer}) => {
-      let {position: kPos, kana: kanaList} = syllables[sPos];
-      kanaList[kPos] = newKana; // should be safe
-      if (suffix === "") {
-        nBuffer = (prefix === "n" && kana.text == "ん") ? [sPos, kPos] : null;
-        kPos++;
-        syllables[sPos].position = kPos;
-        if (!kanaList[kPos]) {sPos++; } 
-        // if getKana(position) still undefined, line is over
-      }
-      return {line, position: sPos, syllables, nBuffer};
-    });
-    keyCallback((prefix.length <= minKeypresses) ? 1 : 0, 0, suffix === "");
-  }
-
-  const handleKeyPress = (e: KeyboardEvent) => {
-    if (["Escape"].includes(e.key)) { return; } // GameArea is handling it
-    const key = e.key.toLowerCase();
-    const allowedCharacters = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890-`~ \"'.?!,"; // idk if this is comprehensive
-    if(!allowedCharacters.includes(key)) { return; }
-    if(key == "n" && nBuffer) {
-      setLineState((s) => {
-        s.nBuffer = null;
-        s.syllables[nBuffer[0]].kana[nBuffer[1]].prefix += "n";
-        return s;
-      });
-      return;
-    }
-    const newKana = resultOfHit(key, sPos);  
-    if (!newKana) { // key is not the next char
-      let newPosition = sPos;
-      while (newPosition < latestActiveSyllable) {
-        newPosition++; // next syllable
-        const testNewKana = resultOfHit(key, newPosition);
-        if (testNewKana) {
-          handleCorrectKeypress(newPosition, testNewKana);
-          return;
-        }
-      }
-      keyCallback(0, 1, false);
-    } else { // key works as the next char
-      handleCorrectKeypress(sPos, newKana);
-    }
-  };
 
   useEffect(() => {
-    document.addEventListener("keydown", handleKeyPress);
+    document.addEventListener("keydown", keyCallback);
     return () => {
-      document.removeEventListener("keydown", handleKeyPress);
+      document.removeEventListener("keydown", keyCallback);
     }
   }, [lineState, currTime]); // any change in state affects the listener
 

@@ -11,7 +11,7 @@ export const kanaRespellings = {
   しゃ: ["sha", "sya"],
   しょ: ["sho", "syo"],
   しゅ: ["shu", "syu"],
-　じゃ: ["ja", "jya", "zya"],
+  じゃ: ["ja", "jya", "zya"],
   じょ: ["jo", "jyo", "zyo"],
   じゅ: ["ju", "jyu", "zyu"],
   か: ["ka", "ca"],
@@ -115,7 +115,7 @@ const minKeypressOptions = { // idk what's going on here tbh, TODO ig
     ん: "n", 
   },
 }
-export const computeMinKeypresses = (syllable: string) => {
-  const ans = toRomaji(syllable);
-  return ans.length;
+export const computeMinKeypresses = (kana: Kana) => {
+  const ans = Math.min(...kana.romanizations.map(s => s.length));
+  return ans;
 }

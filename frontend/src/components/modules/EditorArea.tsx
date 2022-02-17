@@ -13,7 +13,6 @@ import {
   makeLineStateAt,
   makeSetFunc,
   timeToLineIndex, 
-  updateStatsOnKeyPress, 
   updateStatsOnLineEnd,
   GAME_FPS,
   timeToSyllableIndex,
@@ -536,10 +535,6 @@ const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap, 
     setGameState((oldGameState) => makeState(oldGameState.currTime));
   }, [beatmap.content]);
 
-  const keyCallback = (hit: number, miss: number, endKana: boolean) => {
-    set('stats')((oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana, 1));
-  };
-
   if (status === GameStatus.GOBACK) {
     return <Navigate to={`/edit/${beatmap.beatmapset.id}`} replace={true} />;
   }
@@ -574,7 +569,6 @@ const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap, 
         user={user}
         beatmap={beatmap}
         gameState={displayGameState}
-        keyCallback={isTesting ? keyCallback : () => {}}
         setGameState={isTesting ? setGameState : () => {}}
 				speed={1}
 				setAvailableSpeeds={setAvailableSpeeds}

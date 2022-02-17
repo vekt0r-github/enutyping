@@ -12,7 +12,6 @@ import {
   makeLineStateAt,
   makeSetFunc,
   timeToLineIndex, 
-  updateStatsOnKeyPress, 
   updateStatsOnLineEnd,
   GAME_FPS,
 } from '@/utils/beatmaputils';
@@ -143,10 +142,6 @@ const GameArea = ({ user, beatmap, config, speed, afterGameEnd, setAvailableSpee
     }
   }, [status]); // may eventually depend on other things
 
-  const keyCallback = (hit: number, miss: number, endKana: boolean) => {
-    set('stats')((oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana, scoreMultiplier));
-  }
-
   if (status === GameStatus.GOBACK) {
     return <Navigate to={`/play/${beatmap.beatmapset.id}`} replace={true} />;
   }
@@ -156,7 +151,6 @@ const GameArea = ({ user, beatmap, config, speed, afterGameEnd, setAvailableSpee
       user={user}
       beatmap={beatmap}
       gameState={gameState}
-      keyCallback={keyCallback}
       setGameState={setGameState}
 			setAvailableSpeeds={setAvailableSpeeds}
 			speed={speed}

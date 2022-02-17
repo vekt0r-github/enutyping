@@ -112,10 +112,11 @@ export const timeToSyllableIndex = (syllables: LineData['syllables'], time: numb
 
 // 0 to timingPoints.length
 export const timeToTimingPointIndex = (timingPoints: TimingPoint[], currTime: number) => {
+  let index = timingPoints.length;
   timingPoints.forEach(({time, bpm}, i, arr) => {
-    if (time > currTime) { return i; }
+    if (time > currTime) { index = i; }
   });
-  return timingPoints.length;
+  return index;
 };
 
 // have a canonical time for every beat
@@ -149,7 +150,11 @@ export const lastLineOrSyllableTime = (lines: LineData[]) => {
 
 const computeLineKeypresses = (line: LineData) => {
   let keypresses: number = 0;
-  line.syllables.forEach(({ text }) => { keypresses += computeMinKeypresses(text) });
+  line.syllables.forEach(({ kana }) => {
+    kana.forEach((k) => {
+      keypresses += computeMinKeypresses(k);
+    });
+  });
   return keypresses;
 };
 
@@ -162,7 +167,9 @@ export const computeBeatmapKPM = (map: Beatmap) => {
   let keypresses: number = 0;
   let drainTime: number = 0;
   map.lines?.forEach((line: LineData) => {
-    keypresses += computeLineKeypresses(line);
+    const newKeypresses = computeLineKeypresses(line);
+    if (newKeypresses === 0) { return; }
+    keypresses += newKeypresses;
     drainTime += (line.endTime - line.startTime) / MS_IN_MINUTE;
   });
   return drainTime ? Math.round(keypresses / drainTime) : 0;
@@ -174,12 +181,33 @@ export const computeLineKana = (line: LineData) => {
   return totalKana;
 };
 
-export const updateStatsOnKeyPress = (oldStats: GameState['stats'], hit: number, miss: number, endKana: boolean, scoreMultiplier: number) => {
+/**
+ * update stats, including the scoring function
+ * @param oldStats 
+ * @param hit how many hits to count keypress as
+ * @param miss how many misses to count keypress as
+ * @param endKana whether this keypress finishes a kana
+ * @param scoreMultiplier given by active mods
+ * @param error in ms relative to the syllable time
+ * @returns new stats object
+ */
+export const updateStatsOnKeyPress = (
+  oldStats: GameState['stats'], 
+  hit: number, 
+  miss: number, 
+  endKana: boolean, 
+  scoreMultiplier: number,
+  error: number,
+) => {
+  const effectiveError = error < 0 ? -3 * error : error // penalize early hits more
+  const timingMultiplier = 1 + 4 * Math.pow(0.5, (effectiveError / 1000));
+  let scoreEarned = -5 * miss;
+  scoreEarned += 5 * hit * timingMultiplier;
   return { ...oldStats,
     hits: oldStats.hits + hit,
     misses: oldStats.misses + miss,
     kanaHits: oldStats.kanaHits + (endKana ? 1 : 0),
-    score: oldStats.score + (10 * hit - 5 * miss) * scoreMultiplier,
+    score: oldStats.score + scoreEarned * scoreMultiplier,
   };
 };
 
@@ -208,7 +236,7 @@ const makeInitOrLastKanaState = (kana: Kana, last: boolean) => ({
   kana: kana, 
   prefix: last ? kana.romanizations[0] : "", 
   suffix: last ? "" : kana.romanizations[0], 
-  minKeypresses: computeMinKeypresses(kana.text) 
+  minKeypresses: computeMinKeypresses(kana), 
 });
 
 export const makeLineStateAt = (currTime: number, lineData: LineData, config: Config, editor = false) : LineState => ({

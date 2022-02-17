@@ -110,7 +110,7 @@ def init_db():
             content=content,
             kpm=401),
         Beatmapset(id=1337, 
-            owner_id=4321,
+            owner_id="8484892osu",
             artist='Nekomata Okayu', \
             title='flos', \
             artist_original='猫又おかゆ', \

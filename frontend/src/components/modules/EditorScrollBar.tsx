@@ -47,7 +47,6 @@ const Slider = styled.input`
   outline: none;
   -webkit-transition: .2s;
   transition: opacity .2s;
-  z-index: 3;
   &::-webkit-slider-thumb {
     appearance: none;
     width: 4px; 
@@ -131,13 +130,6 @@ const EditorScrollBar = ({ currTime, setCurrTime, lines, timingPoints, endTime, 
         <SliderFill
           fill={currTime / length}
         />
-        <Slider
-          type="range" 
-          min={0} 
-          max={length}
-          value={currTime}
-          onChange={handleScrub} 
-        />
         {timingPoints.map((point) => <TimingMarker key={`T${point.time}`} pos={calcPos(point.time)} />)}
         {lines.map((line) => <Fragment key={`L${line.startTime}`}>
           <LineMarker pos={calcPos(line.startTime)} />
@@ -146,6 +138,13 @@ const EditorScrollBar = ({ currTime, setCurrTime, lines, timingPoints, endTime, 
           )}
         </Fragment>)} 
         {endTime ? <EndMarker key={`E${endTime}`} pos={calcPos(endTime)} /> : null}
+        <Slider
+          type="range" 
+          min={0} 
+          max={length}
+          value={currTime}
+          onChange={handleScrub} 
+        />
       </SliderContainer>
     </SliderOuterContainer>
   );
