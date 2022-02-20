@@ -188,8 +188,8 @@ export const computeLineKana = (line: LineData) => {
  * @param miss how many misses to count keypress as
  * @param endKana whether this keypress finishes a kana
  * @param scoreMultiplier given by active mods
- * @param error in ms relative to the syllable time
- * @returns new stats object
+ * @param scoreEarned how much score to add before multiplier
+ * @returns object of {newStats: GameState['stats'], scoreEarned: number}
  */
 export const updateStatsOnKeyPress = (
   oldStats: GameState['stats'], 
@@ -197,12 +197,8 @@ export const updateStatsOnKeyPress = (
   miss: number, 
   endKana: boolean, 
   scoreMultiplier: number,
-  error: number,
+  scoreEarned: number,
 ) => {
-  const effectiveError = error < 0 ? -3 * error : error // penalize early hits more
-  const timingMultiplier = 1 + 4 * Math.pow(0.5, (effectiveError / 1000));
-  let scoreEarned = -5 * miss;
-  scoreEarned += 5 * hit * timingMultiplier;
   return { ...oldStats,
     hits: oldStats.hits + hit,
     misses: oldStats.misses + miss,
@@ -232,11 +228,12 @@ export const makeSetFunc = <State>(setState : (state : State | ((oldState: State
 export const getCurrentRomanization = (kana : KanaState[]) => 
   "".concat.apply("", kana.map(ks => ks.prefix + ks.suffix))
 
-const makeInitOrLastKanaState = (kana: Kana, last: boolean) => ({ 
+const makeInitOrLastKanaState = (kana: Kana, last: boolean): KanaState => ({ 
   kana: kana, 
   prefix: last ? kana.romanizations[0] : "", 
   suffix: last ? "" : kana.romanizations[0], 
   minKeypresses: computeMinKeypresses(kana), 
+  score: 0,
 });
 
 export const makeLineStateAt = (currTime: number, lineData: LineData, config: Config, editor = false) : LineState => ({

@@ -171,26 +171,6 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
       <span>{entry[1]}</span>
     </InfoEntry>
   ));
-
-  const handleCorrectKeypress = (sPos: number, newKana : KanaState, error: number) => {
-    const {kana, prefix, suffix, minKeypresses} = newKana;
-    setLineState(({line, syllables, nBuffer}) => {
-      let {position: kPos, kana: kanaList} = syllables[sPos];
-      kanaList[kPos] = newKana; // should be safe
-      if (suffix === "") {
-        nBuffer = (prefix === "n" && kana.text == "ん") ? [sPos, kPos] : null;
-        kPos++;
-        syllables[sPos].position = kPos;
-        if (!kanaList[kPos]) { sPos++; } 
-        // if getKana(position) still undefined, line is over
-      }
-      return {line, position: sPos, syllables, nBuffer};
-    });
-    let hits = 0;
-    if (prefix.length === 1) { hits = 1; } // first hit
-    if (suffix === "") { hits += minKeypresses - 1; } // last hit
-    keyCallback(hits, 0, suffix === "", error);
-  }
   
   const getKana = (sPos: number) : KanaState | undefined => {
     if (!lineState) { return; }
@@ -199,22 +179,26 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
     return syllable.kana[syllable.position];
   }
 
-  const resultOfHit = (key : string, sPos: number) : KanaState | undefined => {
+  const updateKanaAffix = (key : string, sPos: number) : KanaState | undefined => {
     const curKana = getKana(sPos);
     if (!curKana) return;
-    const {kana, prefix, minKeypresses} = curKana;
+    const {kana, prefix} = curKana;
     const newPrefix = prefix + key;
     const filteredRomanizations = kana.romanizations.filter(s => s.substring(0, newPrefix.length) == newPrefix);
     if (filteredRomanizations.length == 0) { return; }
     const newSuffix = filteredRomanizations[0].substring(newPrefix.length);
-    return {kana: kana, prefix: newPrefix, suffix: newSuffix, minKeypresses: minKeypresses};
+    return {...curKana, prefix: newPrefix, suffix: newSuffix};
   }
 
   const handleKeyPress = (e: KeyboardEvent) => {
     if (["Escape"].includes(e.key)) { return; } // GameArea is handling it
     if ([GameStatus.PAUSED, GameStatus.AUTOPLAYING].includes(status)) { return; }
     if (lineState === undefined || currTime === undefined) { return; }
-    
+    if (lineState.syllables.length === 0) { return; }
+    let sPos = lineState.position;
+    const curKana = getKana(sPos);
+    if (!curKana) return; // finished line or something
+
     const {line, syllables, nBuffer} = lineState ?? {};
     const key = e.key.toLowerCase();
     const allowedCharacters = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890-`~ \"'.?!,"; // idk if this is comprehensive
@@ -228,29 +212,51 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
       return;
     }
 
-    const sPos = lineState.position;
     const latestActiveSyllable = timeToSyllableIndex(line.syllables, currTime) - 1;
     const error = currTime - syllables![sPos].time;
 
-    const newKana = resultOfHit(key, sPos);  
-    if (!newKana) { // key is not the next char
-      let newPosition = sPos;
-      while (newPosition < latestActiveSyllable) {
-        newPosition++; // next syllable
-        const testNewKana = resultOfHit(key, newPosition);
+    const maybeNewKana = updateKanaAffix(key, sPos);
+    let success = maybeNewKana !== undefined;
+    let newKana = maybeNewKana ?? curKana;
+    if (!success) { // key is not the next char; set newKana
+      for (let newPos = sPos; newPos < latestActiveSyllable; ++newPos) { // try skipping syllables
+        const testNewKana = updateKanaAffix(key, newPos);
         if (testNewKana) {
-          handleCorrectKeypress(newPosition, testNewKana, error);
-          return;
+          sPos = newPos;
+          newKana = testNewKana;
+          success = true; // wow it worked
+          break;
         }
       }
-      keyCallback(0, 1, false, error); // mark as incorrect
-    } else { // key works as the next char
-      handleCorrectKeypress(sPos, newKana, error);
     }
+    const {kana, prefix, suffix, minKeypresses} = newKana; // no updated score
+    let hit = 0, miss = 0;
+    if (success) {
+      if (prefix.length === 1) { hit = 1; } // first hit
+      if (suffix === "") { hit += minKeypresses - 1; } // last hit
+    } else { miss = 1; }
+    newKana.score += calcScoreAndUpdateStats(hit, miss, suffix === "", error);
+    setLineState(({line, syllables, nBuffer}) => {
+      let {position: kPos, kana: kanaList} = syllables[sPos];
+      kanaList[kPos] = newKana; // should be safe
+      if (suffix === "") {
+        nBuffer = (prefix === "n" && kana.text == "ん") ? [sPos, kPos] : null;
+        kPos++;
+        syllables[sPos].position = kPos;
+        if (!kanaList[kPos]) { sPos++; } 
+        // if getKana(position) still undefined, line is over
+      }
+      return {line, position: sPos, syllables, nBuffer};
+    });
   };
 
-  const keyCallback = (hit: number, miss: number, endKana: boolean, error: number) => {
-    set('stats')((oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana, 1, error));
+  const calcScoreAndUpdateStats = (hit: number, miss: number, endKana: boolean, error: number) => {
+    const effectiveError = error < 0 ? -3 * error : error // penalize early hits more
+    const timingMultiplier = 1 + 4 * Math.pow(0.5, (effectiveError / 1000));
+    let scoreEarned = -5 * miss;
+    scoreEarned += 5 * hit * timingMultiplier;
+    set('stats')((oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana, scoreMultiplier, scoreEarned));
+    return scoreEarned;
   };
   
   return (
@@ -263,6 +269,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
 								currTime={adjustedTime}
 								lineState={lines[currIndex]}
 								keyCallback={handleKeyPress}
+                isPlayingGame={isPlayingGame}
 							/>
 							<LyricLine>{lines[currIndex].line.lyric}</LyricLine>
 						</> : null}

@@ -140,6 +140,7 @@ export type KanaState = {
   prefix: string, // the correct keystrokes user has typed for this kana
   suffix: string, // one possible romaji completion of this kana after prefix
   minKeypresses: number, // fewest keystrokes to type this kana
+  score: number, // amount of score earned for this kana (max being proportional to minKeypresses)
 };
 
 export type LineState = {

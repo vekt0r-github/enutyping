@@ -13,6 +13,7 @@ type Props = {
   currTime: number,
   lineState: LineState,
   keyCallback: (e: KeyboardEvent) => void,
+  isPlayingGame: boolean,
 }
 
 enum ActiveStatus { MISSED, PAST, PRESENT, FUTURE };
@@ -114,12 +115,23 @@ const Tick = styled.div<{active?: ActiveStatus}>`
   left: 4px;
   top: 32px;
   z-index: 1;
-  background-color: ${(props) => 
-    props.active === ActiveStatus.PAST ? 'var(--clr-darkgrey)' : 'black'
-  };
+  background-color: black;
 `;
 
-const GameLine = ({ currTime, lineState, keyCallback } : Props) => {
+const ScoreMarker = styled.div<{value: number}>` // value 0-1
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  position: absolute;
+  content: "";
+  left: 1px;
+  top: 40px;
+  z-index: 1;
+  background-color: hsl(calc(0 + 120 * ${({value}) => value}), 100%, 50%);
+  filter: blur(2px); 
+`;
+
+const GameLine = ({ currTime, lineState, keyCallback, isPlayingGame } : Props) => {
   const {line, syllables} = lineState;
   const sPos = lineState.position;
 
@@ -134,6 +146,17 @@ const GameLine = ({ currTime, lineState, keyCallback } : Props) => {
   let syllablesWithOffsets : (typeof syllables[number] & {pos: number, offset: number})[] = 
     withOverlapOffsets(lineState, Math.pow(1.125, 2)).syllables;
   let syllableList = syllablesWithOffsets.map(({time, text, position: kPos, kana, pos, offset}, index) => {
+    let prefixes = ""; // this is pretty implementation dependent
+    let suffixes = ""; // and seems likely to break
+    let score = 0;
+    let maxScore = 0;
+    kana.forEach(ks => {
+      prefixes += ks.prefix;
+      suffixes += ks.suffix;
+      score += ks.score;
+      maxScore += 25 * ks.minKeypresses; // TODO: hardcode alert
+    });
+
     let active;
     let topContent : JSX.Element;
     let bottomContent : JSX.Element;
@@ -146,16 +169,11 @@ const GameLine = ({ currTime, lineState, keyCallback } : Props) => {
           {getCurrentRomanization(kana)}
         </CharText> 
     } else if (index < sPos) {
+      active = PAST;
       topContent = (<>
         <CharText active={PAST}>{joinKana(kana.slice(0, kPos))}</CharText>
         <CharText active={MISSED}>{joinKana(kana.slice(kPos))}</CharText>
       </>);
-      let prefixes = ""; // this is pretty implementation dependent
-      let suffixes = ""; // and seems likely to break
-      kana.forEach(ks => {
-        prefixes += ks.prefix;
-        suffixes += ks.suffix;
-      });
       bottomContent = (<>
         <CharText active={PAST}>{prefixes}</CharText>
         <CharText active={MISSED}>{suffixes}</CharText>
@@ -190,6 +208,8 @@ const GameLine = ({ currTime, lineState, keyCallback } : Props) => {
           <Connector offset={`${offset}px`} flip={false} />
           <Connector offset={`${offset}px`} flip={true} />
         </> : <Tick active={active}/>}
+        {active !== ActiveStatus.FUTURE && isPlayingGame ? 
+          <ScoreMarker value={Math.max(score / maxScore, 0)} /> : null}
         <SyllableText pos={[`${offset}px`, "60px"]}>{bottomContent}</SyllableText>
       </Syllable>
     );

@@ -54,7 +54,6 @@ const Cancel = styled(DeleteButton)`
 `;
 
 const ConfirmPopup = ({ button, warningText, onConfirm }: Props) => {
-  console.log(button, warningText, onConfirm)
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return (<>
