@@ -94,7 +94,25 @@ export const SearchBar = styled.input`
   font-size: 18px;
   min-width: 40%;
   max-width: 500px;
-  margin: var(--m);
+`;
+
+export const SearchContainer = styled.div`
+  display: flex;
+	flex-direction: row;
+	justify-content: center;
+  align-items: center;
+  min-width: 1000px;
+  margin: var(--m) 0;
+`;
+
+export const InputContainer = styled.div`
+  margin: 0 var(--s);
+  & > label {
+    margin: 0 var(--s) 0 0;
+  };
+  & > input, & > select {
+    margin: 0;
+  };
 `;
 
 export const SongsContainer = styled.div`

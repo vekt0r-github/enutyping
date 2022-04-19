@@ -6,10 +6,12 @@ import Loading from "@/components/modules/Loading";
 
 import { get, post } from "@/utils/functions";
 import { User, Config, Beatmapset, BeatmapMetadata } from "@/utils/types";
+import { SortFuncs } from "@/components/pages/SongSelect";
+import { withLabel } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Link, Line, BlackLine, SearchBar, SongsContainer } from '@/utils/styles';
+import { MainBox, Link, Line, BlackLine, SearchBar, SearchContainer, SongsContainer } from '@/utils/styles';
 
 type Props = {
   user: User | null,
@@ -35,7 +37,6 @@ const NewMapset = styled(MainBox)`
   }
 `;
 
-
 const EditorSongSelect = ({ user, config } : Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />
@@ -43,6 +44,10 @@ const EditorSongSelect = ({ user, config } : Props) => {
 
   const [mapsets, setMapsets] = useState<Beatmapset[]>();
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [sortLabel, setSortLabel] = useState<string>("Date Created");
+  const [sortReverse, setSortReverse] = useState<boolean>(true);
+  let sortFunc = SortFuncs[sortLabel];
+  if (sortReverse) sortFunc = sortFunc.reverse();
 
   // Scuffed code 2
 
@@ -60,6 +65,8 @@ const EditorSongSelect = ({ user, config } : Props) => {
       newDiff(),
     ],
   }));
+
+  filteredMapsets?.sort(sortFunc);
 
   const getBeatmapsets = () => {
     get("/api/beatmapsets", { search: user.id }).then((res) => {
@@ -79,7 +86,14 @@ const EditorSongSelect = ({ user, config } : Props) => {
   return (
     <>
       <h1>My Beatmapsets</h1>
-      <SearchBar value={searchQuery} placeholder={"Search for a mapset:"} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} />
+      <SearchContainer>
+        <SearchBar value={searchQuery} placeholder={"Search for a mapset:"} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} />
+        {withLabel(<select onChange={(e) => setSortLabel(e.target.value)}>
+          {Object.keys(SortFuncs).filter(x => x !== "Creator").map(k => <option value={k}>{k}</option>)}
+        </select>, "song-select-sort", "Sort by:")}
+        {withLabel(<input type="checkbox" checked={sortReverse} onChange={(e) => setSortReverse(e.target.checked)}></input>, 
+          "song-select-reverse", "Reverse?")}
+      </SearchContainer>
       <SongsContainer>
         {(filteredMapsets === undefined) ? <Loading /> :
           <>

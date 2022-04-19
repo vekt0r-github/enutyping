@@ -5,27 +5,53 @@ import Loading from "@/components/modules/Loading";
 
 import { get } from "@/utils/functions";
 import { Config, Beatmapset, Beatmap, BeatmapMetadata } from "@/utils/types";
+import { withLabel } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { SearchBar, SongsContainer } from '@/utils/styles';
+import { SearchBar, SearchContainer, SongsContainer } from '@/utils/styles';
 
-const SearchContainer = styled.div`
-  display: flex;
-	flex-direction: row;
-	justify-content: center;
-  align-items: center;
-  min-width: 1000px;
+const KPMInput = styled.input`
+  width: 60px;
 `;
 
 type Props = {
   config: Config,
 };
 
+interface SortFunc {
+  (a: Beatmapset, b: Beatmapset): number
+  reverse(): SortFunc
+}
+const makeSortFunc = (f: (a: Beatmapset, b: Beatmapset) => number): SortFunc => {
+  const sf = f as SortFunc;
+  sf.reverse = () => makeSortFunc((a, b) => -f(a, b));
+  return sf
+}
+
+const makeSortFuncForProp = (f: (set: Beatmapset) => string): SortFunc => {
+  return makeSortFunc((a, b) => {
+    const [pa, pb] = [f(a), f(b)].map(s => s.toLowerCase());
+    return +(pa > pb) || -(pb > pa)
+  });
+}
+
+export const SortFuncs: {[key: string]: SortFunc} = {
+  ["Date Created"]: makeSortFunc((a, b) => a.id - b.id),
+  Length: makeSortFunc((a, b) => a.duration - b.duration),
+  Title: makeSortFuncForProp(set => set.title),
+  Artist: makeSortFuncForProp(set => set.artist),
+  Creator: makeSortFuncForProp(set => set.owner.name),
+}
+
 const SongSelect = ({ config } : Props) => {
   const [mapsets, setMapsets] = useState<Beatmapset[]>();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [KPMUpperBound, setKPMUpperBound] = useState<number>();
+  const [sortLabel, setSortLabel] = useState<string>("Date Created");
+  const [sortReverse, setSortReverse] = useState<boolean>(true);
+  let sortFunc = SortFuncs[sortLabel];
+  if (sortReverse) sortFunc = sortFunc.reverse();
 
   const filteredMapsets = mapsets?.filter((set: Beatmapset) => {  
     const lowercaseQuery = searchQuery.toLowerCase();
@@ -34,7 +60,9 @@ const SongSelect = ({ config } : Props) => {
     return KPMUpperBound ? set.beatmaps.some((b: Beatmap | BeatmapMetadata) => (b.kpm && b.kpm < KPMUpperBound)) : true;
   });
 
-  useEffect(() => {
+  filteredMapsets?.sort(sortFunc);
+
+  const getBeatmapsets = () => {
     get("/api/beatmapsets").then((res) => {
       const beatmapsets = res.beatmapsets;
       if (beatmapsets && beatmapsets.length) {
@@ -43,6 +71,10 @@ const SongSelect = ({ config } : Props) => {
         setMapsets([]);
       }
     });
+  }
+
+  useEffect(() => {
+    getBeatmapsets();
   }, []);
   
   return (
@@ -50,12 +82,18 @@ const SongSelect = ({ config } : Props) => {
       <h1>Song Select</h1>
       <SearchContainer>
 				<SearchBar value={searchQuery} placeholder={"Search for a mapset:"} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} />
-        <span><b>Filter: KPM {"<"}</b></span>
-        <input type="number" value={KPMUpperBound} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setKPMUpperBound(e.target.value ? parseInt(e.target.value) : undefined)}/>
+        {withLabel(<KPMInput type="number" value={KPMUpperBound} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setKPMUpperBound(e.target.value ? parseInt(e.target.value) : undefined)}/>,
+          "song-select-filter", "Filter: KPM <")}
+        {withLabel(<select onChange={(e) => setSortLabel(e.target.value)}>
+          {Object.keys(SortFuncs).map(k => <option value={k}>{k}</option>)}
+        </select>, "song-select-sort", "Sort by:")}
+        {withLabel(<input type="checkbox" checked={sortReverse} onChange={(e) => setSortReverse(e.target.checked)}></input>, 
+          "song-select-reverse", "Reverse?")}
       </SearchContainer>
       <SongsContainer>
         {(filteredMapsets === undefined) ? <Loading /> :
           <MapsetList 
+            getBeatmapsets={getBeatmapsets}
             mapsets={filteredMapsets} 
             config={config} 
             link={(mapsetId, mapId) => `/play/${mapsetId}/${mapId??''}`} 
