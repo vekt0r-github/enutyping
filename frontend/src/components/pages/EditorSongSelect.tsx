@@ -8,6 +8,7 @@ import { get, post } from "@/utils/functions";
 import { User, Config, Beatmapset, BeatmapMetadata } from "@/utils/types";
 import { SortFuncs } from "@/components/pages/SongSelect";
 import { withLabel } from "@/utils/componentutils";
+import { processBeatmap, lengthOfBeatmap } from "@/utils/beatmaputils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -54,7 +55,8 @@ const EditorSongSelect = ({ user, config } : Props) => {
   const newDiff = () => ({
     id: "new",
     diffname: "Create New Difficulty",
-    kpm: 0
+    kpm: 0,
+    length: 0,
   });
 
   const filteredMapsets = mapsets?.filter((set: Beatmapset) => {  
@@ -72,6 +74,10 @@ const EditorSongSelect = ({ user, config } : Props) => {
     get("/api/beatmapsets", { search: user.id }).then((res) => {
       const beatmapsets = res.beatmapsets;
       if (beatmapsets && beatmapsets.length) {
+        beatmapsets.beatmaps.forEach((map: any) => {
+          processBeatmap(map, config);
+          map.length = lengthOfBeatmap(map);
+        });
         setMapsets(beatmapsets);
       } else {
         setMapsets([]);

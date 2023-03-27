@@ -271,3 +271,24 @@ export const withOverlapOffsets = (lineState : LineState, fontSize : number) : a
   });
   return lineState;
 }
+
+export const lengthOfBeatmap = (map: Beatmap) => {
+  if (map.endTime !== undefined) return map.endTime;
+  if (map.lines.length) return map.lines[map.lines.length - 1].endTime;
+  return 0;
+}
+
+export const formatTime = (time: number) => {
+  // time in ms
+  const ms = Math.round(time % 1000);
+  time = (time - ms) / 1000;
+  const ss = Math.round(time % 60);
+  time = (time - ss) / 60;
+  const mm = Math.round(time % 60);
+  time = (time - mm) / 60;
+  const hh = Math.round(time);
+  let tstr = `${ms}`.padStart(3, '0');
+  tstr = `${ss}:`.padStart(3, '0') + tstr;
+  tstr = `${mm}:`.padStart(3, '0') + tstr;
+  return hh ? `${hh}:` + tstr : tstr;
+}

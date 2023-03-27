@@ -100,6 +100,7 @@ export type BeatmapMetadata = {
   id: number | string;
   diffname: string;
   kpm: number;
+  length: number; // in ms; computed from content (which is secretly sent from backend)
 };
 
 export type Beatmap = {
@@ -111,6 +112,7 @@ export type Beatmap = {
   lines: LineData[]; // processed content
   endTime?: number; // also processed
   kpm?: number;
+  length?: number;
   scores?: Score[];
 };
 
@@ -123,7 +125,7 @@ export type Beatmapset = { // example
   yt_id: string;
   source?: string; // created from yt_id on backend
   preview_point: number;
-  duration: number;
+  duration: number; // in ms
   owner: User;
   beatmaps: (Beatmap | BeatmapMetadata)[];
 }

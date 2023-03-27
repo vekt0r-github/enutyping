@@ -1,6 +1,7 @@
 import React, { Fragment } from "react";
 
 import { LineData, TimingPoint } from "@/utils/types";
+import { formatTime } from "@/utils/beatmaputils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -108,23 +109,11 @@ const EditorScrollBar = ({ currTime, setCurrTime, lines, timingPoints, endTime, 
   };
   const calcPos = (time : number) => time / length;
 
-  const formattedTime = ((time : number) => {
-    const ms = Math.round(time % 1000);
-    time = (time - ms) / 1000;
-    const ss = Math.round(time % 60);
-    time = (time - ss) / 60;
-    const mm = Math.round(time % 60);
-    time = (time - mm) / 60;
-    const hh = Math.round(time);
-    let tstr = `${ms}`.padStart(3, '0');
-    tstr = `${ss}:`.padStart(3, '0') + tstr;
-    tstr = `${mm}:`.padStart(3, '0') + tstr;
-    return hh ? `${hh}:` + tstr : tstr;
-  })(currTime);
+  const formattedCurrTime = formatTime(currTime);
   
   return (
     <SliderOuterContainer>
-      <SliderLabel as="label" htmlFor="editor-timeline-slider-container">{formattedTime}</SliderLabel>
+      <SliderLabel as="label" htmlFor="editor-timeline-slider-container">{formattedCurrTime}</SliderLabel>
       <SliderContainer id="editor-timeline-slider-container">
         <SliderBody />
         <SliderFill

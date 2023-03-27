@@ -5,7 +5,7 @@ import ConfirmPopup from "@/components/modules/ConfirmPopup";
 
 import { Config, Beatmapset, Beatmap, BeatmapMetadata } from "@/utils/types";
 
-import { getArtist, getTitle } from "@/utils/beatmaputils";
+import { formatTime, getArtist, getTitle } from "@/utils/beatmaputils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -100,7 +100,7 @@ const MapsetList = ({ getBeatmapsets, mapsets, config, link } : Props) => {
   return (
     <>
       {mapsets?.map((mapset) => {
-        const {yt_id, preview_point, owner, beatmaps} = mapset;
+        const {yt_id, preview_point, owner, beatmaps, duration} = mapset; 
         const diffCount = beatmaps.filter((map: Beatmap | BeatmapMetadata) => (map.id !== "new")).length;
         return (
           <SongBox key={mapset.id}>
@@ -111,7 +111,7 @@ const MapsetList = ({ getBeatmapsets, mapsets, config, link } : Props) => {
                   <Line size='1.25em' as='h2'>{getTitle(mapset, config)}</Line>
                   <Line size='1em'>by {getArtist(mapset, config)}</Line>
                   <Line size='0.8em'>mapped by {owner.name}</Line>
-                  <Line size='0.8em'>{diffCount} difficult{diffCount !== 1 ? 'ies' : 'y'}</Line>
+                  <Line size='0.8em'>{formatTime(duration).slice(0, -4)} | {diffCount} difficult{diffCount !== 1 ? 'ies' : 'y'}</Line>
                 </Info>
               </SetLink>
               <DiffsContainer>
@@ -128,7 +128,7 @@ const MapsetList = ({ getBeatmapsets, mapsets, config, link } : Props) => {
 												<BlackLine size="1em">{map.diffname}</BlackLine>
 											</>
                       : <>
-                    		<Line size="1em">{map.diffname} ({Math.round(map.kpm ?? 0)} keys/min)</Line>
+                    		<Line size="1em">{map.diffname} ({formatTime(map.length!).slice(0, -4)}, {Math.round(map.kpm ?? 0)} keys/min)</Line>
 											</>}
                   </Diff>
                 )}

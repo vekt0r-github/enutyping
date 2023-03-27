@@ -6,6 +6,7 @@ import Loading from "@/components/modules/Loading";
 import { get } from "@/utils/functions";
 import { Config, Beatmapset, Beatmap, BeatmapMetadata } from "@/utils/types";
 import { withLabel } from "@/utils/componentutils";
+import { processBeatmap, lengthOfBeatmap } from "@/utils/beatmaputils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -53,7 +54,9 @@ const SongSelect = ({ config } : Props) => {
   let sortFunc = SortFuncs[sortLabel];
   if (sortReverse) sortFunc = sortFunc.reverse();
 
-  const filteredMapsets = mapsets?.filter((set: Beatmapset) => {  
+  const filteredMapsets = mapsets?.filter((set: Beatmapset) => {
+    return set.beatmaps.length > 0;
+  }).filter((set: Beatmapset) => {  
     const lowercaseQuery = searchQuery.toLowerCase();
     return JSON.stringify(set).toLowerCase().includes(lowercaseQuery);
   }).filter((set: Beatmapset) => {
@@ -67,6 +70,10 @@ const SongSelect = ({ config } : Props) => {
       const beatmapsets = res.beatmapsets;
       if (beatmapsets && beatmapsets.length) {
         setMapsets(beatmapsets);
+        beatmapsets.beatmaps.forEach((map: any) => {
+          processBeatmap(map, config);
+          map.length = lengthOfBeatmap(map);
+        });
       } else {
         setMapsets([]);
       }

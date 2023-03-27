@@ -299,6 +299,9 @@ const EditorDiffSelect = ({ user, config } : Props) => {
                   <Line size="3.5em" margin="-3px 12px 0 0" style={{'width': '40px'}}>+</Line>
                   <Line size="1em">Create New Difficulty</Line>
                 </NewButton>
+                {beatmaps.length === 0 ? 
+									<FormWarning size="1.5em" margin="0 0 0.5em 0">Note: This mapset is invisible to others until you create a difficulty.</FormWarning>
+                : null}
               </DiffsContainer>
             </>}
           </Overlay>
