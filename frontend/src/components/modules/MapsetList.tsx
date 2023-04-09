@@ -1,20 +1,21 @@
 import React, { useState }  from "react";
 
-import YTThumbnail from "@/components/modules/YTThumbnail";
 import ConfirmPopup from "@/components/modules/ConfirmPopup";
+import YTThumbnail from "@/components/modules/YTThumbnail";
 
 import { Config, Beatmapset, Beatmap, BeatmapMetadata } from "@/utils/types";
 
-import { getArtist, getTitle } from "@/utils/beatmaputils";
+import { getArtist, getTitle, getSetAvg } from "@/utils/beatmaputils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, SubBox, Link, Line, BlackLine } from '@/utils/styles';
+import { MainBox, SubBox, Link, Line, BlackLine, Thumbnail } from '@/utils/styles';
 import { httpDelete } from "@/utils/functions";
 
 type Props = {
   getBeatmapsets: () => void,
   mapsets: Beatmapset[],
+  includeCreate: boolean,
   config: Config,
   link: (mapsetId: number, mapId?: number|string) => string,
 };
@@ -36,13 +37,13 @@ const DiffsContainer = styled.div`
   z-index: 1;
 `;
 
-const Diff = styled(SubBox)<{color: string}>`
+const Diff = styled(SubBox)<{color: string, changeHeight?: boolean}>`
   background-color: ${({color}) => `var(--clr-${color})`};
   display: flex;
   align-items: center;
   width: 100%;
-  height: 30px;
-  padding: 1px var(--s);
+  height: 32px;
+  padding: var(--xs) var(--s);
   & + &, & + div { margin-top: var(--xs); } /* clap point stupid */
   box-sizing: border-box;
   transition: var(--tt-short);
@@ -50,6 +51,14 @@ const Diff = styled(SubBox)<{color: string}>`
   &:hover {
     background-color: ${({color}) => `var(--clr-${color}-light)`};
     cursor: pointer;
+    ${({changeHeight}) => changeHeight ? "height: auto;" : ''}
+    & > ${Line} {
+      overflow: visible;
+      white-space: normal;
+    }
+  }
+  & > ${Thumbnail} + ${Line} {
+    margin-left: var(--s);
   }
 `;
 
@@ -89,7 +98,7 @@ const Info = styled.div`
   min-width: 0;
 `;
 
-const MapsetList = ({ getBeatmapsets, mapsets, config, link } : Props) => {
+const MapsetList = ({ getBeatmapsets, mapsets, includeCreate, config, link } : Props) => {
   const handleDeleteBeatmapset = async (mapsetId: number) => {
     const res = await httpDelete(`/api/beatmapsets/${mapsetId}`);
     if (res && res.success) {
@@ -100,55 +109,59 @@ const MapsetList = ({ getBeatmapsets, mapsets, config, link } : Props) => {
   return (
     <>
       {mapsets?.map((mapset) => {
-        const {yt_id, preview_point, owner, beatmaps} = mapset;
-        const diffCount = beatmaps.filter((map: Beatmap | BeatmapMetadata) => (map.id !== "new")).length;
+        const {icon_url, owner, beatmaps} = mapset;
+        const mapCount = beatmaps.length;
         return (
           <SongBox key={mapset.id}>
             <HoverContainer>
               <SetLink as={Link} to={link(mapset.id)}>
-                <YTThumbnail yt_id={yt_id} width={120} height={90} />
+                <Thumbnail src={icon_url} width={120} height={90} />
                 <Info>
-                  <Line size='1.25em' as='h2'>{getTitle(mapset, config)}</Line>
-                  <Line size='1em'>by {getArtist(mapset, config)}</Line>
-                  <Line size='0.8em'>mapped by {owner.name}</Line>
-                  <Line size='0.8em'>{diffCount} difficult{diffCount !== 1 ? 'ies' : 'y'}</Line>
+                  <Line size='1.25em' as='h2'>{mapset.name}</Line>
+                  {/* <Line size='1em'>by {getArtist(mapset, config)}</Line> */}
+                  <Line size='1em'>{mapset.description}</Line>
+                  <Line size='0.8em'>created by {owner.name}</Line>
+                  <Line size='0.8em'>{mapCount} map{mapCount !== 1 ? 's' : ''} | Average keys/min: {Math.round(getSetAvg(mapset, 'kpm'))}</Line>
                 </Info>
               </SetLink>
               <DiffsContainer>
-                {/* This map_id === new, delete shit pattern code color is so scuffed wtf */}
                 {beatmaps.map((map) => 
                   <Diff
                     as={Link} 
                     to={link(mapset.id, map.id)} 
-                    color={(map.id === "new") ? "create" : "secondary"}
+                    color={"secondary"}
+                    changeHeight={true}
                     key={map.id}
                   >
-                    {(map.id === "new") ? <>
-												<BlackLine size="2.5em" margin="-1.5px 8px 0 0">+</BlackLine>
-												<BlackLine size="1em">{map.diffname}</BlackLine>
-											</>
-                      : <>
-                    		<Line size="1em">{map.diffname} ({Math.round(map.kpm ?? 0)} keys/min)</Line>
-											</>}
+                    <YTThumbnail yt_id={map.yt_id} width={32} height={24} />
+                    <Line size="1em">{getArtist(map, config)} - {getTitle(map, config)} [{map.diffname}] ({Math.round(map.kpm ?? 0)} kpm)</Line>
                   </Diff>
                 )}
-                {/* scuff code due to scuff code */
-                // now it's more scuffed yw
-                  beatmaps.map(b => b.id).includes("new") &&
+                {/* below only when in editor mode */}
+                {includeCreate ? <>
+                  <Diff
+                    as={Link} 
+                    to={link(mapset.id, "new")} 
+                    color={"create"}
+                    key={"new"}
+                  >
+                    <BlackLine size="2.5em" margin="-1.5px 8px 0 0">+</BlackLine>
+                    <BlackLine size="1em">Create New Beatmap in Group</BlackLine>
+                  </Diff>
                   <ConfirmPopup 
                     button={<Diff color="warn">
                     <BlackLine size="2.5em" margin="-8px 14px 0 5px">-</BlackLine>
-                      <BlackLine size="1em">Delete Beatmapset</BlackLine>
+                      <BlackLine size="1em">Delete Group</BlackLine>
                     </Diff>}
                     warningText={<>
                       <Line size="1.25em" margin="1.5em 0 0 0">Are you sure you want to delete this beatmapset:</Line>
-                      <Line size="1.75em" margin="1.5em 0 0 0">{mapset.artist} - {mapset.title}?</Line>
-                      <Line size="1.25em" margin="1.5em 0 0 0">All {diffCount} beatmap(s) will be deleted.</Line>
+                      <Line size="1.75em" margin="1.5em 0 0 0">{mapset.name}?</Line>
+                      <Line size="1.25em" margin="1.5em 0 0 0">All {mapCount} beatmap(s) will be deleted.</Line>
                       <Line size="1.25em" margin="1.5em 0 0 0">This action is permanent and cannot be undone.</Line>
                     </>}
                     onConfirm={() => handleDeleteBeatmapset(mapset.id)}
                   />
-                }
+                </> : null}
               </DiffsContainer>
             </HoverContainer>
           </SongBox>

@@ -23,9 +23,9 @@ def login_required(f):
         return f(user['id'], *args, **kwargs)
     return wrapper
 
-def process_beatmapset(beatmapset):
-    source = f"https://www.youtube.com/watch?v={beatmapset['yt_id']}"
-    return { **beatmapset, 'source' : source }
+def process_beatmap(beatmap):
+    source = f"https://www.youtube.com/watch?v={beatmap['yt_id']}"
+    return { **beatmap, 'source' : source }
 
 @api.route('/me/changename', methods=['POST'])
 @login_required
@@ -90,11 +90,13 @@ def get_beatmap_with_set_and_scores(beatmap_id):
             .order_by(Score.score.desc()).limit(MAX_NUM_SCORES).all()
     scores_result = scores_schema.dump(scores)
     beatmapset_result = beatmapset_schema.dump(beatmap.beatmapset)
-    return { **beatmap_result, 'scores' : scores_result, 'beatmapset' : process_beatmapset(beatmapset_result) }
+    return { **process_beatmap(beatmap_result), 'scores' : scores_result, 'beatmapset' : beatmapset_result }
 
 @api.route('/beatmaps/<int:beatmap_id>', methods=['PUT'])
 @login_required
 def update_beatmap(user_id, beatmap_id):
+    # TODO: can actually change metadata after creation now!
+    # TODO: do we need to run process_beatmap on res
     '''
     Data
     ----
@@ -156,6 +158,13 @@ def add_beatmap(user_id):
     Data
     ----
     beatmapset_id
+    artist
+    title
+    artist_original
+    title_original
+    yt_id
+    preview_point
+    duration
     diffname
     content
     kpm
@@ -170,6 +179,9 @@ def add_beatmap(user_id):
 
     bms_id, diffname, content, kpm = itemgetter('beatmapset_id', 'diffname', 'content', 'kpm')(data)
 
+    # artist, title, artist_original, title_original, yt_id, preview_point, duration = \
+    #     itemgetter('artist', 'title', 'artist_original', 'title_original', 'yt_id', 'preview_point', 'duration')(data)
+
     exists_subq = Beatmapset.query.filter(
             Beatmapset.owner_id == user_id,
             Beatmapset.id == bms_id).exists()
@@ -177,7 +189,7 @@ def add_beatmap(user_id):
     if not exists:
         return 'Beatmapset does not exist or you do not own it!', 400
 
-    beatmap = Beatmap(beatmapset_id=bms_id, diffname=diffname, content=content, kpm=kpm)
+    beatmap = Beatmap(**data)
     db_session.add(beatmap)
     db_session.commit()
 
@@ -186,20 +198,21 @@ def add_beatmap(user_id):
 
 @api.route('/beatmapsets/<int:beatmapset_id>', methods=['GET'])
 def get_beatmapset_with_diffs_and_scores(beatmapset_id):
+    # TODO: do we need to run process_beatmap on result
     beatmapset = Beatmapset.query.get(beatmapset_id)
     if beatmapset is None:
         abort(404, description = 'Beatmapset not found')
     beatmapset_result = beatmapset_schema.dump(beatmapset)
     beatmaps_result = beatmaps_schema.dump(beatmapset.beatmaps)
-    return { **process_beatmapset(beatmapset_result), 'beatmaps': beatmaps_result }
+    # list(map(process_beatmap, beatmaps_result))
+    return { **beatmapset_result, 'beatmaps': beatmaps_result }
 
 @api.route('/beatmapsets', methods=['GET'])
 def get_beatmapset_list():
     search_query = request.args.get('search', '')
     owner_result = Beatmapset.query.filter(Beatmapset.owner_id.ilike('%' + search_query + '%')).all()
     # https://softwareengineering.stackexchange.com/questions/286293/whats-the-best-way-to-return-an-array-as-a-response-in-a-restful-api
-    results = beatmapsets_schema.dump(owner_result)
-    return { 'beatmapsets': list(map(process_beatmapset, results)) }
+    return { 'beatmapsets': list(beatmapsets_schema.dump(owner_result)) }
 
 @api.route('/beatmapsets', methods=['POST'])
 @login_required
@@ -207,13 +220,9 @@ def add_beatmapset(user_id):
     '''
     Data
     ----
-    artist
-    title
-    artist_original
-    title_original
-    yt_id
-    preview_point
-    duration
+    name
+    name_original
+    icon_url
     '''
     json_data = request.get_json()
     if not json_data:
@@ -224,20 +233,10 @@ def add_beatmapset(user_id):
     except ValidationError as err:
         return err.messages, 400
 
-    artist, title, artist_original, title_original, yt_id, preview_point, duration = \
-        itemgetter('artist', 'title', 'artist_original', 'title_original', 'yt_id', 'preview_point', 'duration')(data)
-
     owner = User.query.get(user_id)
     assert owner is not None
 
-    new_bmset = Beatmapset(artist=artist, \
-                           title=title, \
-                           artist_original=artist_original, \
-                           title_original=title_original, \
-                           yt_id=yt_id, \
-                           preview_point=preview_point, \
-                           owner=owner, \
-                           duration=duration)
+    new_bmset = Beatmapset(**data)
 
     db_session.add(new_bmset)
     db_session.commit()

@@ -44,27 +44,36 @@ const EditorSongSelect = ({ user, config } : Props) => {
 
   const [mapsets, setMapsets] = useState<Beatmapset[]>();
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [sortLabel, setSortLabel] = useState<string>("Date Created");
+  const [sortLabel, setSortLabel] = useState<keyof typeof SortFuncs>("Date Created");
   const [sortReverse, setSortReverse] = useState<boolean>(true);
   let sortFunc = SortFuncs[sortLabel];
   if (sortReverse) sortFunc = sortFunc.reverse();
 
   // Scuffed code 2
 
-  const newDiff = () => ({
-    id: "new",
-    diffname: "Create New Difficulty",
-    kpm: 0
-  });
+  // const newDiff = () : BeatmapMetadata => ({
+  //   id: "new",
+  //   artist: ;
+  //   title: ;
+  //   artist_original: ;
+  //   title_original: ;
+  //   yt_id: '';
+  //   source?: ; // created from yt_id on backend
+  //   preview_point: ;
+  //   duration: ;
+  //   diffname: "Create new beatmap in this group",
+  //   kpm: 0
+  // });
 
   const filteredMapsets = mapsets?.filter((set: Beatmapset) => {  
     const lowercaseQuery = searchQuery.toLowerCase();
     return JSON.stringify(set).toLowerCase().includes(lowercaseQuery);
-  }).map((set: Beatmapset) => ({ ...set,
-    beatmaps: [ ...set.beatmaps,
-      newDiff(),
-    ],
-  }));
+  })
+  // .map((set: Beatmapset) => ({ ...set,
+  //   beatmaps: [ ...set.beatmaps,
+  //     newDiff(),
+  //   ],
+  // }));
 
   filteredMapsets?.sort(sortFunc);
 
@@ -88,7 +97,7 @@ const EditorSongSelect = ({ user, config } : Props) => {
       <h1>My Beatmapsets</h1>
       <SearchContainer>
         <SearchBar value={searchQuery} placeholder={"Search for a mapset:"} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} />
-        {withLabel(<select onChange={(e) => setSortLabel(e.target.value)}>
+        {withLabel(<select onChange={(e) => setSortLabel(e.target.value as keyof typeof SortFuncs)}>
           {Object.keys(SortFuncs).filter(x => x !== "Creator").map(k => <option value={k}>{k}</option>)}
         </select>, "song-select-sort", "Sort by:")}
         {withLabel(<input type="checkbox" checked={sortReverse} onChange={(e) => setSortReverse(e.target.checked)}></input>, 
@@ -103,7 +112,8 @@ const EditorSongSelect = ({ user, config } : Props) => {
             </NewMapset>
             <MapsetList 
               getBeatmapsets={getBeatmapsets}
-              mapsets={filteredMapsets} 
+              mapsets={filteredMapsets}
+              includeCreate={true}
               config={config} 
               link={(mapsetId, mapId) => `/edit/${mapsetId}/${mapId??''}`} 
             />

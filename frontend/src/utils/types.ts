@@ -97,24 +97,7 @@ export type TimingPoint = {
 };
 
 export type BeatmapMetadata = {
-  id: number | string;
-  diffname: string;
-  kpm: number;
-};
-
-export type Beatmap = {
-  id: number;
-  beatmapset: Beatmapset;
-  diffname: string;
-  content: string;
-  timingPoints: TimingPoint[];
-  lines: LineData[]; // processed content
-  endTime?: number; // also processed
-  kpm?: number;
-  scores?: Score[];
-};
-
-export type Beatmapset = { // example
+  // TODO populate this from the backend
   id: number;
   artist: string;
   title: string;
@@ -124,8 +107,26 @@ export type Beatmapset = { // example
   source?: string; // created from yt_id on backend
   preview_point: number;
   duration: number;
+  diffname: string;
+  kpm?: number;
+};
+
+export type Beatmap = BeatmapMetadata & {
+  beatmapset: Beatmapset;
+  content: string;
+  timingPoints: TimingPoint[];
+  lines: LineData[]; // processed content
+  endTime?: number; // also processed
+  scores?: Score[];
+};
+
+export type Beatmapset = { // example
+  id: number;
   owner: User;
-  beatmaps: (Beatmap | BeatmapMetadata)[];
+  name: string;
+  description: string;
+  icon_url: string;
+  beatmaps: BeatmapMetadata[];
 }
 
 export enum GameStatus { 

@@ -31,31 +31,32 @@ class Beatmap(Base):
     __tablename__ = 'beatmaps'
     id = Column(Integer, primary_key=True)
     beatmapset_id = Column(Integer, ForeignKey('beatmapsets.id'))
+    yt_id = Column(String(15))
+    artist = Column(String(100))
+    title = Column(String(100))
+    artist_original = Column(String(100))
+    title_original = Column(String(100))
     diffname = Column(String(50))
+    preview_point = Column(Integer)
+    duration = Column(Integer)
+
     scores = relationship('Score', back_populates='beatmap')
     content = deferred(Column(UnicodeText))
 
     beatmapset = relationship('Beatmapset', back_populates='beatmaps')
     kpm = Column(Float)
 
-    def __init__(self, beatmapset_id, diffname, content, kpm, id = None):
-        self.beatmapset_id = beatmapset_id
-        self.diffname = diffname
-        self.content = content
-        self.kpm = kpm
+    def __init__(self, id = None, **kwargs):
+        super(Beatmap, self).__init__(**kwargs)
         self.id = id
 
 class Beatmapset(Base):
     __tablename__ = 'beatmapsets'
     id = Column(Integer, primary_key=True)
     owner_id = Column(String(69), ForeignKey('users.id'))
-    artist = Column(String(100))
-    title = Column(String(100))
-    artist_original = Column(String(100))
-    title_original = Column(String(100))
-    yt_id = Column(String(69))
-    preview_point = Column(Integer)
-    duration = Column(Integer)
+    name = Column(String(60))
+    description = Column(String(140))
+    icon_url = Column(String(100))
 
     owner = relationship('User', back_populates='beatmapsets')
     beatmaps = relationship('Beatmap', back_populates='beatmapset', cascade="all, delete, delete-orphan")
@@ -94,79 +95,92 @@ def init_db():
         User(id=1234, name='ppfarmer', avatar_url='https://avatars.githubusercontent.com/u/34809632'),
         User(id=4321, name='songenjoyer', avatar_url='https://avatars.githubusercontent.com/u/1700346'),
         User(id="8484892osu", name='vekt0r', avatar_url='https://a.ppy.sh/8484892?1594621695.jpeg'),
-        # TODO: Add durations to the beatmapsets, choose what unit you want but make it consistent
         Beatmapset(id=727, 
             owner_id=1234,
+            name="dev test map collection also did you know",
+            description="杉並睦実は直枝理樹の同級生の一人である。睦実は、肩まである深いブルーの髪を大きな黄色いリボンで少し後ろに引き、四角い前髪を額にかけ、茶黄色の瞳をしており、身長は直枝理樹と同じくらいである。",
+            icon_url="https://cdn.discordapp.com/attachments/963645781112406059/1094859695203819670/nyaruhodo_remake.png"),
+        Beatmap(id=727, \
+            beatmapset_id=727, \
             artist='Nanahira', \
             title='Nanahira singing from the window to a fucking van', \
             artist_original='ななひら', \
             title_original='Nanahira singing from the window to a fucking van', \
             yt_id='9USxPiJzdv0', \
             preview_point=0, \
-            duration=78000),
-        Beatmap(id=727, \
-            beatmapset_id=727, \
+            duration=78000, \
             diffname="sampai_'s ear damage", \
             content=content,
             kpm=401),
         Beatmapset(id=1337, 
             owner_id="8484892osu",
+            name="flos",
+            description="これはflos",
+            icon_url="http://img.youtube.com/vi/4muYzftomAE/default.jpg"),
+        Beatmap(id=1337, \
+            beatmapset_id=1337, \
             artist='Nekomata Okayu', \
             title='flos', \
             artist_original='猫又おかゆ', \
             title_original='flos', \
             yt_id='4muYzftomAE', \
             preview_point=0, \
-            duration=280000),
-        Beatmap(id=1337, \
-            beatmapset_id=1337, \
+            duration=280000, \
             diffname="Lythrum", \
             content=flos_content,
             kpm=273),
-#        Beatmapset(id=272, 
-#            owner_id=4321,
-#            artist='YOASOBI', \
-#            title='Yoru ni Kakeru', \
-#            artist_original='YOASOBI', \
-#            title_original='夜に駆ける', \
-#            yt_id='xtfXl7TZTac', \
-#            preview_point=0, \
-#            duration=261000),
-#        Beatmap(id=272, \
-#            beatmapset_id=272, \
-#            diffname="夜にこｃｋ", \
-#            content=yorunicontent,
-#            kpm=381),
-#        Beatmap(id=2727, \
-#            beatmapset_id=272, \
-#            diffname="dev map ん～", \
-#            content=test_map_content,
-#            kpm=189),
-        Beatmapset(id=1338, 
-            owner_id="8484892osu",
-            artist='Minato Aqua & Nekomata Okayu', \
-            title='Turing Love', \
-            artist_original='湊あくあ&猫又おかゆ', \
-            title_original='チューリングラブ', \
-            yt_id='0OtNQEpSeIA', \
-            preview_point=0, \
-            duration=220000),
-        Beatmap(id=2729, \
-            beatmapset_id=1338, \
-            diffname="Complete", \
-            content=turing_content,
-            kpm=427),
+       Beatmap(id=272, \
+           beatmapset_id=727, \
+           artist='YOASOBI', \
+           title='Yoru ni Kakeru', \
+           artist_original='YOASOBI', \
+           title_original='夜に駆ける', \
+           yt_id='xtfXl7TZTac', \
+           preview_point=0, \
+           duration=261000, \
+           diffname="あ", \
+           content=yorunicontent,
+           kpm=381),
+       Beatmap(id=2727, \
+           beatmapset_id=727, \
+           artist='YOASOBI', \
+           title='Yoru ni Kakeru', \
+           artist_original='YOASOBI', \
+           title_original='夜に駆ける', \
+           yt_id='xtfXl7TZTac', \
+           preview_point=0, \
+           duration=261000, \
+           diffname="dev map", \
+           content=test_map_content,
+           kpm=189),
+        # Beatmapset(id=1338, 
+        #     owner_id="8484892osu",
+        #     artist='Minato Aqua & Nekomata Okayu', \
+        #     title='Turing Love', \
+        #     artist_original='湊あくあ&猫又おかゆ', \
+        #     title_original='チューリングラブ', \
+        #     yt_id='0OtNQEpSeIA', \
+        #     preview_point=0, \
+        #     duration=220000),
+        # Beatmap(id=2729, \
+        #     beatmapset_id=1338, \
+        #     diffname="Complete", \
+        #     content=turing_content,
+        #     kpm=427),
         Beatmapset(id=6789, \
             owner_id="1234", \
+            name="Bo en - My Time",
+            description="no *your* time",
+            icon_url="http://img.youtube.com/vi/erzgjfU271g/default.jpg"),
+        Beatmap(id=2730, \
+            beatmapset_id=6789, \
             artist='Bo en', \
             title='My Time', \
             artist_original='Bo en', \
             title_original='My Time', \
             yt_id='erzgjfU271g', \
             preview_point=0, \
-            duration=105000),
-        Beatmap(id=2730, \
-            beatmapset_id=6789, \
+            duration=105000, \
             diffname="sampai_'s Fun Time", \
             content=my_time_content,
             kpm=196),
@@ -336,9 +350,10 @@ S,10000,てぃ
 S,11000,えぇぇぇ
 S,13000,ぁぇぃぅぇぉぁぉ
 S,17000,んなってっしゃじょん
-L,20000,ヵゕ
-S,20000,ヵゕ
-E,21000
+L,20000,メロディーヵゕ
+S,20000,めろでぃー
+S,22000,ヵゕ
+E,23000
 '''
 
 content = '''ishpytoing file format v1

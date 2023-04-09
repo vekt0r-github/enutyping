@@ -285,7 +285,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
 							<p>KPM: {KPM}</p>
 						</StatBox>
 						<GameVideo
-							yt_id={beatmap.beatmapset.yt_id}
+							yt_id={beatmap.yt_id}
 							status={status}
 							currTime={adjustedTime}
 							startGame={() => startGame(totalOffset)}

@@ -1,4 +1,4 @@
-import { Beatmap, Beatmapset, LineData, defaultConfig, Config, GameState, Kana, LineState, TimingPoint, KanaState } from '@/utils/types';
+import { Beatmap, Beatmapset, LineData, defaultConfig, Config, GameState, Kana, LineState, TimingPoint, KanaState, BeatmapMetadata } from '@/utils/types';
 import { computeMinKeypresses, parseKana } from '@/utils/kana';
 import getTextWidth from "@/utils/widths";
 
@@ -53,7 +53,7 @@ export const processBeatmap = (beatmap : Beatmap, config: Config) => {
     }
   }
   if (endTime === undefined && line) {
-    line.endTime = beatmap.beatmapset.duration;
+    line.endTime = beatmap.duration;
     lines.push(line);
   } 
   beatmap.lines = lines;
@@ -87,11 +87,18 @@ export const writeBeatmap = (beatmap : Beatmap) => {
   return content.join('\n');
 };
 
-export const getArtist = (mapset: Beatmapset, config: Config) => 
-  mapset[`artist${config.localizeMetadata ? '' : '_original'}`];
+type KeysMatching<T, V> = {[K in keyof T]-?: T[K] extends V ? K : never}[keyof T];
+export const getSetAvg = (mapset: Beatmapset, prop: KeysMatching<BeatmapMetadata, number | undefined>) => {
+  const vals = mapset.beatmaps.map((map) => map[prop]);
+  const cleanVals : number[] = vals.filter(x => x !== undefined) as number[]
+  return cleanVals.reduce((a, b) => a + b) / vals.length;
+}
 
-export const getTitle = (mapset: Beatmapset, config: Config) => 
-  mapset[`title${config.localizeMetadata ? '' : '_original'}`];
+export const getArtist = (map: BeatmapMetadata, config: Config) => 
+  map[`artist${config.localizeMetadata ? '' : '_original'}`];
+
+export const getTitle = (map: BeatmapMetadata, config: Config) => 
+  map[`title${config.localizeMetadata ? '' : '_original'}`];
 
 // -1 to lines.length
 export const timeToLineIndex = (lines: LineData[], time: number) => {

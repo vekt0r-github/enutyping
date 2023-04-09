@@ -6,6 +6,7 @@ import Loading from "@/components/modules/Loading";
 import { get } from "@/utils/functions";
 import { Config, Beatmapset, Beatmap, BeatmapMetadata } from "@/utils/types";
 import { withLabel } from "@/utils/componentutils";
+import { getSetAvg } from "@/utils/beatmaputils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -36,11 +37,11 @@ const makeSortFuncForProp = (f: (set: Beatmapset) => string): SortFunc => {
   });
 }
 
-export const SortFuncs: {[key: string]: SortFunc} = {
+export const SortFuncs = {
   ["Date Created"]: makeSortFunc((a, b) => a.id - b.id),
-  Length: makeSortFunc((a, b) => a.duration - b.duration),
-  Title: makeSortFuncForProp(set => set.title),
-  Artist: makeSortFuncForProp(set => set.artist),
+  ["Average Length"]: makeSortFunc((a, b) => getSetAvg(a, 'duration') - getSetAvg(b, 'duration')),
+  ["Collection Name"]: makeSortFuncForProp(set => set.name),
+  // Artist: makeSortFuncForProp(set => set.artist),
   Creator: makeSortFuncForProp(set => set.owner.name),
 }
 
@@ -48,7 +49,7 @@ const SongSelect = ({ config } : Props) => {
   const [mapsets, setMapsets] = useState<Beatmapset[]>();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [KPMUpperBound, setKPMUpperBound] = useState<number>();
-  const [sortLabel, setSortLabel] = useState<string>("Date Created");
+  const [sortLabel, setSortLabel] = useState<keyof typeof SortFuncs>("Date Created");
   const [sortReverse, setSortReverse] = useState<boolean>(true);
   let sortFunc = SortFuncs[sortLabel];
   if (sortReverse) sortFunc = sortFunc.reverse();
@@ -57,7 +58,7 @@ const SongSelect = ({ config } : Props) => {
     const lowercaseQuery = searchQuery.toLowerCase();
     return JSON.stringify(set).toLowerCase().includes(lowercaseQuery);
   }).filter((set: Beatmapset) => {
-    return KPMUpperBound ? set.beatmaps.some((b: Beatmap | BeatmapMetadata) => (b.kpm && b.kpm < KPMUpperBound)) : true;
+    return KPMUpperBound ? set.beatmaps.some((b: BeatmapMetadata) => (b.kpm && b.kpm < KPMUpperBound)) : true;
   });
 
   filteredMapsets?.sort(sortFunc);
@@ -84,7 +85,7 @@ const SongSelect = ({ config } : Props) => {
 				<SearchBar value={searchQuery} placeholder={"Search for a mapset:"} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} />
         {withLabel(<KPMInput type="number" value={KPMUpperBound} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setKPMUpperBound(e.target.value ? parseInt(e.target.value) : undefined)}/>,
           "song-select-filter", "Filter: KPM <")}
-        {withLabel(<select onChange={(e) => setSortLabel(e.target.value)}>
+        {withLabel(<select onChange={(e) => setSortLabel(e.target.value as keyof typeof SortFuncs)}>
           {Object.keys(SortFuncs).map(k => <option value={k}>{k}</option>)}
         </select>, "song-select-sort", "Sort by:")}
         {withLabel(<input type="checkbox" checked={sortReverse} onChange={(e) => setSortReverse(e.target.checked)}></input>, 
@@ -94,8 +95,9 @@ const SongSelect = ({ config } : Props) => {
         {(filteredMapsets === undefined) ? <Loading /> :
           <MapsetList 
             getBeatmapsets={getBeatmapsets}
-            mapsets={filteredMapsets} 
-            config={config} 
+            mapsets={filteredMapsets}
+            includeCreate={false}
+            config={config}
             link={(mapsetId, mapId) => `/play/${mapsetId}/${mapId??''}`} 
           />}
       </SongsContainer>

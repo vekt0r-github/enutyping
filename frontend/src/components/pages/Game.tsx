@@ -70,9 +70,9 @@ const Game = ({ user, config } : Props) => {
   const [map, setMap] = useState<Beatmap | null>();
   if (map === undefined) { return <Loading />; }
   if (map === null) { return <NotFound />; }
-  const {beatmapset, diffname, lines, kpm, scores} = map;
-  const {yt_id, source, preview_point, owner, beatmaps} = beatmapset;
-  const [artist, title] = [getArtist(beatmapset, config), getTitle(beatmapset, config)];
+  const {beatmapset, yt_id, source, preview_point, diffname, lines, kpm, scores} = map;
+  const {owner, beatmaps} = beatmapset;
+  const [artist, title] = map ? [getArtist(map, config), getTitle(map, config)] : [undefined, undefined];
 
 
   return (
@@ -81,8 +81,8 @@ const Game = ({ user, config } : Props) => {
       <GamePageContainer>
         <Sidebar>
           <MapInfoDisplay 
-            title={title}
-            artist={artist}
+            title={title ?? ''}
+            artist={artist ?? ''}
             source={source!}
             diffname={diffname}
             kpm={kpm}

@@ -1,23 +1,13 @@
 import React from "react";
 
-import styled from 'styled-components';
 import '@/utils/styles.css';
-import {} from '@/utils/styles';
+import { Thumbnail } from '@/utils/styles';
 
 type Props = {
   yt_id: string,
   width: number, // in px
   height: number, 
 };
-
-const Thumbnail = styled.img<{
-  width: number,
-  height: number,
-}>`
-  width: ${(props) => props.width}px;
-  height: ${(props) => props.height}px;
-  object-fit: contain;
-`;
 
 const YTThumbnail = ({ yt_id, width, height } : Props) => {
   let quality = ""; 
@@ -26,7 +16,7 @@ const YTThumbnail = ({ yt_id, width, height } : Props) => {
   }
   return (
     <Thumbnail 
-      src={`http://img.youtube.com/vi/${yt_id}/${quality}default.jpg`}
+      src={yt_id ? `http://img.youtube.com/vi/${yt_id}/${quality}default.jpg` : ''}
       width={width}
       height={height}
     />
