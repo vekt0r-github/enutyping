@@ -242,13 +242,12 @@ def add_beatmapset(user_id):
     owner = User.query.get(user_id)
     assert owner is not None
 
-    print(data)
-
-    new_bmset = Beatmapset(**data)
-
+    new_bmset = Beatmapset(**data, owner_id=user_id)
     db_session.add(new_bmset)
     db_session.commit()
-    res = beatmapset_schema.dump(Beatmapset.query.get(new_bmset.id))
+# Beatmapset.query.get(new_bmset.id)
+    res = beatmapset_schema.dump(new_bmset)
+    print(res)
     return res, 201
 
 @api.route('/beatmapsets/<int:beatmapset_id>', methods=['DELETE'])

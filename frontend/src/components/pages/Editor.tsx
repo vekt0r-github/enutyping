@@ -56,12 +56,18 @@ const Editor = ({ user, config } : Props) => {
   const copyOf = searchParams.get('copy');
 
   const [state, setState] = useState<BeatmapState>({ status: LOADING });
-  const processAndLoad = (beatmap : (oldBeatmap?: Beatmap) => Beatmap | undefined, saved = false) => {
+  /**
+   * applies beatmapTransform to state and updates lastSavedBeatmap
+   * @param beatmapTransform function from old beatmap state to new
+   * @param saved whether map has just been saved to database
+   */
+  const processAndLoad = (beatmapTransform : (oldBeatmap?: Beatmap) => Beatmap | undefined, saved = false) => {
     setState((oldState) => {
-      const newBeatmap = beatmap(oldState.beatmap);
+      const newBeatmap = beatmapTransform(oldState.beatmap);
       let newBeatmapCopy : Beatmap | undefined;
       if (saved) { newBeatmapCopy = newBeatmap && {...newBeatmap}; }
       newBeatmap && processBeatmap(newBeatmap, config); // mutates
+      console.log(newBeatmap)
       return { status: LOADED, beatmap: newBeatmap, lastSavedBeatmap: newBeatmapCopy ?? oldState.lastSavedBeatmap };
     });
   };
@@ -79,6 +85,7 @@ const Editor = ({ user, config } : Props) => {
     }
   };
   
+  // handle saving map when status is "SUBMITTING"
   useEffect(() => {
     if (state.status !== SUBMITTING) { return; }
     if (!beatmap) { return; }
@@ -91,51 +98,25 @@ const Editor = ({ user, config } : Props) => {
     put(`/api/beatmaps/${mapId}`, data)
       .then((beatmapRes) => {
         // do something to indicate map is saved
+        // unsure whether should use current state value or returned value
         processAndLoad((beatmap) => beatmap, true);
       })
       .catch((err) => console.log(err));
   }, [state]);
   
+  // handle loading map
   useEffect(() => {
-    if (!isNewMap || copyOf) { // load existing diff
-      const loadMapId = isNewMap ? copyOf : mapId;
-      get(`/api/beatmaps/${loadMapId}`).then((beatmap) => {
-        if (!beatmap || !beatmap.id || beatmap.beatmapset.id != mapsetId) {
-          setState({ status: INVALID }); // map not found or param is wrong
-        } else if (beatmap.beatmapset.owner.id !== user.id) {
-          setState({ status: NO_PERMS }); // user doesn't own mapset
-        } else {
-          if (isNewMap) {
-            beatmap = { ...beatmap,
-              id: -1,
-              diffname: "",
-            };
-          }
-          processAndLoad(() => beatmap, true);
-        }
-      }).catch((err) => {
+    get(`/api/beatmaps/${mapId}`).then((beatmap) => {
+      if (!beatmap || !beatmap.id || beatmap.beatmapset.id != mapsetId) {
         setState({ status: INVALID }); // map not found or param is wrong
-      });
-    } else { // create actual new diff
-      get(`/api/beatmapsets/${mapsetId}`).then((beatmapset) => {
-        if (!beatmapset || !beatmapset.id) {
-          setState({ status: INVALID }); // mapset not found
-        } else if (beatmapset.owner.id !== user.id) {
-          setState({ status: NO_PERMS }); // user doesn't own mapset
-        } else {
-          processAndLoad(() => ({
-            id: -1,
-            beatmapset: beatmapset,
-            diffname: "",
-            content: "ishpytoing file format v1\n\n[TimingPoints]\n\n\n[Lines]\n",
-            timingPoints: [],
-            lines: [],
-          }), true);
-        }
-      }).catch((err) => {
-        setState({ status: INVALID }); // map not found or param is wrong
-      });
-    }
+      } else if (beatmap.beatmapset.owner.id !== user.id) {
+        setState({ status: NO_PERMS }); // user doesn't own mapset
+      } else {
+        processAndLoad(() => beatmap, true);
+      }
+    }).catch((err) => {
+      setState({ status: INVALID }); // map not found or param is wrong
+    });
   }, []);
 
   useEffect(() => {
@@ -170,32 +151,31 @@ const Editor = ({ user, config } : Props) => {
           <MapInfoDisplay 
             {...beatmap}
           />
-          <p>Change diffname: <DiffName
-                value={diffname}
-                onChange={(e : React.ChangeEvent<HTMLInputElement>) => {
-                  setDiffname(e.target.value);
-                }}
-              /></p>
-          {!isNewMap ?
-            <>
-              <NewButton as={Link} to={`/edit/${mapsetId}/new?copy=${mapId}`}>
-                <Line size="3.5em" margin="-3px 12px 0 0" style={{'width': '40px'}}>+</Line>
-                <Line size="1em" margin="0">Create a Copy</Line>
-              </NewButton>
-              <ConfirmPopup 
-                button={<DeleteButton>
-                  <Line size="3.5em" margin="-12px 0px 0 0" style={{'width': '40px'}}>-</Line>
-                  <Line size="1em" margin="0">Delete Beatmap</Line>
-                </DeleteButton>}
-                warningText={<>
-                  <Line size="1.25em" margin="1.5em 0 0 0">Are you sure you want to delete this beatmap:</Line>
-                  <Line size="1.75em" margin="1.5em">{artist} - {title} [{diffname}]?</Line>
-                  <Line size="1.25em" margin="0">This action is permanent and cannot be undone.</Line>
-                </>}
-                onConfirm={handleDeleteBeatmap}
-              />
-            </>
-          : null }
+          <p>
+            Change diffname:
+            <DiffName
+              value={diffname}
+              onChange={(e : React.ChangeEvent<HTMLInputElement>) => {
+                setDiffname(e.target.value);
+              }}
+            />
+          </p>
+          <NewButton as={Link} to={`/edit/${mapsetId}/new?copy=${mapId}`}>
+            <Line size="3.5em" margin="-3px 12px 0 0" style={{'width': '40px'}}>+</Line>
+            <Line size="1em" margin="0">Create a Copy</Line>
+          </NewButton>
+          <ConfirmPopup 
+            button={<DeleteButton>
+              <Line size="3.5em" margin="-12px 0px 0 0" style={{'width': '40px'}}>-</Line>
+              <Line size="1em" margin="0">Delete Beatmap</Line>
+            </DeleteButton>}
+            warningText={<>
+              <Line size="1.25em" margin="1.5em 0 0 0">Are you sure you want to delete this beatmap:</Line>
+              <Line size="1.75em" margin="1.5em">{artist} - {title} [{diffname}]?</Line>
+              <Line size="1.25em" margin="0">This action is permanent and cannot be undone.</Line>
+            </>}
+            onConfirm={handleDeleteBeatmap}
+          />
         </Sidebar>
         <EditorArea
           user={user}

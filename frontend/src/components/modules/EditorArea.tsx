@@ -247,7 +247,7 @@ const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap, 
           startTime: time,
           endTime: currLine ? currLine.endTime :
             (nextLine ? nextLine.startTime : 
-              (beatmap.endTime ?? beatmap.beatmapset.duration)),
+              (beatmap.endTime ?? beatmap.duration)),
           lyric: editingState.content!,
           syllables: syllables,
         });
@@ -431,7 +431,7 @@ const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap, 
               let newTime = Math.max(Math.round(gtob(divisor, beat - 1)), 0);
               setSeekingTo(newTime);
             } else { // seek "next"
-              let newTime = Math.min(Math.round(gtob(divisor, beat + 1)), beatmap.beatmapset.duration);
+              let newTime = Math.min(Math.round(gtob(divisor, beat + 1)), beatmap.duration);
               setSeekingTo(newTime);
             }
           }
@@ -443,7 +443,7 @@ const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap, 
             let newTime = Math.max(time - ms, 0);
             setSeekingTo(newTime);
           } else { // seek next
-            let newTime = Math.min(time + ms, beatmap.beatmapset.duration);
+            let newTime = Math.min(time + ms, beatmap.duration);
             setSeekingTo(newTime);
           }
         }
@@ -489,7 +489,7 @@ const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap, 
     const gameStartTime = new Date().getTime() - (currTime ?? 0); // resume at current time
     const intervalId = setInterval(() => {
       const currTime = new Date().getTime() - gameStartTime;
-      if (currTime < beatmap.beatmapset.duration) {
+      if (currTime < beatmap.duration) {
         set('currTime')(currTime);
       } else {
         set('status')(GameStatus.PAUSED);
@@ -605,7 +605,7 @@ const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap, 
         lines={lines}
         timingPoints={timingPoints}
         endTime={beatmap.endTime}
-        length={beatmap.beatmapset.duration}
+        length={beatmap.duration}
       /> : <TimelineMessageBox>
         <Line size="1.25em" margin="0">Testing Mode</Line>
       </TimelineMessageBox>}

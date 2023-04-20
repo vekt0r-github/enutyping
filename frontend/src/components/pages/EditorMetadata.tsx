@@ -3,7 +3,7 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
 import YTVideo from "@/components/modules/YTVideo";
-import {MapInfoDisplay} from "@/components/modules/InfoDisplay";
+import { MapInfoDisplay, MapsetInfoDisplay } from "@/components/modules/InfoDisplay";
 import EditorShortcutsDisplay from "@/components/modules/EditorShortcutsDisplay";
 
 import { get, httpDelete, post, put } from "@/utils/functions";
@@ -135,6 +135,7 @@ const EditorDiffSelect = ({ user, config } : Props) => {
   const createOrUpdateMap = () => {
     const {artist, title, artist_original, title_original, yt_id, preview_point, diffname} = map;
     let duration = (player?.getDuration() ?? 0) * 1000;
+    duration = 150000 // TODO: REMOVE THIS TEMP OFFLINE TESTiNG
     if (!mapset || !artist || !title || !artist_original || !title_original || !yt_id || !duration || !diffname) { return; }
     const data = {
       artist, title, artist_original, title_original, yt_id, preview_point, duration, diffname,
@@ -150,7 +151,11 @@ const EditorDiffSelect = ({ user, config } : Props) => {
       }));
     }
     if (isNewMap) {
-      post(`/api/beatmaps`, data).then(callback);
+      // add default values for content
+      post(`/api/beatmaps`, {
+        ...data,
+        content: "ishpytoing file format v1\n\n[TimingPoints]\n\n\n[Lines]\n",
+      }).then(callback);
     } else {
       put(`/api/beatmaps/${mapId}`, data).then(callback);
     }
@@ -261,6 +266,8 @@ const EditorDiffSelect = ({ user, config } : Props) => {
             {...map}
             source={yt_id.length ? `https://www.youtube.com/watch?v=${yt_id}` : ''}
           />
+          <MapsetInfoDisplay {...mapset} />
+          <p>{mapset.description}</p>
         </Sidebar>
         <GameContainer>
           <BottomHalf>
@@ -273,7 +280,7 @@ const EditorDiffSelect = ({ user, config } : Props) => {
               e.preventDefault();
               createOrUpdateMap();
             }}>
-              <Line as="h2" size="1.5em" margin="0.75em 0 1em 0">Enter Mapset Metadata:</Line>
+              <Line as="h2" size="1.5em" margin="0.75em 0 1em 0">Map Metadata:</Line>
               {([
                 {field: "yt_id", label: "YouTube Video ID", description: "11 character video code"},
                 {field: "artist_original", label: "Artist", active: artistRoman, setActive: setArtistRoman},
@@ -282,7 +289,9 @@ const EditorDiffSelect = ({ user, config } : Props) => {
               ] as NewMapProps[]).map(formInput)}
               {/* <FormWarning size="1em">Make sure your metadata is correct; you can't change it once you've started mapping!</FormWarning> */}
               <FormSubmit as="button" type="submit">
-                <Line size="1em" margin="0">Create Mapset and Continue</Line>
+                <Line size="1em" margin="0">
+                  {isNewMap ? `Create Map and Continue` : `Update Map Metadata`}
+                </Line>
               </FormSubmit>
             </NewMapForm>
           </Overlay>
