@@ -41,7 +41,7 @@ export type Config = {
 export const defaultConfig: Config = {
   volume: 1.0,
   offset: 0,
-  localizeMetadata: true,
+  localizeMetadata: false,
   typePolygraphs: true,
   kanaSpellings: {
     し: "shi", 
