@@ -3,4 +3,5 @@ env/
 build/
 node_modules/
 dummy.db
+backend/persistent/
 .env
