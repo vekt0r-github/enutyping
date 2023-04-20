@@ -3,7 +3,7 @@ import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-
 
 import Loading from "@/components/modules/Loading";
 import EditorArea from "@/components/modules/EditorArea";
-import MapInfoDisplay from "@/components/modules/MapInfoDisplay";
+import {MapInfoDisplay} from "@/components/modules/InfoDisplay";
 import EditorShortcutsDisplay from "@/components/modules/EditorShortcutsDisplay";
 import ConfirmPopup from "@/components/modules/ConfirmPopup";
 
@@ -48,9 +48,10 @@ const Editor = ({ user, config } : Props) => {
     return <Navigate to='/login' replace={true} />
   }
 
+  // TODO: button to edit metadata
+
   const navigate = useNavigate();
   const { mapId, mapsetId } = useParams();
-  const isNewMap = (mapId === "new");
   const [searchParams] = useSearchParams();
   const copyOf = searchParams.get('copy');
 
@@ -82,34 +83,17 @@ const Editor = ({ user, config } : Props) => {
     if (state.status !== SUBMITTING) { return; }
     if (!beatmap) { return; }
     if (!beatmap.content.length || !beatmap.diffname.length) { return; }
-    if (isNewMap) {
-      const data = {
-        beatmapset_id: mapsetId,
-        diffname: diffname,
-        kpm: kpm,
-        content: beatmap.content,
-      }
-      post('/api/beatmaps', data)
-        .then((beatmapRes) => {
-          setState({
-            status: CREATED_DIFF, // about to redirect to the below id
-            beatmap: { ...beatmap, id: beatmapRes.id}
-          });
-        })
-        .catch((err) => console.log(err));
-    } else {
-      const data = {
-        diffname: diffname,
-        kpm: kpm,
-        content: beatmap.content,
-      }
-      put(`/api/beatmaps/${mapId}`, data)
-        .then((beatmapRes) => {
-          // do something to indicate map is saved
-          processAndLoad((beatmap) => beatmap, true);
-        })
-        .catch((err) => console.log(err));
+    const data = {
+      diffname: diffname,
+      kpm: kpm,
+      content: beatmap.content,
     }
+    put(`/api/beatmaps/${mapId}`, data)
+      .then((beatmapRes) => {
+        // do something to indicate map is saved
+        processAndLoad((beatmap) => beatmap, true);
+      })
+      .catch((err) => console.log(err));
   }, [state]);
   
   useEffect(() => {
@@ -164,9 +148,8 @@ const Editor = ({ user, config } : Props) => {
   if (status === CREATED_DIFF) { return <Navigate to={`/edit/${mapsetId}/${beatmap!.id}`} />; }
   if (status === NO_PERMS) { return Invalid; }
   if (status === INVALID || !beatmap) { return Invalid; }
-  const {beatmapset, content, diffname, lines, kpm, scores} = beatmap;
-  const {yt_id, source, preview_point, owner, beatmaps} = beatmapset;
-  const [artist, title] = [getArtist(beatmapset, config), getTitle(beatmapset, config)];
+  const {beatmapset, yt_id, source, preview_point, content, diffname, lines, kpm, scores} = beatmap;
+  const [artist, title] = [getArtist(beatmap, config), getTitle(beatmap, config)];
   
   const setContent = (content : string, saved = false) => 
     processAndLoad((oldBeatmap) => oldBeatmap ? { ...oldBeatmap,
@@ -185,28 +168,24 @@ const Editor = ({ user, config } : Props) => {
       <GamePageContainer>
         <Sidebar>
           <MapInfoDisplay 
-            title={title}
-            artist={artist}
-            source={source!}
-            diffname={
-              <DiffName
+            {...beatmap}
+          />
+          <p>Change diffname: <DiffName
                 value={diffname}
                 onChange={(e : React.ChangeEvent<HTMLInputElement>) => {
                   setDiffname(e.target.value);
                 }}
-              />}
-            kpm={kpm}
-          />
+              /></p>
           {!isNewMap ?
             <>
               <NewButton as={Link} to={`/edit/${mapsetId}/new?copy=${mapId}`}>
                 <Line size="3.5em" margin="-3px 12px 0 0" style={{'width': '40px'}}>+</Line>
-                <Line size="1em">Create a Copy</Line>
+                <Line size="1em" margin="0">Create a Copy</Line>
               </NewButton>
               <ConfirmPopup 
                 button={<DeleteButton>
                   <Line size="3.5em" margin="-12px 0px 0 0" style={{'width': '40px'}}>-</Line>
-                  <Line size="1em">Delete Beatmap</Line>
+                  <Line size="1em" margin="0">Delete Beatmap</Line>
                 </DeleteButton>}
                 warningText={<>
                   <Line size="1.25em" margin="1.5em 0 0 0">Are you sure you want to delete this beatmap:</Line>

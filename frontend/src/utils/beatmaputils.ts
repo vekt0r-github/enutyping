@@ -88,9 +88,10 @@ export const writeBeatmap = (beatmap : Beatmap) => {
 };
 
 type KeysMatching<T, V> = {[K in keyof T]-?: T[K] extends V ? K : never}[keyof T];
-export const getSetAvg = (mapset: Beatmapset, prop: KeysMatching<BeatmapMetadata, number | undefined>) => {
+export const getSetAvg = (mapset: Beatmapset, prop: KeysMatching<BeatmapMetadata, number | undefined>, defaultValue = 0) => {
   const vals = mapset.beatmaps.map((map) => map[prop]);
   const cleanVals : number[] = vals.filter(x => x !== undefined) as number[]
+  if (!cleanVals.length) return defaultValue;
   return cleanVals.reduce((a, b) => a + b) / vals.length;
 }
 

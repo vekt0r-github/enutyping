@@ -34,9 +34,10 @@ export const Line = styled.span<{
   margin?: string,
 }>`
   max-width: 100%;
-  font-size: ${(props) => props.size ?? '1em'};
-  margin: ${(props) => props.margin ?? 0};
+  ${({size}) => `font-size: ${size}` ?? ''};
+  ${({margin}) => `margin: ${margin}` ?? ''};
   display: block;
+  flex-shrink: 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;

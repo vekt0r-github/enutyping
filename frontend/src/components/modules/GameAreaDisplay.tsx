@@ -92,6 +92,8 @@ export const Overlay = styled.div`
   & ${Line} {
     width: 100%;
     text-align: center;
+  }
+  & > ${Line} {
     font-style: italic;
   }
 `;
@@ -307,15 +309,15 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
 									<Line size="1.5em" margin="0 0 0.5em 0">Warning: You are not logged in, and your score will not be submitted.</Line>
 								</Warning>
 							</>}
-							<Line size="1.5em">Press Space to play</Line>
+							<Line size="1.5em" margin="0">Press Space to play</Line>
 							<Line size="1em" margin="0 0 0.5em 0">Press Esc to exit during a game</Line>
-							<Line size="1em">Set map offset:&nbsp;
+							<Line size="1em" margin="0">Set map offset:&nbsp;
 								<OffsetInput size={3} defaultValue={offset} onChange={(e) => {
 									const intValue = parseInt(e.target.value)
 									if (!isNaN(intValue)) { setOffset(intValue); }
 								}}></OffsetInput>
 							</Line>
-							<Line size="1em">(Put negative offset if you think syllables are late; positive if you think they're early)</Line>
+							<Line size="1em" margin="0">(Put negative offset if you think syllables are late; positive if you think they're early)</Line>
 						</Overlay>
 						: null}
 					{status === GameStatus.ENDED ?

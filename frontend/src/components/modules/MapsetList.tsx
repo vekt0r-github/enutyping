@@ -117,11 +117,11 @@ const MapsetList = ({ getBeatmapsets, mapsets, includeCreate, config, link } : P
               <SetLink as={Link} to={link(mapset.id)}>
                 <Thumbnail src={icon_url} width={120} height={90} />
                 <Info>
-                  <Line size='1.25em' as='h2'>{mapset.name}</Line>
-                  {/* <Line size='1em'>by {getArtist(mapset, config)}</Line> */}
-                  <Line size='1em'>{mapset.description}</Line>
-                  <Line size='0.8em'>created by {owner.name}</Line>
-                  <Line size='0.8em'>{mapCount} map{mapCount !== 1 ? 's' : ''} | Average keys/min: {Math.round(getSetAvg(mapset, 'kpm'))}</Line>
+                  <Line size='1.25em' as='h2' margin="0">{mapset.name}</Line>
+                  {/* <Line size='1em' margin="0">by {getArtist(mapset, config)}</Line> */}
+                  <Line size='1em' margin="0">{mapset.description}</Line>
+                  <Line size='0.8em' margin="0">created by {owner.name}</Line>
+                  <Line size='0.8em' margin="0">{mapCount} map{mapCount !== 1 ? 's' : ''} | Average keys/min: {Math.round(getSetAvg(mapset, 'kpm'))}</Line>
                 </Info>
               </SetLink>
               <DiffsContainer>
@@ -134,7 +134,7 @@ const MapsetList = ({ getBeatmapsets, mapsets, includeCreate, config, link } : P
                     key={map.id}
                   >
                     <YTThumbnail yt_id={map.yt_id} width={32} height={24} />
-                    <Line size="1em">{getArtist(map, config)} - {getTitle(map, config)} [{map.diffname}] ({Math.round(map.kpm ?? 0)} kpm)</Line>
+                    <Line size="1em" margin="0">{getArtist(map, config)} - {getTitle(map, config)} [{map.diffname}] ({Math.round(map.kpm ?? 0)} kpm)</Line>
                   </Diff>
                 )}
                 {/* below only when in editor mode */}
@@ -146,12 +146,12 @@ const MapsetList = ({ getBeatmapsets, mapsets, includeCreate, config, link } : P
                     key={"new"}
                   >
                     <BlackLine size="2.5em" margin="-1.5px 8px 0 0">+</BlackLine>
-                    <BlackLine size="1em">Create New Beatmap in Group</BlackLine>
+                    <BlackLine size="1em">Create New Beatmap in Collection</BlackLine>
                   </Diff>
                   <ConfirmPopup 
                     button={<Diff color="warn">
                     <BlackLine size="2.5em" margin="-8px 14px 0 5px">-</BlackLine>
-                      <BlackLine size="1em">Delete Group</BlackLine>
+                      <BlackLine size="1em">Delete Collection</BlackLine>
                     </Diff>}
                     warningText={<>
                       <Line size="1.25em" margin="1.5em 0 0 0">Are you sure you want to delete this beatmapset:</Line>

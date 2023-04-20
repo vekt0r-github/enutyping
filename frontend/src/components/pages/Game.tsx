@@ -4,7 +4,7 @@ import { Navigate, useParams } from "react-router-dom";
 import Loading from "@/components/modules/Loading";
 import GameArea from "@/components/modules/GameArea";
 import NotFound from "@/components/pages/NotFound";
-import MapInfoDisplay from "@/components/modules/MapInfoDisplay";
+import {MapInfoDisplay} from "@/components/modules/InfoDisplay";
 
 import { get } from "@/utils/functions";
 import { User, Config, Beatmap } from "@/utils/types";
@@ -80,13 +80,7 @@ const Game = ({ user, config } : Props) => {
       <h1>{artist} - {title} [{diffname}]</h1>
       <GamePageContainer>
         <Sidebar>
-          <MapInfoDisplay 
-            title={title ?? ''}
-            artist={artist ?? ''}
-            source={source!}
-            diffname={diffname}
-            kpm={kpm}
-          />
+          <MapInfoDisplay {...map} />
           <SpeedSelect
             speed={speed}
             setSpeed={setSpeed}

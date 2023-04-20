@@ -563,7 +563,7 @@ const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap, 
         endTime={beatmap.endTime}
         beatSnapDivisor={beatSnapDivisor}
       /> : <TimelineMessageBox>
-        <Line size="1.25em">Testing Mode</Line>
+        <Line size="1.25em" margin="0">Testing Mode</Line>
       </TimelineMessageBox>}
       <GameAreaDisplay
         user={user}
@@ -607,7 +607,7 @@ const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap, 
         endTime={beatmap.endTime}
         length={beatmap.beatmapset.duration}
       /> : <TimelineMessageBox>
-        <Line size="1.25em">Testing Mode</Line>
+        <Line size="1.25em" margin="0">Testing Mode</Line>
       </TimelineMessageBox>}
     </EditorAreaContainer>
   );

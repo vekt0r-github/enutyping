@@ -100,6 +100,15 @@ def update_beatmap(user_id, beatmap_id):
     '''
     Data
     ----
+    SOME SUBSET OF THE FOLLOWING:
+    beatmapset_id
+    artist
+    title
+    artist_original
+    title_original
+    yt_id
+    preview_point
+    duration
     diffname
     content
     kpm
@@ -111,8 +120,6 @@ def update_beatmap(user_id, beatmap_id):
         data = beatmap_schema.load(json_data)
     except ValidationError as err:
         return err.messages, 400
-
-    diffname, content, kpm = itemgetter('diffname', 'content', 'kpm')(data)
 
     beatmap = Beatmap.query.get(beatmap_id)
     if not beatmap:
@@ -126,9 +133,8 @@ def update_beatmap(user_id, beatmap_id):
     if not exists:
         return 'Beatmapset does not exist or you do not own it!', 400
 
-    beatmap.content = content
-    beatmap.diffname = diffname
-    beatmap.kpm = kpm
+    for k, v in data.items():
+        setattr(beatmap, k, v)
     db_session.commit()
     res = beatmap_schema.dump(beatmap)
     return res
@@ -177,7 +183,7 @@ def add_beatmap(user_id):
     except ValidationError as err:
         return err.messages, 400
 
-    bms_id, diffname, content, kpm = itemgetter('beatmapset_id', 'diffname', 'content', 'kpm')(data)
+    bms_id = data['beatmapset_id']
 
     # artist, title, artist_original, title_original, yt_id, preview_point, duration = \
     #     itemgetter('artist', 'title', 'artist_original', 'title_original', 'yt_id', 'preview_point', 'duration')(data)
@@ -221,7 +227,7 @@ def add_beatmapset(user_id):
     Data
     ----
     name
-    name_original
+    description
     icon_url
     '''
     json_data = request.get_json()
@@ -235,6 +241,8 @@ def add_beatmapset(user_id):
 
     owner = User.query.get(user_id)
     assert owner is not None
+
+    print(data)
 
     new_bmset = Beatmapset(**data)
 

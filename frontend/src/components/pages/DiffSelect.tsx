@@ -4,7 +4,7 @@ import { Navigate, useParams, useLocation } from "react-router-dom";
 import Loading from "@/components/modules/Loading";
 import NotFound from "@/components/pages/NotFound";
 import YTThumbnail from "@/components/modules/YTThumbnail";
-import MapInfoDisplay from "@/components/modules/MapInfoDisplay";
+import {MapInfoDisplay, MapsetInfoDisplay} from "@/components/modules/InfoDisplay";
 
 import { get } from "@/utils/functions";
 import { Config, Beatmapset, BeatmapMetadata } from "@/utils/types";
@@ -13,7 +13,7 @@ import { withParamsAsKey } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Line, Link, Sidebar, GamePageContainer } from '@/utils/styles';
+import { MainBox, Line, Link, Sidebar, GamePageContainer, Thumbnail } from '@/utils/styles';
 
 import { GameContainer, BottomHalf, StatBox, Overlay as GameOverlay } from "@/components/modules/GameAreaDisplay";
 
@@ -21,7 +21,7 @@ type Props = {
   config: Config,
 };
 
-const Overlay = styled(GameOverlay)`
+export const Overlay = styled(GameOverlay)`
   padding: var(--m) 0;
   justify-content: flex-start;
   & > ${Line} {
@@ -29,13 +29,13 @@ const Overlay = styled(GameOverlay)`
   }
 `;
 
-const DiffsContainer = styled.div`
+export const DiffsContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: space-evenly;
 `;
 
-const Diff = styled(MainBox)`
+export const Diff = styled(MainBox)`
   max-width: 300px;
   height: 68px;
   display: flex;
@@ -50,10 +50,12 @@ const Diff = styled(MainBox)`
   }
 `;
 
-const MainThumbnail = styled(YTThumbnail)`
+const StyledThumbnail = (base: Parameters<typeof styled>[0]) => styled(base)`
   position: absolute;
   z-index: 1;
 `;
+const MainYTThumbnail = StyledThumbnail(YTThumbnail);
+const MainThumbnail = Thumbnail;
 
 const DiffSelect = ({ config } : Props) => {
   const [goback, setGoback] = useState<boolean>(false);
@@ -66,7 +68,6 @@ const DiffSelect = ({ config } : Props) => {
         setMapset(null); // mapset not found
       }
       setMapset(beatmapset);
-      setSelectedMap(beatmapset.beatmaps[0]);
     }).catch(() => {
       setMapset(null);
     });
@@ -89,7 +90,7 @@ const DiffSelect = ({ config } : Props) => {
   const [selectedMap, setSelectedMap] = useState<BeatmapMetadata>();
   if (mapset === undefined) { return <Loading />; }
   if (mapset === null) { return <NotFound />; }
-  const {name, owner, beatmaps} = mapset;
+  const {name, icon_url, owner, beatmaps} = mapset;
   const [artist, title] = selectedMap ?
     [getArtist(selectedMap, config), getTitle(selectedMap, config)] : [undefined, undefined];
   
@@ -99,23 +100,23 @@ const DiffSelect = ({ config } : Props) => {
   
   return (
     <>
-      <h1>{name}</h1>
+      <Line as="h1" size="2em">{name}</Line>
+      <Line as="p" margin="0 0 0.5em 0">Collection created by <Link to={`/user/${owner.id}`}>{owner.name}</Link></Line>
       <GamePageContainer>
         <Sidebar>
-          <MapInfoDisplay 
-            title={title ?? ''}
-            artist={artist ?? ''}
-            source={selectedMap?.source ?? ''}
-          />
+          <MapsetInfoDisplay {...mapset} />
+          <p>{mapset.description}</p>
         </Sidebar>
         <GameContainer>
           <BottomHalf>
             <StatBox />
-            <MainThumbnail yt_id={selectedMap?.yt_id ?? ''} width={400} height={300} />
+            {selectedMap 
+            ? <MainYTThumbnail yt_id={selectedMap?.yt_id ?? ''} width={400} height={300} />
+            : <MainThumbnail src={icon_url} width={400} height={300} />
+            }
             <StatBox />
           </BottomHalf>
           <Overlay>
-            <Line as="p" size="1em">Collection created by {owner.name}</Line>
             <Line as="h2" size="1.5em" margin="1.5em 0">Select Beatmap:</Line>
             <DiffsContainer>
               {beatmaps.map((map) => 
@@ -123,19 +124,22 @@ const DiffSelect = ({ config } : Props) => {
                   as={Link}
                   to={`/play/${mapset.id}/${map.id}`}
                   key={map.id}
+                  tabindex={0}
                   onMouseEnter={() => setSelectedMap(map)}
                   onFocus={() => setSelectedMap(map)}
+                  onMouseLeave={() => setSelectedMap(undefined)}
+                  onFocusOut={() => setSelectedMap(undefined)}
                 >
                   <YTThumbnail yt_id={map.yt_id} width={32} height={24} />
-                  <Line as="p" size="1em">{getArtist(map, config)} - {getTitle(map, config)} [{map.diffname}]</Line>
-                  <Line as="p" size="1em">({Math.round(map.kpm ?? 0)} kpm)</Line>
+                  <Line as="p" size="1em" margin="0">{getArtist(map, config)} - {getTitle(map, config)} [{map.diffname}]</Line>
+                  <Line as="p" size="1em" margin="0">({Math.round(map.kpm ?? 0)} kpm)</Line>
                 </Diff>
               )}
             </DiffsContainer>
           </Overlay>
         </GameContainer>
         <Sidebar>
-          <p>{mapset.description}</p>
+          {selectedMap ? <MapInfoDisplay {...selectedMap} /> : null}
         </Sidebar>
       </GamePageContainer>
     </>

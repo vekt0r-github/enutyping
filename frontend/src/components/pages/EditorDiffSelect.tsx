@@ -2,21 +2,22 @@ import React, { useEffect, useState }  from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
-import YTVideo from "@/components/modules/YTVideo";
-import MapInfoDisplay from "@/components/modules/MapInfoDisplay";
+import YTThumbnail from "@/components/modules/YTThumbnail";
+import {MapInfoDisplay, MapsetInfoDisplay} from "@/components/modules/InfoDisplay";
 import EditorShortcutsDisplay from "@/components/modules/EditorShortcutsDisplay";
 import ConfirmPopup from "@/components/modules/ConfirmPopup";
 
 import { get, httpDelete, post } from "@/utils/functions";
-import { Config, Beatmapset, User } from "@/utils/types";
+import { Config, Beatmapset, User, BeatmapMetadata } from "@/utils/types";
 import { getArtist, getTitle, makeSetFunc } from "@/utils/beatmaputils"
 import { withParamsAsKey } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Line, Link, GamePageContainer, Sidebar, Button, DeleteButton, NewButton } from '@/utils/styles';
+import { MainBox, Line, Link, GamePageContainer, Sidebar, Button, DeleteButton, NewButton, Thumbnail } from '@/utils/styles';
 
 import { GameContainer, BottomHalf, StatBox, Overlay as GameOverlay } from "@/components/modules/GameAreaDisplay";
+import { Overlay, DiffsContainer, Diff } from "@/components/pages/DiffSelect";
 
 type NewSetProps = {
   field: keyof Beatmapset,
@@ -81,26 +82,19 @@ const { LOADING, LOADED, INVALID, GOBACK, CREATED_SET } = Status;
 type State = {
   status: Status,
   mapset: Beatmapset,
+  selectedMap?: BeatmapMetadata,
 }
-
-const Overlay = styled(GameOverlay)`
-  padding: var(--m) 0;
-  justify-content: flex-start;
-  align-items: center;
-  & ${Line} {
-    font-style: normal;
-  }
-`;
-
-const DiffsContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-evenly;
-`;
 
 const FormSubmit = styled(NewButton)`
   margin: var(--m) 0 0 0;
-`
+`;
+
+const StyledThumbnail = (base: Parameters<typeof styled>[0]) => styled(base)`
+  position: absolute;
+  z-index: 1;
+`;
+const MainYTThumbnail = StyledThumbnail(YTThumbnail);
+const MainThumbnail = Thumbnail;
 
 const EditorDiffSelect = ({ user, config } : Props) => {
   if (!user) { // include this in every restricted page
@@ -112,39 +106,34 @@ const EditorDiffSelect = ({ user, config } : Props) => {
     status: LOADING,
     mapset: {
       id: -1,
-      artist: '',
-      title: '',
-      artist_original: '',
-      title_original: '',
-      yt_id: '',
-      preview_point: 0, // not set here
-      duration: 0, // will be automatically set
+      name: '',
+      description: '',
+      icon_url: '',
       owner: user, // probably doesn't get sent to backend
       beatmaps: [], // not set here
     },
+    selectedMap: undefined,
   });
-  const {status, mapset} = state;
+  const {status, mapset, selectedMap} = state;
   const setStatus = makeSetFunc(setState)('status');
   const setMapset = makeSetFunc(setState)('mapset');
+  const setSelectedMap = makeSetFunc(setState)('selectedMap');
   const set = makeSetFunc(setMapset);
-  const [artistRoman, setArtistRoman] = useState<boolean>(false);
-  const [titleRoman, setTitleRoman] = useState<boolean>(false);
-  const [player, setPlayer] = useState<YT.Player>();
 
   const { mapsetId } = useParams();
   const isNewMapset = (mapsetId === "new");
 
   const createMapset = () => {
-    const {artist, title, artist_original, title_original, yt_id, preview_point} = mapset;
-    let duration = (player?.getDuration() ?? 0) * 1000;
-    if (!artist || !title || !artist_original || !title_original || !yt_id || !duration) { return; }
-    const data = {artist, title, artist_original, title_original, yt_id, preview_point, duration};
+    const {name, description, icon_url} = mapset;
+    if (!name || !description || !icon_url) { return; }
+    const data = {name, description, icon_url};
     post(`/api/beatmapsets`, data).then((beatmapset) => {
-      setState(({mapset}) => ({
+      setState(({mapset, selectedMap}) => ({
         status: CREATED_SET,
         mapset: { ...mapset,
           id: beatmapset.id,
         },
+        selectedMap: selectedMap,
       }));
     })
   };  
@@ -179,14 +168,16 @@ const EditorDiffSelect = ({ user, config } : Props) => {
     }
   }, []); // may eventually depend on other things
 
-  const Invalid = <p>This beatmapset doesn't exist, or you don't have the permissions to edit it. <Link to="/edit/new">Create a new one?</Link></p>;
+  const Invalid = <p>This collection doesn't exist, or you don't have the permissions to edit it. <Link to="/edit/new">Create a new one?</Link></p>;
   if (status === GOBACK) { return <Navigate to={`/edit`} replace={true} />; }
   if (status === INVALID) { return Invalid; }
   if (status === LOADING || !mapset) { return <Loading />; }
   if (status === CREATED_SET) { return <Navigate to={`/edit/${mapset.id}/new`} replace={true} />; }
-  const {yt_id, preview_point, owner, beatmaps} = mapset;
-  const [artist, title] = [getArtist(mapset, config), getTitle(mapset, config)];
-
+  
+  const {name, icon_url, owner, beatmaps} = mapset;
+  const [artist, title] = selectedMap ?
+    [getArtist(selectedMap, config), getTitle(selectedMap, config)] : [undefined, undefined];
+  
   const formInput = ({field, label, description, active, setActive} : NewSetProps) => {
     const id = field.replace("_", "-");
     const toRoman = (field : keyof Beatmapset) => {
@@ -226,10 +217,6 @@ const EditorDiffSelect = ({ user, config } : Props) => {
       </NewSetContainer>
     );
   }
-
-  const onPlayerReady = (e : YT.PlayerEvent) => {
-    setPlayer(e.target);
-  };
   
   const handleDeleteBeatmapset = async () => {
     const res = await httpDelete(`/api/beatmapsets/${mapsetId}`);
@@ -240,24 +227,22 @@ const EditorDiffSelect = ({ user, config } : Props) => {
 
   return (
     <>
-      <h1>Editing: {artist.length ? artist : "<artist>"} - {title.length ? title : "<title>"}</h1>
+    <Line as="h1" size="2em">Editing: {name}</Line>
+    <Line as="p" margin="0 0 0.5em 0">Collection created by <Link to={`/user/${owner.id}`}>{owner.name}</Link></Line>
       <GamePageContainer>
         <Sidebar>
-          <MapInfoDisplay 
-            title={title}
-            artist={artist}
-            source={yt_id.length ? `https://www.youtube.com/watch?v=${yt_id}` : ''}
-          />
+          <MapsetInfoDisplay {...mapset} />
+          <p>{mapset.description}</p>
           {!isNewMapset ?
             <>
               <ConfirmPopup 
                 button={<DeleteButton>
                   <Line size="3.5em" margin="-12px 0px 0 0" style={{'width': '40px'}}>-</Line>
-                  <Line size="1em">Delete Beatmapset</Line>
+                  <Line size="1em" margin="0">Delete Collection</Line>
                 </DeleteButton>}
                 warningText={<>
-                  <Line size="1.25em" margin="1.5em 0 0 0">Are you sure you want to delete this beatmapset:</Line>
-                  <Line size="1.75em" margin="1.5em 0 0 0">{artist} - {title}?</Line>
+                  <Line size="1.25em" margin="1.5em 0 0 0">Are you sure you want to delete this collection:</Line>
+                  <Line size="1.75em" margin="1.5em 0 0 0">{name}?</Line>
                   <Line size="1.25em" margin="1.5em 0 0 0">All {beatmaps.length} beatmap(s) will be deleted.</Line>
                   <Line size="1.25em" margin="1.5em 0 0 0">This action is permanent and cannot be undone.</Line>
                 </>}
@@ -269,7 +254,10 @@ const EditorDiffSelect = ({ user, config } : Props) => {
         <GameContainer>
           <BottomHalf>
             <StatBox />
-            <YTVideo yt_id={yt_id} volume={0} show={false} options={{onReady: onPlayerReady}} />
+            {selectedMap 
+            ? <MainYTThumbnail yt_id={selectedMap?.yt_id ?? ''} width={400} height={300} />
+            : <MainThumbnail src={icon_url} width={400} height={300} />
+            }
             <StatBox />
           </BottomHalf>
           <Overlay>
@@ -277,33 +265,47 @@ const EditorDiffSelect = ({ user, config } : Props) => {
               e.preventDefault();
               createMapset();
             }}>
-              <Line as="h2" size="1.5em" margin="0.75em 0 1em 0">Enter Mapset Metadata:</Line>
+              <Line as="h2" size="1.5em" margin="0.75em 0 1em 0">Enter Collection Information:</Line>
               {([
-                {field: "yt_id", label: "YouTube Video ID", description: "11 character video code"},
-                {field: "artist_original", label: "Artist", active: artistRoman, setActive: setArtistRoman},
-                {field: "title_original", label: "Title", active: titleRoman, setActive: setTitleRoman},
+                {field: "name", label: "Collection Title"},
+                {field: "description", label: "Description"},
+                {field: "icon_url", label: "Icon Source", description: "paste the link to an image here!"},
               ] as NewSetProps[]).map(formInput)}
               <FormWarning size="1em">Make sure your metadata is correct; you can't change it once you've started mapping!</FormWarning>
               <FormSubmit as="button" type="submit">
-                <Line size="1em">Create Mapset and Continue</Line>
+                <Line size="1em" margin="0">Create Mapset and Continue</Line>
               </FormSubmit>
             </NewSetForm> : <>
               <Line as="h2" size="1.5em" margin="1.5em 0">Select Difficulty:</Line>
               <DiffsContainer>
                 {beatmaps.map((map) => 
-                  <Button as={Link} to={`/edit/${mapset.id}/${map.id}`} key={map.id}>
-                    <Line size="1em">{map.diffname}</Line>
-                  </Button>
+                  <Diff
+                    as={Link}
+                    to={`/edit/${mapset.id}/${map.id}`}
+                    key={map.id}
+                    tabindex={0}
+                    onMouseEnter={() => setSelectedMap(map)}
+                    onFocus={() => setSelectedMap(map)}
+                    onMouseLeave={() => setSelectedMap(undefined)}
+                    onFocusOut={() => setSelectedMap(undefined)}
+                  >
+                    <YTThumbnail yt_id={map.yt_id} width={32} height={24} />
+                    <Line as="p" size="1em" margin="0">{getArtist(map, config)} - {getTitle(map, config)} [{map.diffname}]</Line>
+                    <Line as="p" size="1em" margin="0">({Math.round(map.kpm ?? 0)} kpm)</Line>
+                  </Diff>
                 )}
                 <NewButton as={Link} to={`/edit/${mapset.id}/new`}>
                   <Line size="3.5em" margin="-3px 12px 0 0" style={{'width': '40px'}}>+</Line>
-                  <Line size="1em">Create New Difficulty</Line>
+                  <Line size="1em" margin="0">Create New Beatmap in Collection</Line>
                 </NewButton>
               </DiffsContainer>
             </>}
           </Overlay>
         </GameContainer>
-        <EditorShortcutsDisplay />
+        {selectedMap 
+          ? <Sidebar><MapInfoDisplay {...selectedMap} /></Sidebar>
+          : <EditorShortcutsDisplay />
+        }
       </GamePageContainer>
     </>
   );

@@ -11,6 +11,7 @@ import DiffSelect from "@/components/pages/DiffSelect";
 import Game from "@/components/pages/Game";
 import EditorSongSelect from "@/components/pages/EditorSongSelect";
 import EditorDiffSelect from "@/components/pages/EditorDiffSelect";
+import EditorMetadata from "./pages/EditorMetadata";
 import Editor from "@/components/pages/Editor";
 import NotFound from "@/components/pages/NotFound";
 import UserPage from "@/components/pages/UserPage";
@@ -176,8 +177,20 @@ const App = ({} : Props) => {
                 config={config}
               />
             }/>
+            <Route path="/edit/:mapsetId/new" element={
+              <EditorMetadata
+                user={user}
+                config={config}
+              />
+            }/>
             <Route path="/edit/:mapsetId/:mapId" element={
               <Editor
+                user={user}
+                config={config}
+              />
+            }/>
+            <Route path="/edit/:mapsetId/:mapId/metadata" element={
+              <EditorMetadata
                 user={user}
                 config={config}
               />

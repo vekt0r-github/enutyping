@@ -108,7 +108,7 @@ const EditorSongSelect = ({ user, config } : Props) => {
           <>
             <NewMapset as={Link} to='/edit/new'>
               <Line size="6em" margin="-5px 20px 0 0">+</Line>
-              <BlackLine as="h2" size="1.5em">Create New Mapset</BlackLine>
+              <BlackLine as="h2" size="1.5em">Create New Collection</BlackLine>
             </NewMapset>
             <MapsetList 
               getBeatmapsets={getBeatmapsets}
