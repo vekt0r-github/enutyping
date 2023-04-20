@@ -1,4 +1,4 @@
 #!/bin/bash
 
-rm dummy.db
+rm persistent/data.db
 python models.py
