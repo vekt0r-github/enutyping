@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link as RouterLink, NavLink } from "react-router-dom";
 
 import { User, Config } from "@/utils/types";
+
+import { Language, languageOptions, LanguageContext } from "@/languages/Language";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -74,8 +76,10 @@ const NavBarLink = styled(Link)`
   }
 `;
 
-const NavBar = ({ handleLogout, user } : Props) => (
-  <Outer>
+const NavBar = ({ handleLogout, user } : Props) => {
+  const {userLanguage, userLanguageChange} = useContext(LanguageContext);
+
+  return <Outer>
   <NavContainer>
     <NavLeft>
       <Logo to="/">enuTyping</Logo>
@@ -89,11 +93,17 @@ const NavBar = ({ handleLogout, user } : Props) => (
         <ProfileButton user={user} handleLogout={handleLogout} />
         :
         <>
+        {/* scuffamole */}
+          <select name={"localization"} value={userLanguage} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+            userLanguageChange(e.target.value as Language);
+          }}>
+            {Object.entries(languageOptions).map(([lang, label]) => <option value={lang}>{label}</option>)}
+          </select>
           <NavBarLink as={NavLink} to="/login">sign in</NavBarLink>
         </>}
     </NavRight>
   </NavContainer>
   </Outer>
-);
+};
 
 export default NavBar;

@@ -17,6 +17,8 @@ import NotFound from "@/components/pages/NotFound";
 import UserPage from "@/components/pages/UserPage";
 import SettingsPage from "@/components/pages/Settings";
 
+import { LanguageProvider, Text } from "@/languages/Language";
+
 import { get, post } from "@/utils/functions";
 import { User, Config, defaultConfig } from "@/utils/types";
 
@@ -110,18 +112,18 @@ const App = ({} : Props) => {
   const isMobile = width <= 768;
   if (isMobile) {
     return (
-      <MobileContainer>
-        <MobileLogo>enuTyping</MobileLogo>
-        <h3>
-          Device Not Supported
-        </h3>
-        <div>enuTyping is only for wide computers. sorry!</div>
-      </MobileContainer>
+      <LanguageProvider>
+        <MobileContainer>
+          <MobileLogo>{Text`title`}</MobileLogo>
+          <h3>{Text`mobile-layout-error-header`}</h3>
+          <div>{Text`mobile-layout-error`}</div>
+        </MobileContainer>
+      </LanguageProvider>
     )
   }
 
   return (
-    <>
+    <LanguageProvider>
       <BrowserRouter>
         <NavBar
           handleLogout={handleLogout}
@@ -213,7 +215,7 @@ const App = ({} : Props) => {
           </Routes>
         </Content>
       </BrowserRouter>
-    </>
+    </LanguageProvider>
   );
 }
 

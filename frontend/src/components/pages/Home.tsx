@@ -5,6 +5,8 @@ import { User } from "@/utils/types";
 import '@/utils/styles.css';
 import { Navigate } from "react-router-dom";
 
+import { Text } from "@/languages/Language";
+
 import gameplayVideo from "@/public/images/gameplay_sample.mp4"
 import styled from "styled-components";
 import { Link } from "react-router-dom";
@@ -72,10 +74,10 @@ const Home = ({ user } : Props) => {
   return (
     <Container>
       <Padded>
-        <Title>Type your favorite songs as you listen</Title>
-        <p style={{color:"white"}}>the second bestest free-to-win rhythm game</p>
+        <Title>{Text`home-title`}</Title>
+        <p style={{color:"white"}}>{Text`home-subtitle`}</p>
         <ButtonContainer>
-          <Button to="/play">Try Now!</Button>
+          <Button to="/play">{Text`try-now`}</Button>
         </ButtonContainer>
       </Padded>
       <Vid autoPlay loop muted playsInline src={gameplayVideo} />

@@ -187,7 +187,7 @@ def init_db():
         Beatmapset(id=7270, \
             owner_id="8484892osu", \
             name="カナデトモスソラ",
-            description="プロセカにて",
+            description="25時、ナイトコードで。 × 巡音ルカ ",
             icon_url="http://img.youtube.com/vi/AICkt9OIFKA/default.jpg"),
         Beatmap(id=2731, \
             beatmapset_id=7270, \

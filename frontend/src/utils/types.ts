@@ -1,3 +1,5 @@
+import { Language, getDefaultLanguage } from "@/languages/Language";
+
 export type User = { // example
   id: number;
   name: string;
@@ -15,6 +17,7 @@ export type UserStats = {
 export type Config = {
   volume: number;
   offset: number;
+  language: Language;
   localizeMetadata: boolean;
   typePolygraphs: boolean;
   kanaSpellings: {
@@ -41,6 +44,7 @@ export type Config = {
 export const defaultConfig: Config = {
   volume: 1.0,
   offset: 0,
+  language: getDefaultLanguage(), // shouldn't matter when this runs
   localizeMetadata: false,
   typePolygraphs: true,
   kanaSpellings: {
