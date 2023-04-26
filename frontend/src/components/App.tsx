@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
@@ -17,10 +17,9 @@ import NotFound from "@/components/pages/NotFound";
 import UserPage from "@/components/pages/UserPage";
 import SettingsPage from "@/components/pages/Settings";
 
-import { LanguageProvider, Text } from "@/languages/Language";
-
+import { Config, ConfigProvider, Text, configContext, setConfigContext } from "@/utils/config";
 import { get, post } from "@/utils/functions";
-import { User, Config, defaultConfig } from "@/utils/types";
+import { User } from "@/utils/types";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -60,11 +59,9 @@ const MobileLogo = styled.div`
 
 const App = ({} : Props) => {
   const [user, setUser] = useState<User | null>();
-  const [config, setConfig] = useState<Config>(defaultConfig);
+  const config = useContext(configContext);
 
   const [width, setWidth] = useState<number>(window.innerWidth);
-
-  const { volume, offset, kanaSpellings } = config;
 
   function handleWindowSizeChange() {
       setWidth(window.innerWidth);
@@ -84,15 +81,7 @@ const App = ({} : Props) => {
         setUser(null);
       }
     });
-    const localConfig: string | null = window.localStorage.getItem('ishotyping-config');
-    if(localConfig) {
-      setConfig({ ...config, ...JSON.parse(localConfig) });
-    }
   }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem('ishotyping-config', JSON.stringify(config));
-  }, [config]);
 
   const handleLogin = (code: string|null, state: string|null, oauthprovider: string) => {
     post(`/api/login/${oauthprovider}/authorize`, { code, state }).then((user) => {
@@ -112,27 +101,24 @@ const App = ({} : Props) => {
   const isMobile = width <= 768;
   if (isMobile) {
     return (
-      <LanguageProvider>
+      <ConfigProvider>
         <MobileContainer>
           <MobileLogo>{Text`title`}</MobileLogo>
           <h3>{Text`mobile-layout-error-header`}</h3>
           <div>{Text`mobile-layout-error`}</div>
         </MobileContainer>
-      </LanguageProvider>
+      </ConfigProvider>
     )
   }
 
   return (
-    <LanguageProvider>
+    <ConfigProvider>
       <BrowserRouter>
         <NavBar
           handleLogout={handleLogout}
           user={user}
         />
-				<Volume
-					volume={volume}
-					setVolume={(v: number) => { setConfig({ ...config, volume: v }); }}
-				/>
+				<Volume />
         <Content>
           <Routes>
             <Route path="/" element={
@@ -205,8 +191,6 @@ const App = ({} : Props) => {
                 user={user}
                 yourUser={user}
                 setYourUser={setUser}
-                initConfig={config}
-                setGlobalConfig={setConfig}
               />
             }/>  
             <Route path="*" element={
@@ -215,7 +199,7 @@ const App = ({} : Props) => {
           </Routes>
         </Content>
       </BrowserRouter>
-    </LanguageProvider>
+    </ConfigProvider>
   );
 }
 

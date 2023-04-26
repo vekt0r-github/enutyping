@@ -1,9 +1,10 @@
 import React, { useContext } from "react";
 import { Link as RouterLink, NavLink } from "react-router-dom";
 
-import { User, Config } from "@/utils/types";
+import { Config, configContext, setConfigContext } from "@/utils/config"
+import { User } from "@/utils/types";
 
-import { Language, languageOptions, LanguageContext } from "@/languages/Language";
+import { Language, languageOptions } from "@/languages";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -77,7 +78,8 @@ const NavBarLink = styled(Link)`
 `;
 
 const NavBar = ({ handleLogout, user } : Props) => {
-  const {userLanguage, userLanguageChange} = useContext(LanguageContext);
+  const config = useContext(configContext);
+  const setConfig = useContext(setConfigContext);
 
   return <Outer>
   <NavContainer>
@@ -94,8 +96,8 @@ const NavBar = ({ handleLogout, user } : Props) => {
         :
         <>
         {/* scuffamole */}
-          <select name={"localization"} value={userLanguage} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-            userLanguageChange(e.target.value as Language);
+          <select name={"localization"} value={config.language} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+            setConfig((config) => ({...config, language: e.target.value as Language}));
           }}>
             {Object.entries(languageOptions).map(([lang, label]) => <option value={lang}>{label}</option>)}
           </select>

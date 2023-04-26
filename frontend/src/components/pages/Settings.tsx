@@ -1,11 +1,12 @@
 import styled from 'styled-components';
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { Navigate } from "react-router-dom";
 
-import { Language, dictionaryList, languageOptions, Text, LanguageContext } from '@/languages/Language';
+import { Language, languageOptions } from '@/languages';
 
-import { User, Config } from "@/utils/types";
+import { Config, configContext, setConfigContext, Text } from '@/utils/config';
+import { User } from "@/utils/types";
 import { kanaRespellings } from "@/utils/kana";
 import { MainBox, SubBox } from "@/utils/styles";
 import { post } from "@/utils/functions";
@@ -64,32 +65,21 @@ const NameErrorMessage = styled.div`
 
 type Props = {
   user: User | null,
-  initConfig: Config,
-  setGlobalConfig: React.Dispatch<React.SetStateAction<Config>>, 
-  yourUser: User | null,
-  setYourUser: React.Dispatch<React.SetStateAction<User | null | undefined>>,
+  yourUser: User | null, // if theoretically you could view this page for different users?? idk
+  setYourUser: React.Dispatch<React.SetStateAction<User | null | undefined>>, // for changing name
 };
 
-// i'm sort of hacking the language context in
-// really the entire config should just use the react context api
-// but rn language does, and language is set in config but doesn't do anything there
-
-const SettingsPage = ({ user, yourUser, setYourUser, initConfig, setGlobalConfig }: Props) => {
+const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />;
   }
-  
-  const [config, setConfig] = useState<Config>(initConfig); 
-  const {userLanguage, userLanguageChange} = useContext(LanguageContext);
+  const config = useContext(configContext);
+  const setConfig = useContext(setConfigContext);
   
   // Account name change state
   const [requestedName, setRequestedName] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>();
 
-  useEffect(() => {
-    setGlobalConfig(config);
-  }, [config]);
-  
   const kanaOptions = (() => {
 
     let kanaSelect: JSX.Element[] = [];
@@ -175,9 +165,9 @@ const SettingsPage = ({ user, yourUser, setYourUser, initConfig, setGlobalConfig
         </CategoryTitle>
         <SettingBox>
           <SettingTitle>Site Language: </SettingTitle>
-          <select name={"localization"} value={userLanguage} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+          <select name={"localization"} value={config.language} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
             // setConfig({ ...config, language: (e.target.value as Language) });
-            userLanguageChange(e.target.value as Language);
+            setConfig((config) => ({...config, language: e.target.value as Language}));
           }}>
             {Object.entries(languageOptions).map(([lang, label]) => <option value={lang}>{label}</option>)}
           </select>

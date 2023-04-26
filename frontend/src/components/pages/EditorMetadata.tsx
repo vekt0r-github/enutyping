@@ -6,8 +6,9 @@ import YTVideo from "@/components/modules/YTVideo";
 import { MapInfoDisplay, MapsetInfoDisplay } from "@/components/modules/InfoDisplay";
 import EditorShortcutsDisplay from "@/components/modules/EditorShortcutsDisplay";
 
+import { Config } from "@/utils/config";
 import { get, httpDelete, post, put } from "@/utils/functions";
-import { Config, Beatmapset, User, BeatmapMetadata } from "@/utils/types";
+import { Beatmapset, User, BeatmapMetadata } from "@/utils/types";
 import { getArtist, getTitle, makeSetFunc } from "@/utils/beatmaputils"
 import { withParamsAsKey } from "@/utils/componentutils";
 
@@ -15,6 +16,7 @@ import styled from 'styled-components';
 import '@/utils/styles.css';
 import { MainBox, Line, Link, GamePageContainer, Sidebar, Button, DeleteButton, NewButton } from '@/utils/styles';
 
+// importing styles
 import { GameContainer, BottomHalf, StatBox, Overlay as GameOverlay } from "@/components/modules/GameAreaDisplay";
 
 type NewMapProps = {

@@ -1,13 +1,12 @@
 import React from "react";
-
-import { User } from "@/utils/types";
-
-import '@/utils/styles.css';
 import { Navigate } from "react-router-dom";
 
-import { Text } from "@/languages/Language";
+import { Text } from "@/utils/config";
+import { User } from "@/utils/types";
 
 import gameplayVideo from "@/public/images/gameplay_sample.mp4"
+
+import '@/utils/styles.css';
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 

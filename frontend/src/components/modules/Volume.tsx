@@ -1,14 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useContext } from "react";
+
+import { configContext, setConfigContext } from "@/utils/config";
 
 import styled from 'styled-components';
 import vicon from '@/public/images/volume.svg';
 import '@/utils/styles.css';
 import { Line } from '@/utils/styles';
-
-type Props = {
-  volume: number,
-  setVolume: (newVolume: number) => void,
-}
 
 const Icon = styled.img`
   width: var(--container-width);
@@ -126,13 +123,16 @@ const Container = styled.div`
   &:focus > ${SliderOuterContainer} { display: block; }
 `;
 
-const Volume = ({ volume, setVolume } : Props) => {
+const Volume = () => {
+  const config = useContext(configContext);
+  const setConfig = useContext(setConfigContext);
+
   const handleVolumeChange = (e : React.ChangeEvent<HTMLInputElement>) => {
     const vol = parseInt(e.target.value) / 100;
-    setVolume(vol);
+    setConfig({ ...config, volume: vol });
   };
 
-  const sliderValue = Math.round(volume * 100);
+  const sliderValue = Math.round(config.volume * 100);
 
   return (
     <Container tabIndex={0}>
@@ -141,7 +141,7 @@ const Volume = ({ volume, setVolume } : Props) => {
       />
       <IconLabel>{sliderValue}</IconLabel>
       <SliderOuterContainer>
-        <SliderLabel as="label" htmlFor="volume-sslider-container">{sliderValue}</SliderLabel>
+        <SliderLabel as="label" htmlFor="volume-slider-container">{sliderValue}</SliderLabel>
         <SliderContainer id="volume-slider-container">
           <SliderBody />
           <SliderFill
