@@ -3,9 +3,11 @@ import styled from 'styled-components';
 import React, { useContext, useState } from "react";
 import { Navigate } from "react-router-dom";
 
-import { Language, languageOptions } from '@/languages';
+import { Language, languageOptions } from '@/localization';
 
-import { Config, configContext, setConfigContext, t } from '@/utils/config';
+import { configContext, setConfigContext } from '@/providers/config';
+import { getLocalizationFunc } from '@/providers/l10n';
+
 import { User } from "@/utils/types";
 import { kanaRespellings } from "@/utils/kana";
 import { MainBox, SubBox } from "@/utils/styles";
@@ -82,6 +84,7 @@ const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
   }
   const config = useContext(configContext);
   const setConfig = useContext(setConfigContext);
+  const t = getLocalizationFunc();
   
   // Account name change state
   const [requestedName, setRequestedName] = useState<string>("");

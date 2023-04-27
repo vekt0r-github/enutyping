@@ -3,4 +3,14 @@ import ReactDOM from 'react-dom';
 
 import App from './components/App';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+import { ConfigProvider } from "@/providers/config";
+import { AppLocalizationProvider } from "@/providers/l10n";
+
+ReactDOM.render(
+  <ConfigProvider>
+    <AppLocalizationProvider>
+      <App />
+    </AppLocalizationProvider>
+  </ConfigProvider>,
+  document.getElementById('root')
+);

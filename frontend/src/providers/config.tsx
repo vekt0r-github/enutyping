@@ -3,7 +3,7 @@
  */
 import React, { useState, useEffect, createContext, useContext } from 'react';
 
-import { Language, TextID, dictionaryList, getDefaultLanguage, languageOptions } from "@/languages";
+import { Language, getDefaultLanguage, languageOptions } from "@/localization";
 
 export type Config = {
   volume: number;
@@ -92,10 +92,4 @@ export function ConfigProvider({ children }: ConfigProviderProps) {
       </setConfigContext.Provider>
     </configContext.Provider>
   );
-};
-
-// get text according to id & current language
-export function t(tid : TextID){
-  const config = useContext(configContext);
-  return dictionaryList[config.language][tid] || tid;
 };

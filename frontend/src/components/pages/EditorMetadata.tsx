@@ -6,7 +6,7 @@ import YTVideo from "@/components/modules/YTVideo";
 import { MapInfoDisplay, MapsetInfoDisplay } from "@/components/modules/InfoDisplay";
 import EditorShortcutsDisplay from "@/components/modules/EditorShortcutsDisplay";
 
-import { Config } from "@/utils/config";
+import { Config } from "@/providers/config";
 import { get, httpDelete, post, put } from "@/utils/functions";
 import { Beatmapset, User, BeatmapMetadata } from "@/utils/types";
 import { getArtist, getTitle, makeSetFunc } from "@/utils/beatmaputils"

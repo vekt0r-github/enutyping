@@ -17,7 +17,9 @@ import NotFound from "@/components/pages/NotFound";
 import UserPage from "@/components/pages/UserPage";
 import SettingsPage from "@/components/pages/Settings";
 
-import { Config, ConfigProvider, t, configContext, setConfigContext } from "@/utils/config";
+import { configContext } from "@/providers/config";
+import { getLocalizationFunc } from "@/providers/l10n";
+
 import { get, post } from "@/utils/functions";
 import { User } from "@/utils/types";
 
@@ -60,6 +62,7 @@ const MobileLogo = styled.div`
 const App = ({} : Props) => {
   const [user, setUser] = useState<User | null>();
   const config = useContext(configContext);
+  const t = getLocalizationFunc();
 
   const [width, setWidth] = useState<number>(window.innerWidth);
 
@@ -101,105 +104,101 @@ const App = ({} : Props) => {
   const isMobile = width <= 768;
   if (isMobile) {
     return (
-      <ConfigProvider>
-        <MobileContainer>
-          <MobileLogo>{t(`title`)}</MobileLogo>
-          <h3>{t(`error-mobile-layout-header`)}</h3>
-          <div>{t(`error-mobile-layout`)}</div>
-        </MobileContainer>
-      </ConfigProvider>
+      <MobileContainer>
+        <MobileLogo>{t(`title`)}</MobileLogo>
+        <h3>{t(`error-mobile-layout-header`)}</h3>
+        <div>{t(`error-mobile-layout`)}</div>
+      </MobileContainer>
     )
   }
 
   return (
-    <ConfigProvider>
-      <BrowserRouter>
-        <NavBar
-          handleLogout={handleLogout}
-          user={user}
-        />
-				<Volume />
-        <Content>
-          <Routes>
-            <Route path="/" element={
-              <Home user={user} />
-            }/>
-            <Route path="/login" element={
+    <BrowserRouter>
+      <NavBar
+        handleLogout={handleLogout}
+        user={user}
+      />
+      <Volume />
+      <Content>
+        <Routes>
+          <Route path="/" element={
+            <Home user={user} />
+          }/>
+          <Route path="/login" element={
+            <Login
+              handleLogin={handleLogin}
+              user={user}
+            />}>
+            {/* This gets the oauth provider for right auth */}
+            <Route path=":oauthprovider" element={
               <Login
                 handleLogin={handleLogin}
                 user={user}
-              />}>
-              {/* This gets the oauth provider for right auth */}
-              <Route path=":oauthprovider" element={
-                <Login
-                  handleLogin={handleLogin}
-                  user={user}
-                />
-              }/>
-            </Route>
-            <Route path="/play" element={
-              <SongSelect
-                config={config}
               />
             }/>
-            <Route path="/play/:mapsetId" element={
-              <DiffSelect
-                config={config}
-              />
-            }/>
-            <Route path="/play/:mapsetId/:mapId" element={
-              <Game
-                user={user}
-                config={config}
-              />
-            }/>
-            <Route path="/edit" element={
-              <EditorSongSelect
-                user={user}
-                config={config}
-              />
-            }/>
-            <Route path="/edit/:mapsetId" element={
-              <EditorDiffSelect
-                user={user}
-                config={config}
-              />
-            }/>
-            <Route path="/edit/:mapsetId/new" element={
-              <EditorMetadata
-                user={user}
-                config={config}
-              />
-            }/>
-            <Route path="/edit/:mapsetId/:mapId" element={
-              <Editor
-                user={user}
-                config={config}
-              />
-            }/>
-            <Route path="/edit/:mapsetId/:mapId/metadata" element={
-              <EditorMetadata
-                user={user}
-                config={config}
-              />
-            }/>
-            <Route path="/user/:userId" element={
-              <UserPage yourUser={user} config={config} />
-            }/>
-            <Route path="/settings" element={
-              <SettingsPage
-                user={user}
-                yourUser={user}
-                setYourUser={setUser}
-              />
-            }/>  
-            <Route path="*" element={
-              <NotFound />
-            }/>
-          </Routes>
-        </Content>
-      </BrowserRouter>
-    </ConfigProvider>
+          </Route>
+          <Route path="/play" element={
+            <SongSelect
+              config={config}
+            />
+          }/>
+          <Route path="/play/:mapsetId" element={
+            <DiffSelect
+              config={config}
+            />
+          }/>
+          <Route path="/play/:mapsetId/:mapId" element={
+            <Game
+              user={user}
+              config={config}
+            />
+          }/>
+          <Route path="/edit" element={
+            <EditorSongSelect
+              user={user}
+              config={config}
+            />
+          }/>
+          <Route path="/edit/:mapsetId" element={
+            <EditorDiffSelect
+              user={user}
+              config={config}
+            />
+          }/>
+          <Route path="/edit/:mapsetId/new" element={
+            <EditorMetadata
+              user={user}
+              config={config}
+            />
+          }/>
+          <Route path="/edit/:mapsetId/:mapId" element={
+            <Editor
+              user={user}
+              config={config}
+            />
+          }/>
+          <Route path="/edit/:mapsetId/:mapId/metadata" element={
+            <EditorMetadata
+              user={user}
+              config={config}
+            />
+          }/>
+          <Route path="/user/:userId" element={
+            <UserPage yourUser={user} config={config} />
+          }/>
+          <Route path="/settings" element={
+            <SettingsPage
+              user={user}
+              yourUser={user}
+              setYourUser={setUser}
+            />
+          }/>  
+          <Route path="*" element={
+            <NotFound />
+          }/>
+        </Routes>
+      </Content>
+    </BrowserRouter>
   );
 }
 

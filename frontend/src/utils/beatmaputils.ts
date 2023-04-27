@@ -1,4 +1,4 @@
-import { defaultConfig, Config } from '@/utils/config';
+import { defaultConfig, Config } from '@/providers/config';
 import { Beatmap, Beatmapset, LineData, GameState, Kana, LineState, TimingPoint, KanaState, BeatmapMetadata } from '@/utils/types';
 import { computeMinKeypresses, parseKana } from '@/utils/kana';
 import getTextWidth from "@/utils/widths";

@@ -1,7 +1,7 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 
-import { t } from "@/utils/config";
+import { getLocalizationFunc } from '@/providers/l10n';
 import { User } from "@/utils/types";
 
 import gameplayVideo from "@/public/images/gameplay_sample.mp4"
@@ -69,6 +69,7 @@ const Home = ({ user } : Props) => {
   if (user) {
     return <Navigate to="/play" replace={true} />
   }
+  const t = getLocalizationFunc();
 
   return (
     <Container>

@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 
-import { configContext, setConfigContext } from "@/utils/config";
+import { configContext, setConfigContext } from "@/providers/config";
 
 import styled from 'styled-components';
 import vicon from '@/public/images/volume.svg';
