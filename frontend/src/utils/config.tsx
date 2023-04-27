@@ -3,7 +3,7 @@
  */
 import React, { useState, useEffect, createContext, useContext } from 'react';
 
-import { Language, dictionaryList, getDefaultLanguage, languageOptions } from "@/languages";
+import { Language, TextID, dictionaryList, getDefaultLanguage, languageOptions } from "@/languages";
 
 export type Config = {
   volume: number;
@@ -59,11 +59,6 @@ export const defaultConfig = (): Config => ({
   },
 });
 
-// type ConfigContext = {
-//   config: Config;
-//   setConfig: (config: React.SetStateAction<Config>) => void;
-// }
-
 // create the language context with default selected language
 // will be initialized in provider
 export const configContext = createContext<Config>(defaultConfig());
@@ -100,7 +95,7 @@ export function ConfigProvider({ children }: ConfigProviderProps) {
 };
 
 // get text according to id & current language
-export function Text([tid]: TemplateStringsArray) {
+export function t(tid : TextID){
   const config = useContext(configContext);
   return dictionaryList[config.language][tid] || tid;
 };

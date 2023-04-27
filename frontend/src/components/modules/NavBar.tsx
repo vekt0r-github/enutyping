@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Link as RouterLink, NavLink } from "react-router-dom";
 
-import { Config, configContext, setConfigContext } from "@/utils/config"
+import { Config, configContext, setConfigContext, t } from "@/utils/config"
 import { User } from "@/utils/types";
 
 import { Language, languageOptions } from "@/languages";
@@ -84,25 +84,23 @@ const NavBar = ({ handleLogout, user } : Props) => {
   return <Outer>
   <NavContainer>
     <NavLeft>
-      <Logo to="/">enuTyping</Logo>
+      <Logo to="/">{t(`title`)}</Logo>
     </NavLeft>
     <NavMiddle>
-      <NavBarLink as={NavLink} to="/play">play</NavBarLink>
-      <NavBarLink as={NavLink} to="/edit">create</NavBarLink>
+      <NavBarLink as={NavLink} to="/play">{t(`navbar-play`)}</NavBarLink>
+      <NavBarLink as={NavLink} to="/edit">{t(`navbar-create`)}</NavBarLink>
     </NavMiddle>
     <NavRight>
-      {user ? 
-        <ProfileButton user={user} handleLogout={handleLogout} />
-        :
-        <>
-        {/* scuffamole */}
-          <select name={"localization"} value={config.language} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-            setConfig((config) => ({...config, language: e.target.value as Language}));
-          }}>
-            {Object.entries(languageOptions).map(([lang, label]) => <option value={lang}>{label}</option>)}
-          </select>
-          <NavBarLink as={NavLink} to="/login">sign in</NavBarLink>
-        </>}
+      <>
+      {/* scuffamole */}
+        <select name={"localization"} value={config.language} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+          setConfig((config) => ({...config, language: e.target.value as Language}));
+        }}>
+          {Object.entries(languageOptions).map(([lang, label]) => <option value={lang}>{label}</option>)}
+        </select>
+        {user ? <ProfileButton user={user} handleLogout={handleLogout} />
+          : <NavBarLink as={NavLink} to="/login">{t(`navbar-login`)}</NavBarLink>}
+      </>
     </NavRight>
   </NavContainer>
   </Outer>

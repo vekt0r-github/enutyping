@@ -17,7 +17,7 @@ import NotFound from "@/components/pages/NotFound";
 import UserPage from "@/components/pages/UserPage";
 import SettingsPage from "@/components/pages/Settings";
 
-import { Config, ConfigProvider, Text, configContext, setConfigContext } from "@/utils/config";
+import { Config, ConfigProvider, t, configContext, setConfigContext } from "@/utils/config";
 import { get, post } from "@/utils/functions";
 import { User } from "@/utils/types";
 
@@ -103,9 +103,9 @@ const App = ({} : Props) => {
     return (
       <ConfigProvider>
         <MobileContainer>
-          <MobileLogo>{Text`title`}</MobileLogo>
-          <h3>{Text`mobile-layout-error-header`}</h3>
-          <div>{Text`mobile-layout-error`}</div>
+          <MobileLogo>{t(`title`)}</MobileLogo>
+          <h3>{t(`error-mobile-layout-header`)}</h3>
+          <div>{t(`error-mobile-layout`)}</div>
         </MobileContainer>
       </ConfigProvider>
     )

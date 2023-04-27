@@ -1,7 +1,7 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 
-import { Text } from "@/utils/config";
+import { t } from "@/utils/config";
 import { User } from "@/utils/types";
 
 import gameplayVideo from "@/public/images/gameplay_sample.mp4"
@@ -73,10 +73,10 @@ const Home = ({ user } : Props) => {
   return (
     <Container>
       <Padded>
-        <Title>{Text`home-title`}</Title>
-        <p style={{color:"white"}}>{Text`home-subtitle`}</p>
+        <Title>{t(`home-title`)}</Title>
+        <p style={{color:"white"}}>{t(`home-subtitle`)}</p>
         <ButtonContainer>
-          <Button to="/play">{Text`try-now`}</Button>
+          <Button to="/play">{t(`home-try-now`)}</Button>
         </ButtonContainer>
       </Padded>
       <Vid autoPlay loop muted playsInline src={gameplayVideo} />

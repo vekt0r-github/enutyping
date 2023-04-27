@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 
 import { Language, languageOptions } from '@/languages';
 
-import { Config, configContext, setConfigContext, Text } from '@/utils/config';
+import { Config, configContext, setConfigContext, t } from '@/utils/config';
 import { User } from "@/utils/types";
 import { kanaRespellings } from "@/utils/kana";
 import { MainBox, SubBox } from "@/utils/styles";
@@ -69,6 +69,13 @@ type Props = {
   setYourUser: React.Dispatch<React.SetStateAction<User | null | undefined>>, // for changing name
 };
 
+enum MessageType { SUCCESS, ERROR };
+const { SUCCESS, ERROR } = MessageType;
+type Message = {
+  type: MessageType,
+  message: string,
+}
+
 const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />;
@@ -78,7 +85,7 @@ const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
   
   // Account name change state
   const [requestedName, setRequestedName] = useState<string>("");
-  const [errorMessage, setErrorMessage] = useState<string>();
+  const [message, setMessage] = useState<Message>({type: SUCCESS, message: ""});
 
   const kanaOptions = (() => {
 
@@ -110,11 +117,17 @@ const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
   }
   const handleSubmit = () => {
     if (!requestedName) {
-      setErrorMessage("We don't like blank names! Pick something else.");
+      setMessage({
+        type: ERROR,
+        message: t(`settings-error-name-blank`),
+      });
       return;
     }
     if (/_(osu|github|google)$/.test(requestedName)) {
-      setErrorMessage("You sneaky rat! Pick something else.");
+      setMessage({
+        type: ERROR,
+        message: t(`settings-error-name-bad`),
+      });
       return;
     }
     post('/api/me/changename', { requested_name: requestedName }).then((res) => {
@@ -124,9 +137,15 @@ const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
             return {...old, 'name': requestedName }
           }
         });
-        setErrorMessage("Success!");
+        setMessage({
+          type: SUCCESS,
+          message: t(`settings-success`),
+        });
       } else {
-        setErrorMessage("Username was taken! Please choose another one.");
+        setMessage({
+          type: ERROR,
+          message: t(`settings-error-name-taken`),
+        });
       }
       setRequestedName("");
     })
@@ -143,28 +162,28 @@ const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
     { (user && yourUser && user.id == yourUser.id) &&
       <>
         <ChangeNameBox>
-            <label>Requested Name: </label>
+            <label>{t(`settings-name-change-prompt`)}</label>
             <input value={requestedName}
                    onChange={handleChange}
                    onKeyDown={handleKeyDown}
             />
             <input onClick={handleSubmit} type="button" value="Submit" />
         </ChangeNameBox>
-        {errorMessage === "Success!" && <NameSuccessMessage>{errorMessage}</NameSuccessMessage>}
-        {(errorMessage && errorMessage !== "Success!") && <NameErrorMessage>{errorMessage}</NameErrorMessage>}
+        {message.type === SUCCESS && <NameSuccessMessage>{message.message}</NameSuccessMessage>}
+        {(message.message && message.type === ERROR) && <NameErrorMessage>{message.message}</NameErrorMessage>}
       </>
     }
     </>
   );
   return (
     <>
-      <h1>{Text`settings`}</h1>
+      <h1>{t(`settings`)}</h1>
       <CategoryBox>
         <CategoryTitle>
-          <h2>General</h2>
+          <h2>{t(`settings-category-general`)}</h2>
         </CategoryTitle>
         <SettingBox>
-          <SettingTitle>Site Language: </SettingTitle>
+          <SettingTitle>{t(`settings-site-language`)}</SettingTitle>
           <select name={"localization"} value={config.language} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
             // setConfig({ ...config, language: (e.target.value as Language) });
             setConfig((config) => ({...config, language: e.target.value as Language}));
@@ -173,22 +192,22 @@ const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
           </select>
         </SettingBox>
         <SettingBox>
-          <SettingTitle>Metadata Localization: </SettingTitle>
+          <SettingTitle>{t(`settings-metadata-localization`)}</SettingTitle>
           <select name={"localization"} value={config.localizeMetadata ? "true" : "false"} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
             setConfig({ ...config, localizeMetadata: (e.target.value ==="true") });
           }}>
-            <option value={"true"}>Display all song metadata in their Romanized versions (i.e. with the English alphabet)</option>
-            <option value={"false"}>Display all song metadata in their original languages</option>
+            <option value={"true"}>{t(`settings-metadata-localization-true`)}</option>
+            <option value={"false"}>{t(`settings-metadata-localization-false`)}</option>
           </select>
         </SettingBox>
       </CategoryBox>
       <CategoryBox>
         <CategoryTitle>
-          <h2>Gameplay</h2>
+          <h2>{t(`settings-category-gameplay`)}</h2>
         </CategoryTitle>
         <SettingContainer>
           <SettingBox>
-            <SettingTitle>Global Offset: </SettingTitle>
+            <SettingTitle>{t(`settings-global-offset`)}</SettingTitle>
             <input
               type="number"
               defaultValue={config.offset} 
@@ -196,34 +215,34 @@ const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
                 const offset = parseInt(e.target.value);
                 if (!isNaN(offset)) { setConfig({ ...config, offset: offset }); }
               }}
-            />
-            <p>If you feel that every map you play is consistently late or early, use this to apply an offset to every map automatically.</p>
+            />ms
+            <p>{t(`settings-global-offset-desc`)}</p>
           </SettingBox>
           <SettingBox>
-            <SettingTitle>Kana Input:</SettingTitle>
-            <p>For each of the following kana, choose how you want it to be romanized:</p>
+            <SettingTitle>{t(`settings-kana-input`)}</SettingTitle>
+            <p>{t(`settings-kana-input-desc`)}</p>
             <KanaContainer>
               {kanaOptions}
             </KanaContainer>
           </SettingBox>
           <SettingBox>
-          <SettingTitle>Polygraphic Kana Input:</SettingTitle>
+          <SettingTitle>{t(`settings-polygraphic-kana-input`)}</SettingTitle>
             <select name={"polygraphs"} value={config.typePolygraphs ? "true" : "false"} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               setConfig({ ...config, typePolygraphs: (e.target.value === "true") });
             }}>
-              <option value={"true"}>Enable individual typing of polygraphs</option>
-              <option value={"false"}>Disable individual typing of polygraphs</option>
+              <option value={"true"}>{t(`settings-polygraphic-kana-input-true`)}</option>
+              <option value={"false"}>{t(`settings-polygraphic-kana-input-false`)}</option>
             </select>
-            <p>Choose whether you want to be able to type polygraphic kana such as しゃ and っぷ by typing each kana individually. For example, with this setting turned on, you can type しゃ as "sha" or "shixya".</p>
+            <p>{t(`settings-polygraphic-kana-input-desc`)}</p>
           </SettingBox>
         </SettingContainer>
       </CategoryBox>
       <CategoryBox>
         <CategoryTitle>
-          <h2>Account</h2>
+          <h2>{t(`settings-category-account`)}</h2>
         </CategoryTitle>
         <SettingBox>
-          <SettingTitle>Change Username</SettingTitle>
+          <SettingTitle>{t(`settings-name-change`)}</SettingTitle>
           { editUser }
         </SettingBox>
       </CategoryBox>

@@ -2,6 +2,8 @@
 
 import en from './en.json';
 import ja from './ja.json';
+const typecheck: typeof en = ja; // enforces that all keys are identical
+export type TextID = keyof typeof en;
 
 const languages = ['en', 'ja'] as const;
 export type Language = typeof languages[number];
@@ -11,11 +13,11 @@ export const dictionaryList: {[K in Language]: {[tid: string]: string}} = {
 };
 export const languageOptions: {[K in Language]: string} = {
   en: 'English',
-  ja: 'Japanese',
+  ja: '日本語',
 };
 
 const globalDefaultLanguage: Language = 'en';
-export function getDefaultLanguage (): Language {
+export function getDefaultLanguage(): Language {
   const regionLanguage = window.navigator.language.slice(0, 2).toLowerCase();
   if (regionLanguage in languages) return (regionLanguage as Language)
   return globalDefaultLanguage;
