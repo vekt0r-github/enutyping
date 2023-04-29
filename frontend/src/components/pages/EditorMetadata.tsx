@@ -62,9 +62,6 @@ const FormSubmit = styled(NewButton)`
 `
 
 const EditorMetadata = ({ user } : Props) => {
-  if (!user) { // include this in every restricted page
-    return <Navigate to='/login' replace={true} />
-  }
   const text = getL10nFunc();
   const elem = getL10nElementFunc();
   const config = useContext(configContext);
@@ -132,7 +129,7 @@ const EditorMetadata = ({ user } : Props) => {
       .then((beatmapset) => {
         if (!beatmapset || !beatmapset.id) {
           throw new Error; // mapset not found
-        } else if (beatmapset.owner.id !== user.id) {
+        } else if (beatmapset.owner.id !== user?.id) {
           throw new Error; // no perms
         } else {
           setMapset(beatmapset);
@@ -169,6 +166,9 @@ const EditorMetadata = ({ user } : Props) => {
     }
   }, []); // may eventually depend on other things
 
+  if (!user) { // include this in every restricted page
+    return <Navigate to='/login' replace={true} />
+  }
   const Invalid = elem((<p></p>), `invalid-access-map`, {elems: {Link: <Link to="/edit/new" />}});
   if (status === GOBACK) { return <Navigate to={`/edit/${mapsetId}`} replace={true} />; }
   if (status === INVALID) { return Invalid; }

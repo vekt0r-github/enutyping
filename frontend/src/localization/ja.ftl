@@ -141,7 +141,7 @@ menu-warning-mapset-delete =
   <Line>コレクションにあるビートマップ（{ $mapCount }）は全部削除されます。</Line>
   <Line>削除すれば、元に戻すことはできません。</Line>
 
-menu-label-filter = KPM上限: KPM <
+menu-label-filter = KPM上限：
 menu-label-sort = ソート順選択：
 menu-label-reverse = リバース
 menu-sorting-date = 作成順

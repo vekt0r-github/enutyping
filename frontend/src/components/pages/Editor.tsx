@@ -46,9 +46,6 @@ const DiffName = styled.input`
 `;
 
 const Editor = ({ user } : Props) => {
-  if (!user) { // include this in every restricted page
-    return <Navigate to='/login' replace={true} />
-  }
   const text = getL10nFunc();
   const elem = getL10nElementFunc();
   const config = useContext(configContext);
@@ -114,7 +111,7 @@ const Editor = ({ user } : Props) => {
     get(`/api/beatmaps/${mapId}`).then((beatmap) => {
       if (!beatmap || !beatmap.id || beatmap.beatmapset.id != mapsetId) {
         setState({ status: INVALID }); // map not found or param is wrong
-      } else if (beatmap.beatmapset.owner.id !== user.id) {
+      } else if (beatmap.beatmapset.owner.id !== user?.id) {
         setState({ status: NO_PERMS }); // user doesn't own mapset
       } else {
         processAndLoad(() => beatmap, true);
@@ -129,6 +126,9 @@ const Editor = ({ user } : Props) => {
     processBeatmap(beatmap, config);
   }, [beatmap?.content]);
 
+  if (!user) { // include this in every restricted page
+    return <Navigate to='/login' replace={true} />
+  }
   const Invalid = elem((<p></p>), `invalid-access-map`, {elems: {Link: <Link to="/edit/new" />}});
   if (status === LOADING) { return <Loading />; }
   if (status === CREATED_DIFF) { return <Navigate to={`/edit/${mapsetId}/${beatmap!.id}`} />; }

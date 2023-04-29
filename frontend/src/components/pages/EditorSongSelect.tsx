@@ -47,9 +47,6 @@ const editorSortFuncs = {
 const defaultSort = "menu-sorting-date";
 
 const EditorSongSelect = ({ user } : Props) => {
-  if (!user) { // include this in every restricted page
-    return <Navigate to='/login' replace={true} />
-  }
   const text = getL10nFunc();
 
   const [mapsets, setMapsets] = useState<Beatmapset[]>();
@@ -88,7 +85,7 @@ const EditorSongSelect = ({ user } : Props) => {
   filteredMapsets?.sort(sortFunc);
 
   const getBeatmapsets = () => {
-    get("/api/beatmapsets", { search: user.id }).then((res) => {
+    get("/api/beatmapsets", { search: user?.id }).then((res) => {
       const beatmapsets = res.beatmapsets;
       if (beatmapsets && beatmapsets.length) {
         setMapsets(beatmapsets);
@@ -102,6 +99,9 @@ const EditorSongSelect = ({ user } : Props) => {
     getBeatmapsets();
   }, []);
   
+  if (!user) { // include this in every restricted page
+    return <Navigate to='/login' replace={true} />
+  }
   return (
     <>
       <h1>{text(`menu-editor-header`)}</h1>

@@ -64,7 +64,7 @@ const Scores = styled.div`
 `;
 
 
-const userInfoDisplay = InfoDisplay("", (stats: UserStats) => [
+const UserInfoDisplay = InfoDisplay("", (stats: UserStats) => [
   // ["Username", user.name],
   ["user-info-join-date", new Date(stats.join_time * 1000).toDateString()],
   ["user-info-key-acc", (stats.key_accuracy * 100).toFixed(2)],
@@ -83,7 +83,6 @@ const UserPage = ({ yourUser }: Props) => {
   const [scores, setScores] = useState<Score[]>([]);
   const [stats, setStats] = useState<UserStats | null>();
   const [scoreBeatmaps, setScoreBeatmaps] = useState<Beatmap[]>([]);
-
 
   useEffect(() => {
     get(`/api/users/${userId}`).then((res) => {
@@ -107,15 +106,6 @@ const UserPage = ({ yourUser }: Props) => {
                 beatmaps.push(res);
     })).then(() => setScoreBeatmaps(beatmaps));
   }, [scores]);
-
-
-  if (user === undefined || stats === undefined) {
-    return <Loading />;
-  }
-
-  if (user === null || stats === null) {
-    return <NotFound />;
-  }
 
   const prettyScore = (score: Score, beatmap: Beatmap) => {
     const {diffname} = beatmap;
@@ -149,6 +139,14 @@ const UserPage = ({ yourUser }: Props) => {
     );
   };
 
+  if (user === undefined || stats === undefined) {
+    return <Loading />;
+  }
+
+  if (user === null || stats === null) {
+    return <NotFound />;
+  }
+
   return (
     <>
       <UserBanner>
@@ -157,7 +155,7 @@ const UserPage = ({ yourUser }: Props) => {
           <h2 style={{paddingLeft: "0.5em"}}>{user.name}</h2>
         </NameAndProfile>
         <StatBox>
-          {userInfoDisplay(stats)}
+          <UserInfoDisplay {...stats} />
         </StatBox>
       </UserBanner>
 

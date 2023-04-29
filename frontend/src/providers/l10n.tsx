@@ -14,13 +14,12 @@ export function AppLocalizationProvider(props: AppLocalizationProviderProps) {
 
   useEffect(() => {
     getBundle(config.language).then((bundle) => {
-      console.log(bundle)
       setL10n(new ReactLocalization([bundle]));
     });
   }, [config.language]);
 
   if (l10n === null) {
-    return <div>Loading…</div>;
+    return <div>Loading…</div>; // can't pick a language to show loading in
   }
 
   return (

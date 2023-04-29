@@ -79,9 +79,6 @@ type Message = {
 }
 
 const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
-  if (!user) { // include this in every restricted page
-    return <Navigate to='/login' replace={true} />;
-  }
   const config = useContext(configContext);
   const setConfig = useContext(setConfigContext);
   const text = getL10nFunc();
@@ -178,6 +175,10 @@ const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
     }
     </>
   );
+
+  if (!user) { // include this in every restricted page
+    return <Navigate to='/login' replace={true} />;
+  }
   return (
     <>
       <h1>{text(`settings`)}</h1>

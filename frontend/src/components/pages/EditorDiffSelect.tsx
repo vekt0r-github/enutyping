@@ -68,9 +68,6 @@ const MainYTThumbnail = StyledThumbnail(YTThumbnail);
 const MainThumbnail = Thumbnail;
 
 const EditorDiffSelect = ({ user } : Props) => {
-  if (!user) { // include this in every restricted page
-    return <Navigate to='/login' replace={true} />
-  }
   const text = getL10nFunc();
   const elem = getL10nElementFunc();
   const config = useContext(configContext);
@@ -83,7 +80,7 @@ const EditorDiffSelect = ({ user } : Props) => {
       name: '',
       description: '',
       icon_url: '',
-      owner: user, // probably doesn't get sent to backend
+      owner: user!, // probably doesn't get sent to backend
       beatmaps: [], // not set here
     },
     selectedMap: undefined,
@@ -117,7 +114,7 @@ const EditorDiffSelect = ({ user } : Props) => {
       get(`/api/beatmapsets/${mapsetId}`).then((beatmapset) => {
         if (!beatmapset || !beatmapset.id) {
           setStatus(INVALID); // mapset not found
-        } else if (beatmapset.owner.id !== user.id) {
+        } else if (beatmapset.owner.id !== user?.id) {
           setStatus(INVALID); // no perms
         } else {
           setMapset(beatmapset);
@@ -142,6 +139,9 @@ const EditorDiffSelect = ({ user } : Props) => {
     }
   }, []); // may eventually depend on other things
 
+  if (!user) { // include this in every restricted page
+    return <Navigate to='/login' replace={true} />
+  }
   const Invalid = elem((<p></p>), `invalid-access-mapset`, {elems: {Link: <Link to="/edit/new" />}});
   if (status === GOBACK) { return <Navigate to={`/edit`} replace={true} />; }
   if (status === INVALID) { return Invalid; }

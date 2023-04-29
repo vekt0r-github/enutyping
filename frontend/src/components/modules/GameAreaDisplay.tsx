@@ -6,7 +6,7 @@ import GameVideo from "@/components/modules/GameVideo";
 import GameLine from "@/components/modules/GameLine";
 import { InfoDisplay, InfoPair } from "@/components/modules/InfoDisplay";
 
-import { getL10nFunc, getL10nElementFunc } from '@/providers/l10n';
+import { getL10nFunc } from '@/providers/l10n';
 import { Config, configContext } from '@/providers/config';
 
 import { 
@@ -179,7 +179,6 @@ const FinalStatsDisplay = InfoDisplay("",
 const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableSpeeds, speed } : Props) => {
   const config = useContext(configContext);
   const text = getL10nFunc();
-  const elem = getL10nElementFunc();
 
   const set = makeSetFunc(setGameState);
 

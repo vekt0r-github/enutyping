@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
@@ -61,7 +61,6 @@ const MobileLogo = styled.div`
 
 const App = ({} : Props) => {
   const [user, setUser] = useState<User | null>();
-  const config = useContext(configContext);
   const text = getL10nFunc();
 
   const [width, setWidth] = useState<number>(window.innerWidth);
