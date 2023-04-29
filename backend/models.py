@@ -97,8 +97,8 @@ def init_db():
         User(id="8484892osu", name='vekt0r', avatar_url='https://a.ppy.sh/8484892?1594621695.jpeg'),
         Beatmapset(id=727, 
             owner_id=1234,
-            name="dev test map collection also did you know",
-            description="杉並睦実は直枝理樹の同級生の一人である。睦実は、肩まである深いブルーの髪を大きな黄色いリボンで少し後ろに引き、四角い前髪を額にかけ、茶黄色の瞳をしており、身長は直枝理樹と同じくらいである。",
+            name="dev test map collection",
+            description="\o/",
             icon_url="https://cdn.discordapp.com/attachments/963645781112406059/1094859695203819670/nyaruhodo_remake.png"),
         Beatmap(id=727, \
             beatmapset_id=727, \
@@ -115,7 +115,7 @@ def init_db():
         Beatmapset(id=1337, 
             owner_id="8484892osu",
             name="flos",
-            description="これはflos",
+            description="猫又おかゆ",
             icon_url="http://img.youtube.com/vi/4muYzftomAE/default.jpg"),
         Beatmap(id=1337, \
             beatmapset_id=1337, \
@@ -138,7 +138,7 @@ def init_db():
            yt_id='xtfXl7TZTac', \
            preview_point=0, \
            duration=261000, \
-           diffname="あ", \
+           diffname="don't play this", \
            content=yorunicontent,
            kpm=381),
        Beatmap(id=2727, \
@@ -170,7 +170,7 @@ def init_db():
         Beatmapset(id=6789, \
             owner_id="1234", \
             name="Bo en - My Time",
-            description="no *your* time",
+            description="from OMORI",
             icon_url="http://img.youtube.com/vi/erzgjfU271g/default.jpg"),
         Beatmap(id=2730, \
             beatmapset_id=6789, \
