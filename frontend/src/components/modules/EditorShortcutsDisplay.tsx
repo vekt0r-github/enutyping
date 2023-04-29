@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+import { getL10nFunc } from '@/providers/l10n';
+
 import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
 import { Line, SubBox, Sidebar } from '@/utils/styles';
@@ -9,20 +11,20 @@ type Props = {
 };
 
 const info = [
-  [`Space`, `Play/Pause`],
-  [`←↑→↓`, `Navigate the timeline`],
-  [`Ctrl+S`, `Save beatmap`],
-  [`T`, `Place a timing point`, `Make sure your timing is correct! Look up the BPM of your song, navigate to the first downbeat, and place your timing point.`],
-  [`U`, `Delete last timing point`],
-  [`[ and ]`, `Change beat snap divisor`, `Each white tick in the timeline is one beat, and the colored lines are subdivisions.`],
-  [`Ctrl+Enter`, `Place a new line`, `Place a line whenever a line of lyrics starts, and enter the lyrics in the textbox. You can join or split lines to make the beatmap more readable!`],
-  [`Ctrl+⌫`, `Delete the previous line`],
-  [`Enter`, `Place a new syllable`, `Write the exact kana or letters you want the player to type at the current time. `],
-  [`⌫`, `Delete the previous syllable`],
-  [`Ctrl+←↑→↓`, `Navigate to nearest lines/syllables`],
-  [`E`, `Set beatmap's end time`, `This is when your last line ends.`],
-  [`Ctrl+Space`, `Enter "Testing Mode"`, `This is where you can test your map from any point, to see how hard it is!`],
-  [`Esc`, `Exit Testing Mode`],
+  [`Space`, `editor-shortcut-play-pause`],
+  [`←↑→↓`, `editor-shortcut-scroll`],
+  [`Ctrl+S`, `editor-shortcut-save`],
+  [`T`, `editor-shortcut-timing-add`, `editor-shortcut-timing-add-desc`],
+  [`U`, `editor-shortcut-timing-remove`],
+  [`[ and ]`, `editor-shortcut-beat-snap`, `editor-shortcut-beat-snap-desc`],
+  [`Ctrl+Enter`, `editor-shortcut-line-add`, `editor-shortcut-line-add-desc`],
+  [`Ctrl+⌫`, `editor-shortcut-line-remove`],
+  [`Enter`, `editor-shortcut-syllable-add`, `editor-shortcut-syllable-add-desc`],
+  [`⌫`, `editor-shortcut-syllable-remove`],
+  [`Ctrl+←↑→↓`, `editor-shortcut-scroll-jump`],
+  [`E`, `editor-shortcut-end-set`, `editor-shortcut-end-set-desc`],
+  [`Ctrl+Space`, `editor-shortcut-testing-enter`, `editor-shortcut-testing-enter-desc`],
+  [`Esc`, `editor-shortcut-testing-exit`],
 ]
 
 const InfoEntry = styled.div`
@@ -69,6 +71,7 @@ const InfoToggle = styled.div<{active: boolean}>`
 
 const EditorShortcutsDisplay = ({  } : Props) => {
   const [curr, setCurr] = useState<number>();
+  const text = getL10nFunc();
 
   return (
     <Sidebar>
@@ -79,10 +82,10 @@ const EditorShortcutsDisplay = ({  } : Props) => {
         return (
           <InfoEntry key={i}>
             <InfoLabel>{key}: </InfoLabel>
-            <InfoInst>{inst}</InfoInst>
+            <InfoInst>{text(inst)}</InfoInst>
             {desc ? <>
               <InfoToggle active={active} onClick={() => setCurr(c => c === i ? undefined : i)}>&gt;</InfoToggle>
-              {active ? <InfoDesc>{desc}</InfoDesc> : null}
+              {active ? <InfoDesc>{text(desc)}</InfoDesc> : null}
             </> : null}
           </InfoEntry>
         )

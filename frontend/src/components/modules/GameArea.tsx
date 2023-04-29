@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Navigate } from "react-router-dom";
 
 import GameAreaDisplay from "@/components/modules/GameAreaDisplay";
 
+import { Config, configContext } from '@/providers/config';
+
 import { post } from '@/utils/functions';
 import { 
-  User, Beatmap, LineData, Config, 
+  User, Beatmap, LineData,
   GameStatus, GameState,
 } from "@/utils/types";
 import { 
@@ -23,7 +25,6 @@ import {} from '@/utils/styles';
 type Props = {
   user: User | null,
   beatmap: Beatmap,
-  config: Config,
 	speed: number,
   afterGameEnd: () => void,
 	setAvailableSpeeds: React.Dispatch<React.SetStateAction<number[]>>,
@@ -46,7 +47,9 @@ const makeInitState = (lines: LineData[], config: Config, speed: number) : GameS
   stats: initStatsState(),
 });
 
-const GameArea = ({ user, beatmap, config, speed, afterGameEnd, setAvailableSpeeds } : Props) => {
+const GameArea = ({ user, beatmap, speed, afterGameEnd, setAvailableSpeeds } : Props) => {
+  const config = useContext(configContext);
+
   const initState = () => makeInitState(beatmap.lines as LineData[], config, speed);
 
   const [gameState, setGameState] = useState<GameState>(initState());
@@ -154,7 +157,6 @@ const GameArea = ({ user, beatmap, config, speed, afterGameEnd, setAvailableSpee
       setGameState={setGameState}
 			setAvailableSpeeds={setAvailableSpeeds}
 			speed={speed}
-      config={config}
     />
   );
 }

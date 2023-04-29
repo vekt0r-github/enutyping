@@ -1,11 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import { Navigate } from "react-router-dom";
+import { Localized } from "@fluent/react";
 
 import GameVideo from "@/components/modules/GameVideo";
 import GameLine from "@/components/modules/GameLine";
+import { InfoDisplay, InfoPair } from "@/components/modules/InfoDisplay";
+
+import { getL10nFunc, getL10nElementFunc } from '@/providers/l10n';
+import { Config, configContext } from '@/providers/config';
 
 import { 
-  User, Beatmap, LineData, Config,
+  User, Beatmap, LineData,
   GameStatus, GameState, LineState, KanaState,
 } from "@/utils/types";
 import { computeLineKPM, makeSetFunc, timeToLineIndex, timeToSyllableIndex, updateStatsOnKeyPress } from '@/utils/beatmaputils';
@@ -20,7 +25,6 @@ type Props = {
   gameState: GameState, // data in gameState.lines is a superset of beatmap.lines
   setGameState: React.Dispatch<React.SetStateAction<GameState>>,
 	setAvailableSpeeds: React.Dispatch<React.SetStateAction<number[]>>,
-  config: Config,
 	speed: number,
 };
 
@@ -108,7 +112,75 @@ const Warning = styled.div`
   padding: var(--s) 0;
 `;
 
-const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableSpeeds, speed, config } : Props) => {
+// computation and component utils
+const acc = ((hitCount: number, missCount: number) => {
+  if (hitCount + missCount == 0) {
+    return 100;
+  }
+  return 100 * hitCount / (hitCount + missCount);
+});
+
+type ComputedStats = GameState["stats"] & {
+  currentKPM: number;
+  keyAcc: string;
+  kanaAcc: string;
+};
+
+const getComputedStats = ({currTime, stats}: GameState): ComputedStats => {
+  const {hits, misses, kanaHits, kanaMisses} = stats;
+  const currentKPM = currTime ? (Math.round(hits * 60000 / currTime)) : 0;
+  const keyAcc = acc(hits, misses).toFixed(2);
+  const kanaAcc = acc(kanaHits, kanaMisses).toFixed(2);
+  return {...stats, currentKPM, keyAcc, kanaAcc};
+}
+
+const IngameStatsDisplay = InfoDisplay("", 
+  ({keyAcc, kanaAcc, score, currentKPM} : ComputedStats) : InfoPair[] => {
+    return [
+      [`game-stats-key-acc`, keyAcc],
+      [`game-stats-kana-acc`, kanaAcc],
+      [`game-stats-score`, Math.round(score)],
+      [`game-stats-kpm`, currentKPM],
+    ]
+  }
+);
+
+type IngameMapStatsDisplayProps = {
+  beatmap: Beatmap;
+  lineIndex: number | null;
+  speedMultiplier: number;
+}
+const IngameMapStatsDisplay = InfoDisplay("", 
+  ({beatmap, lineIndex, speedMultiplier}: IngameMapStatsDisplayProps) : InfoPair[] => {
+    const lineKPM = (lineIndex === null) ? "N/A" :
+      (Math.round(computeLineKPM(beatmap.lines[lineIndex]) * speedMultiplier))
+    return [
+      [`game-map-stats-kpm`, Math.round((beatmap.kpm ?? 0) * speedMultiplier)],
+      [`game-map-stats-line-kpm`, lineKPM],
+    ]
+  }
+);
+
+const FinalStatsDisplay = InfoDisplay("", 
+  ({hits, misses, kanaHits, kanaMisses, keyAcc, kanaAcc, score, currentKPM} : ComputedStats) : InfoPair[] => {
+    return [
+      [`game-stats-correct-keys`, hits],
+      [`game-stats-incorrect-keys`, misses],
+      [`game-stats-kana-typed`, kanaHits],
+      [`game-stats-kana-missed`, kanaMisses],
+      [`game-stats-key-acc`, keyAcc],
+      [`game-stats-kana-acc`, kanaAcc],
+      [`game-stats-kpm`, currentKPM],
+    ]
+  }
+);
+
+
+const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableSpeeds, speed } : Props) => {
+  const config = useContext(configContext);
+  const text = getL10nFunc();
+  const elem = getL10nElementFunc();
+
   const set = makeSetFunc(setGameState);
 
   const { volume } = config;
@@ -117,7 +189,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
   const totalOffset = offset + config.offset;
 
   const {status, currTime, lines, stats} = gameState;
-  const {hits, misses, kanaHits, kanaMisses, score} = stats;
+  const computedStats = getComputedStats(gameState);
 	const adjustedTime = currTime ? currTime * speed : currTime;
   const currIndex = (adjustedTime !== undefined) ? timeToLineIndex(beatmap.lines, adjustedTime) : undefined;
   const lineState = currIndex !== undefined ? lines[currIndex] : undefined;
@@ -136,19 +208,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
       offset: offset,
     }));
   };
-
-  const acc = ((hitCount: number, missCount: number) => {
-    if (hitCount + missCount == 0) {
-      return 100;
-    }
-    return 100 * hitCount / (hitCount + missCount);
-  });  
-
-  const keyAcc = acc(hits, misses);
-  const kanaAcc = acc(kanaHits, kanaMisses);
   
-  const KPM = currTime ? (Math.round(hits * 60000 / currTime)) : 0;
-
   if (status === GameStatus.GOBACK) {
     return <Navigate to={`/play/${beatmap.beatmapset.id}`} replace={true} />;
   }
@@ -158,22 +218,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
   const isPlayingGame = isActive && status === GameStatus.PLAYING;
 
   const scoreMultiplier = Math.pow(speed, 1/speed);
-  const scoreInfoPairs: [string, string | number | JSX.Element | undefined][] = [
-    ["Correct Keystrokes", hits],
-    ["Incorrect Keystrokes", misses],
-    ["Kana Typed", kanaHits],
-    ["Kana Missed", kanaMisses],
-    ["Keystroke Accuracy", keyAcc.toFixed(2)],
-		["Kana Accuracy", kanaAcc.toFixed(2)],
-  ];
 
-  const scoreInfoEntries = scoreInfoPairs.map((entry: [string, string | number | JSX.Element | undefined]) => (
-    <InfoEntry key={entry[0]}>
-      <span><b>{entry[0]}:</b></span>
-      <span>{entry[1]}</span>
-    </InfoEntry>
-  ));
-  
   const getKana = (sPos: number) : KanaState | undefined => {
     if (!lineState) { return; }
     const syllable = lineState.syllables[sPos];
@@ -276,15 +321,12 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
 							<LyricLine>{lines[currIndex].line.lyric}</LyricLine>
 						</> : null}
 						{status === GameStatus.SUBMITTING ?
-							<h2>Submitting score...</h2>
+							<h2>{text(`game-submitting`)}</h2>
 							: null}
 					</TopHalf>
 					<BottomHalf>
 						<StatBox>
-							<p>Keypress Acc: {keyAcc.toFixed(2)}</p>
-							<p>Kana Acc: {kanaAcc.toFixed(2)}</p>
-							<p>Score: {Math.round(score)}</p>
-							<p>KPM: {KPM}</p>
+              <IngameStatsDisplay {...computedStats} />
 						</StatBox>
 						<GameVideo
 							yt_id={beatmap.yt_id}
@@ -296,37 +338,36 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
 							volume={volume}
 						/>
 						<StatBox>
-							<p>Beatmap KPM: {Math.round((beatmap.kpm ?? 0) * speed)}</p>
-							<p>Line KPM: {isPlayingGame ? 
-								(Math.round(computeLineKPM(lines[currIndex].line) * speed))
-								: "N/A"}</p>
+              <IngameMapStatsDisplay
+                beatmap={beatmap}
+                lineIndex={isPlayingGame ? currIndex : null}
+                speedMultiplier={speed}
+              />
 						</StatBox>
 					</BottomHalf>
 					{status === GameStatus.UNSTARTED ? 
 						<Overlay>
 							{!user && <>
 								<Warning>
-									<Line size="1.5em" margin="0 0 0.5em 0">Warning: You are not logged in, and your score will not be submitted.</Line>
+									<Line size="1.5em" margin="0 0 0.5em 0">{text(`game-start-warning-login`)}</Line>
 								</Warning>
 							</>}
-							<Line size="1.5em" margin="0">Press Space to play</Line>
-							<Line size="1em" margin="0 0 0.5em 0">Press Esc to exit during a game</Line>
-							<Line size="1em" margin="0">Set map offset:&nbsp;
+							<Line size="1.5em" margin="0">{text(`game-start-message-header`)}</Line>
+							<Line size="1em" margin="0">{text(`game-start-message-subheader`)}</Line>
+							<Line size="1em" margin="0.5em 0 0 0">{text(`game-start-offset`)}
 								<OffsetInput size={3} defaultValue={offset} onChange={(e) => {
 									const intValue = parseInt(e.target.value)
 									if (!isNaN(intValue)) { setOffset(intValue); }
 								}}></OffsetInput>
 							</Line>
-							<Line size="1em" margin="0">(Put negative offset if you think syllables are late; positive if you think they're early)</Line>
+							<Line size="1em" margin="0">{text(`game-start-offset-desc`)}</Line>
 						</Overlay>
 						: null}
 					{status === GameStatus.ENDED ?
 						<ResultsContainer>
-							<h1><u>RESULTS</u></h1>
-							<h1>Final Score: {Math.round(score)}</h1>
-							<InfoBox width={90}>
-									{scoreInfoEntries}
-							</InfoBox>
+							<h1><u>{text(`game-results-header`)}</u></h1>
+							<h1>{text(`game-results-score`, {score: Math.round(stats.score)})}</h1>
+							<FinalStatsDisplay {...computedStats} />
 						</ResultsContainer>
 						: null} 
 

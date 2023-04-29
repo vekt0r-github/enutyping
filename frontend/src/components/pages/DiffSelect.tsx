@@ -1,13 +1,16 @@
-import React, { useEffect, useState }  from "react";
-import { Navigate, useParams, useLocation } from "react-router-dom";
+import React, { useContext, useEffect, useState }  from "react";
+import { Navigate, useParams } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
 import NotFound from "@/components/pages/NotFound";
 import YTThumbnail from "@/components/modules/YTThumbnail";
-import {MapInfoDisplay, MapsetInfoDisplay} from "@/components/modules/InfoDisplay";
+import { MapInfoDisplay, MapsetInfoDisplay } from "@/components/modules/InfoDisplay";
+
+import { getL10nFunc, getL10nElementFunc } from '@/providers/l10n';
+import { Config, configContext } from "@/providers/config";
 
 import { get } from "@/utils/functions";
-import { Config, Beatmapset, BeatmapMetadata } from "@/utils/types";
+import { Beatmapset, BeatmapMetadata } from "@/utils/types";
 import { getArtist, getTitle } from "@/utils/beatmaputils"
 import { withParamsAsKey } from "@/utils/componentutils";
 
@@ -17,9 +20,7 @@ import { MainBox, Line, Link, Sidebar, GamePageContainer, Thumbnail } from '@/ut
 
 import { GameContainer, BottomHalf, StatBox, Overlay as GameOverlay } from "@/components/modules/GameAreaDisplay";
 
-type Props = {
-  config: Config,
-};
+type Props = {};
 
 export const Overlay = styled(GameOverlay)`
   padding: var(--m) 0;
@@ -37,7 +38,7 @@ export const DiffsContainer = styled.div`
 
 export const Diff = styled(MainBox)`
   max-width: 300px;
-  height: 68px;
+  height: 88px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -57,7 +58,11 @@ const StyledThumbnail = (base: Parameters<typeof styled>[0]) => styled(base)`
 const MainYTThumbnail = StyledThumbnail(YTThumbnail);
 const MainThumbnail = Thumbnail;
 
-const DiffSelect = ({ config } : Props) => {
+const DiffSelect = ({} : Props) => {
+  const text = getL10nFunc();
+  const elem = getL10nElementFunc();
+  const config = useContext(configContext);
+  
   const [goback, setGoback] = useState<boolean>(false);
 
   const { mapsetId } = useParams();
@@ -91,8 +96,6 @@ const DiffSelect = ({ config } : Props) => {
   if (mapset === undefined) { return <Loading />; }
   if (mapset === null) { return <NotFound />; }
   const {name, icon_url, owner, beatmaps} = mapset;
-  const [artist, title] = selectedMap ?
-    [getArtist(selectedMap, config), getTitle(selectedMap, config)] : [undefined, undefined];
   
   if (goback) {
     return <Navigate to={`/play`} replace={true} />;
@@ -101,7 +104,10 @@ const DiffSelect = ({ config } : Props) => {
   return (
     <>
       <Line as="h1" size="2em">{name}</Line>
-      <Line as="p" margin="0 0 0.5em 0">Collection created by <Link to={`/user/${owner.id}`}>{owner.name}</Link></Line>
+      {elem((<Line as="p" margin="0 0 0.5em 0" />), `diffs-mapset-owner`, {
+        elems: {Link: <Link to={`/user/${owner.id}`} />},
+        vars: {owner: owner.name},
+      })}
       <GamePageContainer>
         <Sidebar>
           <MapsetInfoDisplay {...mapset} />
@@ -117,7 +123,7 @@ const DiffSelect = ({ config } : Props) => {
             <StatBox />
           </BottomHalf>
           <Overlay>
-            <Line as="h2" size="1.5em" margin="1.5em 0">Select Beatmap:</Line>
+            <Line as="h2" size="1.5em" margin="1.5em 0">{text(`diffs-header`)}</Line>
             <DiffsContainer>
               {beatmaps.map((map) => 
                 <Diff
@@ -131,8 +137,17 @@ const DiffSelect = ({ config } : Props) => {
                   onFocusOut={() => setSelectedMap(undefined)}
                 >
                   <YTThumbnail yt_id={map.yt_id} width={32} height={24} />
-                  <Line as="p" size="1em" margin="0">{getArtist(map, config)} - {getTitle(map, config)} [{map.diffname}]</Line>
-                  <Line as="p" size="1em" margin="0">({Math.round(map.kpm ?? 0)} kpm)</Line>
+                  {elem((<></>), `diffs-map-display`, {
+                    elems: {
+                      Line: <Line as="p" size="1em" margin="0" />
+                    },
+                    vars: {
+                      artist: getArtist(map, config),
+                      title: getTitle(map, config),
+                      diffname: map.diffname,
+                      kpm: Math.round(map.kpm ?? 0)
+                    },
+                  })}
                 </Diff>
               )}
             </DiffsContainer>

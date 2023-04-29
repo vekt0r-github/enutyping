@@ -1,7 +1,7 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 
-import { getLocalizationFunc } from '@/providers/l10n';
+import { getL10nFunc } from '@/providers/l10n';
 import { User } from "@/utils/types";
 
 import gameplayVideo from "@/public/images/gameplay_sample.mp4"
@@ -69,15 +69,15 @@ const Home = ({ user } : Props) => {
   if (user) {
     return <Navigate to="/play" replace={true} />
   }
-  const t = getLocalizationFunc();
+  const text = getL10nFunc();
 
   return (
     <Container>
       <Padded>
-        <Title>{t(`home-title`)}</Title>
-        <p style={{color:"white"}}>{t(`home-subtitle`)}</p>
+        <Title>{text(`home-title`)}</Title>
+        <p style={{color:"white"}}>{text(`home-subtitle`)}</p>
         <ButtonContainer>
-          <Button to="/play">{t(`home-try-now`)}</Button>
+          <Button to="/play">{text(`home-try-now`)}</Button>
         </ButtonContainer>
       </Padded>
       <Vid autoPlay loop muted playsInline src={gameplayVideo} />

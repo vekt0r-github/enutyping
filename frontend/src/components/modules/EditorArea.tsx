@@ -1,12 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { Navigate, useSearchParams } from "react-router-dom";
 
 import GameAreaDisplay from "@/components/modules/GameAreaDisplay";
 import EditorTimeline from "@/components/modules/EditorTimeline";
 import EditorScrollBar from "@/components/modules/EditorScrollBar";
 
+import { getL10nFunc } from '@/providers/l10n';
+import { Config, configContext } from '@/providers/config';
+
 import { 
-  User, Beatmap, LineData, Config,
+  User, Beatmap, LineData,
   GameStatus, GameState 
 } from "@/utils/types";
 import { 
@@ -34,7 +37,6 @@ type Props = {
   lastSavedBeatmap: Beatmap,
   setContent: (content: string, saved?: boolean) => void,
   saveBeatmap: () => void,
-  config: Config,
 };
 
 enum EditingStatus {NOT, LINE, SYLLABLE, TIMING};
@@ -121,9 +123,12 @@ const makeStateAt = (lines: LineData[], config: Config, currTime?: number, statu
 
 
 
-const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap, config } : Props) => {
+const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap } : Props) => {
   const [searchParams] = useSearchParams();
   const copyOf = searchParams.get('copy');
+  
+  const config = useContext(configContext);
+  const text = getL10nFunc();
   
   const {lines, timingPoints} = beatmap;
   const makeState = (currTime?: number, status?: GameStatus) => makeStateAt(lines as LineData[], config, currTime, status);
@@ -555,16 +560,20 @@ const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap, 
 
   return (
     <EditorAreaContainer>
-      {isEditing ? <EditorTimeline 
-        windowLength={4000}
-        currTime={currTime ?? 0}
-        lines={lines}
-        timingPoints={timingPoints}
-        endTime={beatmap.endTime}
-        beatSnapDivisor={beatSnapDivisor}
-      /> : <TimelineMessageBox>
-        <Line size="1.25em" margin="0">Testing Mode</Line>
-      </TimelineMessageBox>}
+      {isEditing ? (
+        <EditorTimeline 
+          windowLength={4000}
+          currTime={currTime ?? 0}
+          lines={lines}
+          timingPoints={timingPoints}
+          endTime={beatmap.endTime}
+          beatSnapDivisor={beatSnapDivisor}
+        />
+      ) : (
+        <TimelineMessageBox>
+          <Line size="1.25em" margin="0">{text(`editor-testing-mode`)}</Line>
+        </TimelineMessageBox>
+      )}
       <GameAreaDisplay
         user={user}
         beatmap={beatmap}
@@ -572,7 +581,6 @@ const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap, 
         setGameState={isTesting ? setGameState : () => {}}
 				speed={1}
 				setAvailableSpeeds={setAvailableSpeeds}
-        config={config}
       />
       {/* a few absolutely positioned components to overlay */}
       {editingState.status === EditingStatus.LINE ?
@@ -589,26 +597,30 @@ const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap, 
           onChange={onInputChange}
           autoFocus={true}
         /> : null}
-      <TimingDisplay>Current BPM:&nbsp;
+      <TimingDisplay>{text(`editor-timing-bpm`)}
         {editingState.status === EditingStatus.TIMING ?
           <TimingInput 
             size={5}
             value={editingState.content}
             onChange={onInputChange}
             autoFocus={true}
-          /> : (currTimingPoint?.bpm ?? "None—press 'T' to set a timing point")}
+          /> : (currTimingPoint?.bpm ?? text(`editor-timing-bpm-none`))}
       </TimingDisplay>
-      {!saved ? <UnsavedWarning>*Unsaved Changes* (Ctrl+S to save)</UnsavedWarning> : null}
-      {isEditing ? <EditorScrollBar 
-        currTime={currTime ?? 0}
-        setCurrTime={setSeekingTo}
-        lines={lines}
-        timingPoints={timingPoints}
-        endTime={beatmap.endTime}
-        length={beatmap.duration}
-      /> : <TimelineMessageBox>
-        <Line size="1.25em" margin="0">Testing Mode</Line>
-      </TimelineMessageBox>}
+      {!saved ? <UnsavedWarning>{text(`editor-unsaved`)}</UnsavedWarning> : null}
+      {isEditing ? (
+        <EditorScrollBar 
+          currTime={currTime ?? 0}
+          setCurrTime={setSeekingTo}
+          lines={lines}
+          timingPoints={timingPoints}
+          endTime={beatmap.endTime}
+          length={beatmap.duration}
+        />
+      ) : (
+        <TimelineMessageBox>
+          <Line size="1.25em" margin="0">{text(`editor-testing-mode`)}</Line>
+        </TimelineMessageBox>
+      )}
     </EditorAreaContainer>
   );
 }

@@ -106,7 +106,7 @@ const NavBar = ({ handleLogout, user } : Props) => {
         <select name={"localization"} value={config.language} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
           setConfig((config) => ({...config, language: e.target.value as Language}));
         }}>
-          {Object.entries(languageOptions).map(([lang, label]) => <option value={lang}>{label}</option>)}
+          {Object.entries(languageOptions).map(([lang, label]) => <option key={lang} value={lang}>{label}</option>)}
         </select>
         {user ? (
           <ProfileButton user={user} handleLogout={handleLogout} />

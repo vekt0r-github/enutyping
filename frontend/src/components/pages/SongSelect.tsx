@@ -3,8 +3,11 @@ import React, { useEffect, useState }  from "react";
 import MapsetList from "@/components/modules/MapsetList";
 import Loading from "@/components/modules/Loading";
 
+import { getL10nFunc } from '@/providers/l10n';
+import { Config } from "@/providers/config";
+
 import { get } from "@/utils/functions";
-import { Config, Beatmapset, Beatmap, BeatmapMetadata } from "@/utils/types";
+import { Beatmapset, Beatmap, BeatmapMetadata } from "@/utils/types";
 import { withLabel } from "@/utils/componentutils";
 import { getSetAvg } from "@/utils/beatmaputils";
 
@@ -16,9 +19,7 @@ const KPMInput = styled.input`
   width: 60px;
 `;
 
-type Props = {
-  config: Config,
-};
+type Props = {};
 
 interface SortFunc {
   (a: Beatmapset, b: Beatmapset): number
@@ -37,21 +38,24 @@ const makeSortFuncForProp = (f: (set: Beatmapset) => string): SortFunc => {
   });
 }
 
-export const SortFuncs = {
-  ["Date Created"]: makeSortFunc((a, b) => a.id - b.id),
-  ["Average Length"]: makeSortFunc((a, b) => getSetAvg(a, 'duration') - getSetAvg(b, 'duration')),
-  ["Collection Name"]: makeSortFuncForProp(set => set.name),
-  // Artist: makeSortFuncForProp(set => set.artist),
-  Creator: makeSortFuncForProp(set => set.owner.name),
+export const sortFuncs = {
+  // TODO: need ability to break apart collections in sorting
+  ["menu-sorting-date"]: makeSortFunc((a, b) => a.id - b.id),
+  ["menu-sorting-length"]: makeSortFunc((a, b) => getSetAvg(a, 'duration') - getSetAvg(b, 'duration')),
+  ["menu-sorting-name"]: makeSortFuncForProp(set => set.name),
+  ["menu-sorting-owner"]: makeSortFuncForProp(set => set.owner.name),
 }
+const defaultSort = "menu-sorting-date";
 
-const SongSelect = ({ config } : Props) => {
+const SongSelect = ({} : Props) => {
+  const text = getL10nFunc();
+  
   const [mapsets, setMapsets] = useState<Beatmapset[]>();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [KPMUpperBound, setKPMUpperBound] = useState<number>();
-  const [sortLabel, setSortLabel] = useState<keyof typeof SortFuncs>("Date Created");
+  const [sortLabel, setSortLabel] = useState<keyof typeof sortFuncs>(defaultSort);
   const [sortReverse, setSortReverse] = useState<boolean>(true);
-  let sortFunc = SortFuncs[sortLabel];
+  let sortFunc = sortFuncs[sortLabel];
   if (sortReverse) sortFunc = sortFunc.reverse();
 
   const filteredMapsets = mapsets?.filter((set: Beatmapset) => {  
@@ -80,16 +84,16 @@ const SongSelect = ({ config } : Props) => {
   
   return (
     <>
-      <h1>Song Select</h1>
+      <h1>{text(`menu-header`)}</h1>
       <SearchContainer>
-				<SearchBar value={searchQuery} placeholder={"Search for a mapset:"} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} />
+				<SearchBar value={searchQuery} placeholder={text(`menu-search-placeholder`)} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} />
         {withLabel(<KPMInput type="number" value={KPMUpperBound} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setKPMUpperBound(e.target.value ? parseInt(e.target.value) : undefined)}/>,
-          "song-select-filter", "Filter: KPM <")}
-        {withLabel(<select onChange={(e) => setSortLabel(e.target.value as keyof typeof SortFuncs)}>
-          {Object.keys(SortFuncs).map(k => <option value={k}>{k}</option>)}
-        </select>, "song-select-sort", "Sort by:")}
+          "song-select-filter", text("menu-label-filter"))}
+        {withLabel(<select onChange={(e) => setSortLabel(e.target.value as keyof typeof sortFuncs)}>
+          {Object.keys(sortFuncs).map(k => <option value={k}>{text(k)}</option>)}
+        </select>, "song-select-sort", text("menu-label-sort"))}
         {withLabel(<input type="checkbox" checked={sortReverse} onChange={(e) => setSortReverse(e.target.checked)}></input>, 
-          "song-select-reverse", "Reverse?")}
+          "song-select-reverse", text("menu-label-reverse"))}
       </SearchContainer>
       <SongsContainer>
         {(filteredMapsets === undefined) ? <Loading /> :
@@ -97,7 +101,6 @@ const SongSelect = ({ config } : Props) => {
             getBeatmapsets={getBeatmapsets}
             mapsets={filteredMapsets}
             includeCreate={false}
-            config={config}
             link={(mapsetId, mapId) => `/play/${mapsetId}/${mapId??''}`} 
           />}
       </SongsContainer>

@@ -6,7 +6,7 @@ import { Navigate } from "react-router-dom";
 import { Language, languageOptions } from '@/localization';
 
 import { configContext, setConfigContext } from '@/providers/config';
-import { getLocalizationFunc } from '@/providers/l10n';
+import { getL10nFunc } from '@/providers/l10n';
 
 import { User } from "@/utils/types";
 import { kanaRespellings } from "@/utils/kana";
@@ -84,7 +84,7 @@ const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
   }
   const config = useContext(configContext);
   const setConfig = useContext(setConfigContext);
-  const t = getLocalizationFunc();
+  const text = getL10nFunc();
   
   // Account name change state
   const [requestedName, setRequestedName] = useState<string>("");
@@ -122,14 +122,14 @@ const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
     if (!requestedName) {
       setMessage({
         type: ERROR,
-        message: t(`settings-error-name-blank`),
+        message: text(`settings-error-name-blank`),
       });
       return;
     }
     if (/_(osu|github|google)$/.test(requestedName)) {
       setMessage({
         type: ERROR,
-        message: t(`settings-error-name-bad`),
+        message: text(`settings-error-name-bad`),
       });
       return;
     }
@@ -142,12 +142,12 @@ const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
         });
         setMessage({
           type: SUCCESS,
-          message: t(`settings-success`),
+          message: text(`settings-success`),
         });
       } else {
         setMessage({
           type: ERROR,
-          message: t(`settings-error-name-taken`),
+          message: text(`settings-error-name-taken`),
         });
       }
       setRequestedName("");
@@ -165,7 +165,7 @@ const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
     { (user && yourUser && user.id == yourUser.id) &&
       <>
         <ChangeNameBox>
-            <label>{t(`settings-name-change-prompt`)}</label>
+            <label>{text(`settings-name-change-prompt`)}</label>
             <input value={requestedName}
                    onChange={handleChange}
                    onKeyDown={handleKeyDown}
@@ -180,37 +180,37 @@ const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
   );
   return (
     <>
-      <h1>{t(`settings`)}</h1>
+      <h1>{text(`settings`)}</h1>
       <CategoryBox>
         <CategoryTitle>
-          <h2>{t(`settings-category-general`)}</h2>
+          <h2>{text(`settings-section-general`)}</h2>
         </CategoryTitle>
         <SettingBox>
-          <SettingTitle>{t(`settings-site-language`)}</SettingTitle>
+          <SettingTitle>{text(`settings-site-language`)}</SettingTitle>
           <select name={"localization"} value={config.language} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
             // setConfig({ ...config, language: (e.target.value as Language) });
             setConfig((config) => ({...config, language: e.target.value as Language}));
           }}>
-            {Object.entries(languageOptions).map(([lang, label]) => <option value={lang}>{label}</option>)}
+            {Object.entries(languageOptions).map(([lang, label]) => <option key={lang} value={lang}>{label}</option>)}
           </select>
         </SettingBox>
         <SettingBox>
-          <SettingTitle>{t(`settings-metadata-localization`)}</SettingTitle>
+          <SettingTitle>{text(`settings-metadata-localization`)}</SettingTitle>
           <select name={"localization"} value={config.localizeMetadata ? "true" : "false"} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
             setConfig({ ...config, localizeMetadata: (e.target.value ==="true") });
           }}>
-            <option value={"true"}>{t(`settings-metadata-localization-true`)}</option>
-            <option value={"false"}>{t(`settings-metadata-localization-false`)}</option>
+            <option value={"true"}>{text(`settings-metadata-localization-true`)}</option>
+            <option value={"false"}>{text(`settings-metadata-localization-false`)}</option>
           </select>
         </SettingBox>
       </CategoryBox>
       <CategoryBox>
         <CategoryTitle>
-          <h2>{t(`settings-category-gameplay`)}</h2>
+          <h2>{text(`settings-section-gameplay`)}</h2>
         </CategoryTitle>
         <SettingContainer>
           <SettingBox>
-            <SettingTitle>{t(`settings-global-offset`)}</SettingTitle>
+            <SettingTitle>{text(`settings-global-offset`)}</SettingTitle>
             <input
               type="number"
               defaultValue={config.offset} 
@@ -219,33 +219,33 @@ const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
                 if (!isNaN(offset)) { setConfig({ ...config, offset: offset }); }
               }}
             />ms
-            <p>{t(`settings-global-offset-desc`)}</p>
+            <p>{text(`settings-global-offset-desc`)}</p>
           </SettingBox>
           <SettingBox>
-            <SettingTitle>{t(`settings-kana-input`)}</SettingTitle>
-            <p>{t(`settings-kana-input-desc`)}</p>
+            <SettingTitle>{text(`settings-kana-input`)}</SettingTitle>
+            <p>{text(`settings-kana-input-desc`)}</p>
             <KanaContainer>
               {kanaOptions}
             </KanaContainer>
           </SettingBox>
           <SettingBox>
-          <SettingTitle>{t(`settings-polygraphic-kana-input`)}</SettingTitle>
+          <SettingTitle>{text(`settings-polygraphic-kana-input`)}</SettingTitle>
             <select name={"polygraphs"} value={config.typePolygraphs ? "true" : "false"} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               setConfig({ ...config, typePolygraphs: (e.target.value === "true") });
             }}>
-              <option value={"true"}>{t(`settings-polygraphic-kana-input-true`)}</option>
-              <option value={"false"}>{t(`settings-polygraphic-kana-input-false`)}</option>
+              <option value={"true"}>{text(`settings-polygraphic-kana-input-true`)}</option>
+              <option value={"false"}>{text(`settings-polygraphic-kana-input-false`)}</option>
             </select>
-            <p>{t(`settings-polygraphic-kana-input-desc`)}</p>
+            <p>{text(`settings-polygraphic-kana-input-desc`)}</p>
           </SettingBox>
         </SettingContainer>
       </CategoryBox>
       <CategoryBox>
         <CategoryTitle>
-          <h2>{t(`settings-category-account`)}</h2>
+          <h2>{text(`settings-section-account`)}</h2>
         </CategoryTitle>
         <SettingBox>
-          <SettingTitle>{t(`settings-name-change`)}</SettingTitle>
+          <SettingTitle>{text(`settings-name-change`)}</SettingTitle>
           { editUser }
         </SettingBox>
       </CategoryBox>

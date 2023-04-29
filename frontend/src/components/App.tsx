@@ -18,7 +18,7 @@ import UserPage from "@/components/pages/UserPage";
 import SettingsPage from "@/components/pages/Settings";
 
 import { configContext } from "@/providers/config";
-import { getLocalizationFunc } from "@/providers/l10n";
+import { getL10nFunc } from "@/providers/l10n";
 
 import { get, post } from "@/utils/functions";
 import { User } from "@/utils/types";
@@ -62,7 +62,7 @@ const MobileLogo = styled.div`
 const App = ({} : Props) => {
   const [user, setUser] = useState<User | null>();
   const config = useContext(configContext);
-  const t = getLocalizationFunc();
+  const text = getL10nFunc();
 
   const [width, setWidth] = useState<number>(window.innerWidth);
 
@@ -105,9 +105,9 @@ const App = ({} : Props) => {
   if (isMobile) {
     return (
       <MobileContainer>
-        <MobileLogo>{t(`title`)}</MobileLogo>
-        <h3>{t(`error-mobile-layout-header`)}</h3>
-        <div>{t(`error-mobile-layout`)}</div>
+        <MobileLogo>{text(`title`)}</MobileLogo>
+        <h3>{text(`error-mobile-layout-header`)}</h3>
+        <div>{text(`error-mobile-layout`)}</div>
       </MobileContainer>
     )
   }
@@ -138,53 +138,43 @@ const App = ({} : Props) => {
             }/>
           </Route>
           <Route path="/play" element={
-            <SongSelect
-              config={config}
-            />
+            <SongSelect />
           }/>
           <Route path="/play/:mapsetId" element={
-            <DiffSelect
-              config={config}
-            />
+            <DiffSelect />
           }/>
           <Route path="/play/:mapsetId/:mapId" element={
             <Game
               user={user}
-              config={config}
             />
           }/>
           <Route path="/edit" element={
             <EditorSongSelect
               user={user}
-              config={config}
             />
           }/>
           <Route path="/edit/:mapsetId" element={
             <EditorDiffSelect
               user={user}
-              config={config}
             />
           }/>
           <Route path="/edit/:mapsetId/new" element={
             <EditorMetadata
               user={user}
-              config={config}
             />
           }/>
           <Route path="/edit/:mapsetId/:mapId" element={
             <Editor
               user={user}
-              config={config}
             />
           }/>
           <Route path="/edit/:mapsetId/:mapId/metadata" element={
             <EditorMetadata
               user={user}
-              config={config}
             />
           }/>
           <Route path="/user/:userId" element={
-            <UserPage yourUser={user} config={config} />
+            <UserPage yourUser={user} />
           }/>
           <Route path="/settings" element={
             <SettingsPage

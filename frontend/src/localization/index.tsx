@@ -1,5 +1,13 @@
 import { FluentBundle, FluentResource } from "@fluent/bundle";
 
+/**
+ * this project now uses Project Fluent for localization
+ * https://projectfluent.org/
+ * 
+ * currently using as a key-value store; not using best practices
+ * except for NavBar.tsx and places where logic is necessary
+ */
+
 const languages = ['en', 'ja'] as const;
 export type Language = typeof languages[number];
 export const languageOptions: {[K in Language]: string} = {

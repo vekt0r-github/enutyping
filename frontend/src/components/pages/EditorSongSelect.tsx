@@ -4,9 +4,12 @@ import { Navigate } from "react-router-dom";
 import MapsetList from "@/components/modules/MapsetList";
 import Loading from "@/components/modules/Loading";
 
+import { getL10nFunc } from '@/providers/l10n';
+import { Config } from "@/providers/config";
+
 import { get, post } from "@/utils/functions";
-import { User, Config, Beatmapset, BeatmapMetadata } from "@/utils/types";
-import { SortFuncs } from "@/components/pages/SongSelect";
+import { User, Beatmapset, BeatmapMetadata } from "@/utils/types";
+import { sortFuncs } from "@/components/pages/SongSelect";
 import { withLabel } from "@/utils/componentutils";
 
 import styled from 'styled-components';
@@ -15,7 +18,6 @@ import { MainBox, Link, Line, BlackLine, SearchBar, SearchContainer, SongsContai
 
 type Props = {
   user: User | null,
-  config: Config,
 };
 
 const NewMapset = styled(MainBox)`
@@ -37,16 +39,24 @@ const NewMapset = styled(MainBox)`
   }
 `;
 
-const EditorSongSelect = ({ user, config } : Props) => {
+const editorSortFuncs = {
+  "menu-sorting-date": sortFuncs["menu-sorting-date"],
+  "menu-sorting-length": sortFuncs["menu-sorting-length"],
+  "menu-sorting-name": sortFuncs["menu-sorting-name"],
+}
+const defaultSort = "menu-sorting-date";
+
+const EditorSongSelect = ({ user } : Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />
   }
+  const text = getL10nFunc();
 
   const [mapsets, setMapsets] = useState<Beatmapset[]>();
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [sortLabel, setSortLabel] = useState<keyof typeof SortFuncs>("Date Created");
+  const [sortLabel, setSortLabel] = useState<keyof typeof sortFuncs>(defaultSort);
   const [sortReverse, setSortReverse] = useState<boolean>(true);
-  let sortFunc = SortFuncs[sortLabel];
+  let sortFunc = sortFuncs[sortLabel];
   if (sortReverse) sortFunc = sortFunc.reverse();
 
   // Scuffed code 2
@@ -94,27 +104,26 @@ const EditorSongSelect = ({ user, config } : Props) => {
   
   return (
     <>
-      <h1>My Beatmapsets</h1>
+      <h1>{text(`menu-editor-header`)}</h1>
       <SearchContainer>
-        <SearchBar value={searchQuery} placeholder={"Search for a mapset:"} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} />
-        {withLabel(<select onChange={(e) => setSortLabel(e.target.value as keyof typeof SortFuncs)}>
-          {Object.keys(SortFuncs).filter(x => x !== "Creator").map(k => <option value={k}>{k}</option>)}
-        </select>, "song-select-sort", "Sort by:")}
+        <SearchBar value={searchQuery} placeholder={text(`menu-search-placeholder`)} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} />
+        {withLabel(<select onChange={(e) => setSortLabel(e.target.value as keyof typeof sortFuncs)}>
+          {Object.keys(editorSortFuncs).map(k => <option value={k}>{text(k)}</option>)}
+        </select>, "song-select-sort", text("menu-label-sort"))}
         {withLabel(<input type="checkbox" checked={sortReverse} onChange={(e) => setSortReverse(e.target.checked)}></input>, 
-          "song-select-reverse", "Reverse?")}
+          "song-select-reverse", text("menu-label-reverse"))}
       </SearchContainer>
       <SongsContainer>
         {(filteredMapsets === undefined) ? <Loading /> :
           <>
             <NewMapset as={Link} to='/edit/new'>
               <Line size="6em" margin="-5px 20px 0 0">+</Line>
-              <BlackLine as="h2" size="1.5em">Create New Collection</BlackLine>
+              <BlackLine as="h2" size="1.5em">{text(`menu-mapset-new`)}</BlackLine>
             </NewMapset>
             <MapsetList 
               getBeatmapsets={getBeatmapsets}
               mapsets={filteredMapsets}
               includeCreate={true}
-              config={config} 
               link={(mapsetId, mapId) => `/edit/${mapsetId}/${mapId??''}`} 
             />
           </>}

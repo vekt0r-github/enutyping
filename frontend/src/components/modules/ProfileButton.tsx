@@ -1,8 +1,10 @@
 import { User } from "@/utils/types";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import styled from "styled-components";
 
+import { getL10nFunc } from "@/providers/l10n";
+
+import styled from "styled-components";
 import '@/utils/styles.css'
 import { Line } from '@/utils/styles'
 
@@ -75,6 +77,7 @@ const Option = styled.div`
 `;
 
 const ProfileButton = ({ user, handleLogout }: Props) => {
+  const text = getL10nFunc();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -92,9 +95,9 @@ const ProfileButton = ({ user, handleLogout }: Props) => {
         <DropdownContainer>
           <Dropdown>
             <Name>{user.name}</Name>
-            <Option onClick={handleClick(`/user/${user.id}`)}>My Profile</Option>
-            <Option onClick={handleClick('/settings')}>Settings</Option>
-            <Option onClick={handleLogout}>Sign Out</Option>
+            <Option onClick={handleClick(`/user/${user.id}`)}>{text(`navbar-profile`)}</Option>
+            <Option onClick={handleClick('/settings')}>{text(`navbar-settings`)}</Option>
+            <Option onClick={handleLogout}>{text(`navbar-logout`)}</Option>
           </Dropdown>
         </DropdownContainer>
       }

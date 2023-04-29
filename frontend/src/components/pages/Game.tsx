@@ -1,13 +1,16 @@
-import React, { useEffect, useState }  from "react";
+import React, { useContext, useEffect, useState }  from "react";
 import { Navigate, useParams } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
 import GameArea from "@/components/modules/GameArea";
 import NotFound from "@/components/pages/NotFound";
-import {MapInfoDisplay} from "@/components/modules/InfoDisplay";
+import { MapInfoDisplay } from "@/components/modules/InfoDisplay";
+
+import { getL10nFunc } from '@/providers/l10n';
+import { Config, configContext } from "@/providers/config";
 
 import { get } from "@/utils/functions";
-import { User, Config, Beatmap } from "@/utils/types";
+import { User, Beatmap } from "@/utils/types";
 import { getArtist, getTitle, processBeatmap } from '@/utils/beatmaputils';
 import { withParamsAsKey } from "@/utils/componentutils";
 
@@ -21,7 +24,6 @@ import SpeedSelect from "../modules/SpeedSelect";
 
 type Props = {
   user: User | null,
-  config: Config,
 };
 
 const MAX_NUM_LEADERBOARD = 6;
@@ -47,7 +49,10 @@ const UserAvatar = styled.img`
 `;
 
 
-const Game = ({ user, config } : Props) => {
+const Game = ({ user } : Props) => {
+  const text = getL10nFunc();
+  const config = useContext(configContext);
+
   const { mapId, mapsetId } = useParams();
   
   const refreshBeatmap = () => {
@@ -90,13 +95,12 @@ const Game = ({ user, config } : Props) => {
         <GameArea
           user={user}
           beatmap={map}
-          config={config}
           afterGameEnd={refreshBeatmap}
 					speed={speed}
 					setAvailableSpeeds={setAvailableSpeeds}
         />
         <Sidebar>
-          <h2>Leaderboard</h2>
+          <h2>{text(`game-leaderboard-header`)}</h2>
           <LBContainer>
             { map?.scores?.slice(0, MAX_NUM_LEADERBOARD).map((score) =>
               // XXX: hmm is this okay to be optional?

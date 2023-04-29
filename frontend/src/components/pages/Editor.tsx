@@ -1,4 +1,4 @@
-import React, { useEffect, useState }  from "react";
+import React, { useContext, useEffect, useState }  from "react";
 import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
@@ -7,8 +7,11 @@ import {MapInfoDisplay} from "@/components/modules/InfoDisplay";
 import EditorShortcutsDisplay from "@/components/modules/EditorShortcutsDisplay";
 import ConfirmPopup from "@/components/modules/ConfirmPopup";
 
+import { getL10nFunc, getL10nElementFunc } from '@/providers/l10n';
+import { Config, configContext } from "@/providers/config";
+
 import { get, post, put, httpDelete } from "@/utils/functions";
-import { User, Config, Beatmap } from "@/utils/types";
+import { User, Beatmap } from "@/utils/types";
 import { getArtist, getTitle, processBeatmap } from '@/utils/beatmaputils';
 import { withParamsAsKey } from "@/utils/componentutils";
 
@@ -18,7 +21,6 @@ import { MainBox, Line, Sidebar, GamePageContainer, Link, NewButton, DeleteButto
 
 type Props = {
   user: User | null,
-  config: Config,
 };
 
 enum Status { LOADING, LOADED, SUBMITTING, INVALID, NO_PERMS, CREATED_DIFF };
@@ -43,10 +45,13 @@ const DiffName = styled.input`
   font-family: "Open Sans";
 `;
 
-const Editor = ({ user, config } : Props) => {
+const Editor = ({ user } : Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />
   }
+  const text = getL10nFunc();
+  const elem = getL10nElementFunc();
+  const config = useContext(configContext);
 
   // TODO: button to edit metadata
 
@@ -124,12 +129,12 @@ const Editor = ({ user, config } : Props) => {
     processBeatmap(beatmap, config);
   }, [beatmap?.content]);
 
-  const Invalid = <p>This beatmap doesn't exist, or you don't have the permissions to edit it. <Link to="/edit/new">Create a new one?</Link></p>;
+  const Invalid = elem((<p></p>), `invalid-access-map`, {elems: {Link: <Link to="/edit/new" />}});
   if (status === LOADING) { return <Loading />; }
   if (status === CREATED_DIFF) { return <Navigate to={`/edit/${mapsetId}/${beatmap!.id}`} />; }
   if (status === NO_PERMS) { return Invalid; }
   if (status === INVALID || !beatmap) { return Invalid; }
-  const {beatmapset, yt_id, source, preview_point, content, diffname, lines, kpm, scores} = beatmap;
+  const {diffname, kpm} = beatmap;
   const [artist, title] = [getArtist(beatmap, config), getTitle(beatmap, config)];
   
   const setContent = (content : string, saved = false) => 
@@ -145,14 +150,16 @@ const Editor = ({ user, config } : Props) => {
 
   return (
     <>
-      <h1>Editing: {artist} - {title} [{diffname}]</h1>
+      <h1>
+        {text(`editor-header`, {artist, title, diffname})}
+      </h1>
       <GamePageContainer>
         <Sidebar>
           <MapInfoDisplay 
             {...beatmap}
           />
           <p>
-            Change diffname:
+            {text(`editor-change-diffname`)}
             <DiffName
               value={diffname}
               onChange={(e : React.ChangeEvent<HTMLInputElement>) => {
@@ -160,20 +167,21 @@ const Editor = ({ user, config } : Props) => {
               }}
             />
           </p>
-          <NewButton as={Link} to={`/edit/${mapsetId}/new?copy=${mapId}`}>
-            <Line size="3.5em" margin="-3px 12px 0 0" style={{'width': '40px'}}>+</Line>
-            <Line size="1em" margin="0">Create a Copy</Line>
+          <NewButton as={Link} to={`/edit/${mapsetId}/${mapId}/metadata`}>
+            <Line size="1em" margin="0">{text(`editor-map-edit-metadata`)}</Line>
           </NewButton>
           <ConfirmPopup 
             button={<DeleteButton>
               <Line size="3.5em" margin="-12px 0px 0 0" style={{'width': '40px'}}>-</Line>
-              <Line size="1em" margin="0">Delete Beatmap</Line>
+              <Line size="1em" margin="0">{text(`editor-map-delete`)}</Line>
             </DeleteButton>}
-            warningText={<>
-              <Line size="1.25em" margin="1.5em 0 0 0">Are you sure you want to delete this beatmap:</Line>
-              <Line size="1.75em" margin="1.5em">{artist} - {title} [{diffname}]?</Line>
-              <Line size="1.25em" margin="0">This action is permanent and cannot be undone.</Line>
-            </>}
+            warningText={elem((<></>), `editor-warning-map-delete`, {
+              elems: {
+                Line: <Line size="1.25em" margin="1.5em 0 0 0" />,
+                BigLine: <Line size="1.75em" margin="1.5em 0 0 0" />,
+              },
+              vars: {title, artist, diffname}
+            })}
             onConfirm={handleDeleteBeatmap}
           />
         </Sidebar>
@@ -183,17 +191,8 @@ const Editor = ({ user, config } : Props) => {
           lastSavedBeatmap={lastSavedBeatmap!}
           setContent={setContent}
           saveBeatmap={saveBeatmap}
-          config={config}
         />
         <EditorShortcutsDisplay />
-        {/* <Sidebar as="form" onSubmit={(e : React.FormEvent<HTMLFormElement>) => {
-            saveBeatmap();
-            e.preventDefault();
-          }}>
-          <h2>Beatmap File</h2>
-          <GameFile value={content} readOnly={true} />
-          <button type='submit'>SUbSMIT</button>
-        </Sidebar> */}
       </GamePageContainer>
     </>
   );

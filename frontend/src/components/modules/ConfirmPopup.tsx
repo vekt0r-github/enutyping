@@ -1,7 +1,7 @@
-import { User } from "@/utils/types";
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+
+import { getL10nFunc } from '@/providers/l10n';
 
 import '@/utils/styles.css'
 import { Line, MainBox, DeleteButton } from '@/utils/styles';
@@ -55,6 +55,7 @@ const Cancel = styled(DeleteButton)`
 
 const ConfirmPopup = ({ button, warningText, onConfirm }: Props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const text = getL10nFunc();
 
   return (<>
     <div onClick={() => setIsOpen(true)}>{button}</div>
@@ -66,7 +67,7 @@ const ConfirmPopup = ({ button, warningText, onConfirm }: Props) => {
           {warningText}
           <Buttons>
             <Confirm onClick={() => onConfirm()}>
-              <Line size="1.25em" margin="0">Delete</Line>
+              <Line size="1.25em" margin="0">{text(`Delete`)}</Line>
             </Confirm>
             <Cancel onClick={() => setIsOpen(false)}>
               <Line size="1.25em" margin="0">Cancel</Line>

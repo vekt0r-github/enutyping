@@ -1,6 +1,7 @@
 ## enuTyping
 
-Hosted at https://enutyping.timmy.moe
+No longer hosted at https://enutyping.timmy.moe
+Hosted at https://enutyping.vekt0r.dev
 
 # Python modules used
 ```

@@ -1,9 +1,12 @@
-import React, { useState }  from "react";
+import React, { useContext, useState }  from "react";
 
 import ConfirmPopup from "@/components/modules/ConfirmPopup";
 import YTThumbnail from "@/components/modules/YTThumbnail";
 
-import { Config, Beatmapset, Beatmap, BeatmapMetadata } from "@/utils/types";
+import { Beatmapset } from "@/utils/types";
+
+import { getL10nFunc, getL10nElementFunc } from '@/providers/l10n';
+import { Config, configContext } from '@/providers/config';
 
 import { getArtist, getTitle, getSetAvg } from "@/utils/beatmaputils";
 
@@ -16,7 +19,6 @@ type Props = {
   getBeatmapsets: () => void,
   mapsets: Beatmapset[],
   includeCreate: boolean,
-  config: Config,
   link: (mapsetId: number, mapId?: number|string) => string,
 };
 
@@ -98,7 +100,11 @@ const Info = styled.div`
   min-width: 0;
 `;
 
-const MapsetList = ({ getBeatmapsets, mapsets, includeCreate, config, link } : Props) => {
+const MapsetList = ({ getBeatmapsets, mapsets, includeCreate, link } : Props) => {
+  const text = getL10nFunc();
+  const elem = getL10nElementFunc();
+  const config = useContext(configContext);
+
   const handleDeleteBeatmapset = async (mapsetId: number) => {
     const res = await httpDelete(`/api/beatmapsets/${mapsetId}`);
     if (res && res.success) {
@@ -120,8 +126,8 @@ const MapsetList = ({ getBeatmapsets, mapsets, includeCreate, config, link } : P
                   <Line size='1.25em' as='h2' margin="0">{mapset.name}</Line>
                   {/* <Line size='1em' margin="0">by {getArtist(mapset, config)}</Line> */}
                   <Line size='1em' margin="0">{mapset.description}</Line>
-                  <Line size='0.8em' margin="0">created by {owner.name}</Line>
-                  <Line size='0.8em' margin="0">{mapCount} map{mapCount !== 1 ? 's' : ''} | Average keys/min: {Math.round(getSetAvg(mapset, 'kpm'))}</Line>
+                  <Line size='0.8em' margin="0">{text(`menu-mapset-owner`, {owner: owner.name})}</Line>
+                  <Line size='0.8em' margin="0">{text(`menu-mapset-mapcount`, {mapCount})} | {text(`menu-mapset-kpm`, {kpm: Math.round(getSetAvg(mapset, 'kpm'))})}</Line>
                 </Info>
               </SetLink>
               <DiffsContainer>
@@ -134,7 +140,12 @@ const MapsetList = ({ getBeatmapsets, mapsets, includeCreate, config, link } : P
                     key={map.id}
                   >
                     <YTThumbnail yt_id={map.yt_id} width={32} height={24} />
-                    <Line size="1em" margin="0">{getArtist(map, config)} - {getTitle(map, config)} [{map.diffname}] ({Math.round(map.kpm ?? 0)} kpm)</Line>
+                    <Line size="1em" margin="0">{text(`menu-map-display`, {
+                      artist: getArtist(map, config),
+                      title: getTitle(map, config),
+                      diffname: map.diffname,
+                      kpm: Math.round(map.kpm ?? 0),
+                    })}</Line>
                   </Diff>
                 )}
                 {/* below only when in editor mode */}
@@ -146,19 +157,31 @@ const MapsetList = ({ getBeatmapsets, mapsets, includeCreate, config, link } : P
                     key={"new"}
                   >
                     <BlackLine size="2.5em" margin="-1.5px 8px 0 0">+</BlackLine>
-                    <BlackLine size="1em">Create New Beatmap in Collection</BlackLine>
+                    <BlackLine size="1em">{text(`menu-map-new`)}</BlackLine>
                   </Diff>
                   <ConfirmPopup 
                     button={<Diff color="warn">
                     <BlackLine size="2.5em" margin="-8px 14px 0 5px">-</BlackLine>
-                      <BlackLine size="1em">Delete Collection</BlackLine>
+                      <BlackLine size="1em">{text(`menu-mapset-delete`)}</BlackLine>
                     </Diff>}
-                    warningText={<>
-                      <Line size="1.25em" margin="1.5em 0 0 0">Are you sure you want to delete this beatmapset:</Line>
-                      <Line size="1.75em" margin="1.5em 0 0 0">{mapset.name}?</Line>
-                      <Line size="1.25em" margin="1.5em 0 0 0">All {mapCount} beatmap(s) will be deleted.</Line>
-                      <Line size="1.25em" margin="1.5em 0 0 0">This action is permanent and cannot be undone.</Line>
-                    </>}
+                    warningText={
+                      elem((<></>), `menu-warning-mapset-delete`, {
+                        elems: {
+                          Line: <Line size="1.25em" margin="1.5em 0 0 0" />,
+                          BigLine: <Line size="1.75em" margin="1.5em 0 0 0" />,
+                        },
+                        vars: {
+                          name: mapset.name,
+                          mapCount: mapCount,
+                        }
+                      })
+                    }
+                    // {<>
+                    //   <Line size="1.25em" margin="1.5em 0 0 0">Are you sure you want to delete this beatmapset:</Line>
+                    //   <Line size="1.75em" margin="1.5em 0 0 0">{mapset.name}?</Line>
+                    //   <Line size="1.25em" margin="1.5em 0 0 0">All {mapCount} beatmap(s) will be deleted.</Line>
+                    //   <Line size="1.25em" margin="1.5em 0 0 0">This action is permanent and cannot be undone.</Line>
+                    // </>}
                     onConfirm={() => handleDeleteBeatmapset(mapset.id)}
                   />
                 </> : null}

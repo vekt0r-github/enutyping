@@ -1,6 +1,4 @@
-import { Language, getDefaultLanguage } from "@/languages";
-
-export type User = { // example
+export type User = {
   id: number;
   name: string;
   avatar_url: string;
@@ -70,7 +68,7 @@ export type Beatmap = BeatmapMetadata & {
   scores?: Score[];
 };
 
-export type Beatmapset = { // example
+export type Beatmapset = {
   id: number;
   owner: User;
   name: string;

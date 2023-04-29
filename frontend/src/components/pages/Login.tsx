@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
 
+import Loading from "@/components/modules/Loading";
 import OAuthButton from "@/components/modules/OAuthButton";
+
+import { getL10nFunc } from "@/providers/l10n";
 
 import { User } from "@/utils/types";
 import { withParamsAsKey } from "@/utils/componentutils";
@@ -21,6 +24,8 @@ const Container = styled.div`
 `
 
 const Login = ({ handleLogin, user } : Props) => {
+  const text = getL10nFunc();
+  
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchParams, _] = useSearchParams();
 
@@ -44,10 +49,8 @@ const Login = ({ handleLogin, user } : Props) => {
 
   return (
     <>
-      <h1>Login</h1>
-      { isLoading ? (
-        <p>Loading...</p>
-      ): (
+      <h1>{text(`login-header`)}</h1>
+      { isLoading ? <Loading />: (
         <Container>
           <OAuthButton text="Sign in with Github" link="/api/login/github/request" svgUrl={GithubSVG} width={45} />
           <OAuthButton text="Sign in with Google" link="/api/login/google/request" svgUrl={GoogleSVG} width={45} />

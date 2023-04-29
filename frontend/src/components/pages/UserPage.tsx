@@ -1,14 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
+import NotFound from "@/components/pages/NotFound";
+import Loading from "@/components/modules/Loading";
+import { InfoDisplay } from "@/components/modules/InfoDisplay";
+
+import { getL10nFunc, getL10nElementFunc } from "@/providers/l10n";
+import { configContext } from "@/providers/config";
+
 import { get } from "@/utils/functions";
-import { Beatmap, Score, User, UserStats, Config } from "@/utils/types";
+import { Beatmap, Score, User, UserStats } from "@/utils/types";
+import { getArtist, getTitle } from "@/utils/beatmaputils";
+
+import styled from 'styled-components';
 import { InfoBox, InfoEntry } from '@/utils/styles';
 import { withParamsAsKey } from "@/utils/componentutils";
 
-import styled from 'styled-components';
-
-import Loading from "../modules/Loading";
+type Props = {
+  yourUser: User | null,
+};
 
 const StatBox = styled.div`
   display: flex;
@@ -16,7 +26,7 @@ const StatBox = styled.div`
   min-width: 500px;
   justify-content: center;
   border-radius: var(--s);
-  padding: 1em;
+  padding: var(--s);
   background-color: var(--clr-secondary);
 `;
 
@@ -28,6 +38,7 @@ const NameAndProfile = styled.div`
 
 const UserAvatar = styled.img`
   width: 150px;
+  height: 150px;
   margin: var(--s);
   border-radius: 25%;
 `;
@@ -37,7 +48,7 @@ const UserBanner = styled.div`
   background-color: var(--clr-primary);
   display: flex;
   margin: var(--s);
-  min-width: 1200px;
+  min-width: 900px;
   padding: 1rem;
   margin-top: 2em;
 `;
@@ -46,18 +57,27 @@ const Scores = styled.div`
   display: flex;
   flex-direction: column;
   background-color: var(--clr-primary);
-  min-width: 1200px;
+  min-width: 900px;
   padding: 1rem;
   align-items: center;
   border-radius: var(--s);
 `;
 
-type Props = {
-  yourUser: User | null,
-  config: Config,
-};
 
-const UserPage = ({ yourUser, config }: Props) => {
+const userInfoDisplay = InfoDisplay("", (stats: UserStats) => [
+  // ["Username", user.name],
+  ["user-info-join-date", new Date(stats.join_time * 1000).toDateString()],
+  ["user-info-key-acc", (stats.kana_accuracy * 100).toFixed(2)],
+  ["user-info-kana-acc", (stats.key_accuracy * 100).toFixed(2)],
+  ["user-info-play-count", stats.play_count],
+  ["user-info-total-score", stats.total_score]
+]);
+
+const UserPage = ({ yourUser }: Props) => {
+  const text = getL10nFunc();
+  const elem = getL10nElementFunc();
+  const config = useContext(configContext);
+
   const { userId } = useParams();
   const [user, setUser] = useState<User | null>();
   const [scores, setScores] = useState<Score[]>([]);
@@ -90,48 +110,44 @@ const UserPage = ({ yourUser, config }: Props) => {
 
 
   if (user === undefined || stats === undefined) {
-    return (
-      <Loading />
-    );
+    return <Loading />;
   }
 
   if (user === null || stats === null) {
-    return (
-      <p>User not found!</p>
-    );
+    return <NotFound />;
   }
 
   const prettyScore = (score: Score, beatmap: Beatmap) => {
-    const [title, artist]: string[] = (config.localizeMetadata) ? [beatmap.beatmapset.title, beatmap.beatmapset.artist] : [beatmap.beatmapset.title_original, beatmap.beatmapset.artist_original]; 
+    const {diffname} = beatmap;
+    const [artist, title] = [getArtist(beatmap, config), getTitle(beatmap, config)];
     return (
       <>
         <InfoEntry>
-          <span><b>{artist} - {title}</b> [{beatmap.diffname}]</span>
-          <span><b>{score.score}</b> points (<b>{score.speed_modification}x</b> speed)</span>
+          {elem((<span></span>), `userpage-score-map-display`, {
+            elems: {emph: <b></b>},
+            vars: {artist, title, diffname},
+          })}
+          {elem((<span></span>), `userpage-score-score`, {
+            elems: {emph: <b></b>},
+            vars: {
+              score: score.score,
+              speed: score.speed_modification,
+            },
+          })}
         </InfoEntry>
         <InfoEntry>
-          <span>Played at {new Date(score.time_unix * 1000).toLocaleString()}</span>
-          <span><b>{(score.key_accuracy * 100).toFixed(2)}%</b> key, <b>{(score.kana_accuracy * 100).toFixed(2)}%</b> kana</span>
+          <span>{text(`userpage-score-date`, {date: new Date(score.time_unix * 1000).toLocaleString()})}</span>
+          {elem((<span></span>), `userpage-score-acc`, {
+            elems: {emph: <b></b>},
+            vars: {
+              keyAcc: (score.key_accuracy * 100).toFixed(2),
+              kanaAcc: (score.kana_accuracy * 100).toFixed(2),
+            },
+          })}
         </InfoEntry>
       </>
     );
   };
-
-  const userInfoPairs = [
-    // ["Username", user.name],
-    ["Join Date", new Date(stats.join_time * 1000).toDateString()],
-    ["Overall Kana Accuracy", (stats.kana_accuracy * 100).toFixed(2)],
-    ["Overall Key Accuracy", (stats.key_accuracy * 100).toFixed(2)],
-    ["Play Count", stats.play_count],
-    ["Total Score", stats.total_score]
-  ];
-
-  const userStatsElements = userInfoPairs.map((entry: (string | number)[]) => (
-    <InfoEntry key={entry[0]}>
-      <span><b>{entry[0]}:</b></span>
-      <span>{entry[1]}</span>
-    </InfoEntry>
-  ));
 
   return (
     <>
@@ -141,23 +157,23 @@ const UserPage = ({ yourUser, config }: Props) => {
           <h2 style={{paddingLeft: "0.5em"}}>{user.name}</h2>
         </NameAndProfile>
         <StatBox>
-            {userStatsElements}
+          {userInfoDisplay(stats)}
         </StatBox>
       </UserBanner>
 
       <div>
-        <h2>Recent Scores</h2>
+        <h2>{text(`userpage-section-scores`)}</h2>
         <Scores>
           { (scores && scores.length > 0) ?
             <>
               {scores.map((score, i) =>
                 <InfoBox width={100} key={score.id}>
-                  {scoreBeatmaps[i] ? prettyScore(score, scoreBeatmaps[i]): "Couldn't load map"} 
+                  {scoreBeatmaps[i] ? prettyScore(score, scoreBeatmaps[i]) : null} 
                 </InfoBox>
               )}
             </>
             :
-            <p>No recent plays for this player!</p>
+            <p>{text(`userpage-no-scores`)}</p>
           }
         </Scores>
       </div>

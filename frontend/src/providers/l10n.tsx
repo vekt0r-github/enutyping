@@ -30,7 +30,15 @@ export function AppLocalizationProvider(props: AppLocalizationProviderProps) {
   );
 };
 
-export const getLocalizationFunc = () : ((s: string) => string) => {
+export type L10nFunc = ReactLocalization["getString"];
+export type L10nElementFunc = ReactLocalization["getElement"];
+
+export const getL10nFunc = () : L10nFunc => {
   const { l10n } = useLocalization();
   return l10n.getString.bind(l10n);
+};
+
+export const getL10nElementFunc = () : L10nElementFunc => {
+  const { l10n } = useLocalization();
+  return l10n.getElement.bind(l10n);
 };

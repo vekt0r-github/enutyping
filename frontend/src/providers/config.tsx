@@ -74,13 +74,14 @@ export function ConfigProvider({ children }: ConfigProviderProps) {
   const [config, setConfig] = useState(defaultConfig());
 
   useEffect(() => {
-    const localConfig: string | null = window.localStorage.getItem('ishotyping-config');
+    const localConfig: string | null = window.localStorage.getItem('enutyping-config');
     if(localConfig) {
       setConfig({ ...config, ...JSON.parse(localConfig) });
     }
   }, []);
 
   useEffect(() => {
+    console.log(config)
     window.localStorage.setItem('enutyping-config', JSON.stringify(config));
   }, [config]);
   
