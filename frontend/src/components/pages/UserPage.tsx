@@ -67,8 +67,8 @@ const Scores = styled.div`
 const userInfoDisplay = InfoDisplay("", (stats: UserStats) => [
   // ["Username", user.name],
   ["user-info-join-date", new Date(stats.join_time * 1000).toDateString()],
-  ["user-info-key-acc", (stats.kana_accuracy * 100).toFixed(2)],
-  ["user-info-kana-acc", (stats.key_accuracy * 100).toFixed(2)],
+  ["user-info-key-acc", (stats.key_accuracy * 100).toFixed(2)],
+  ["user-info-kana-acc", (stats.kana_accuracy * 100).toFixed(2)],
   ["user-info-play-count", stats.play_count],
   ["user-info-total-score", stats.total_score]
 ]);

@@ -81,7 +81,6 @@ export function ConfigProvider({ children }: ConfigProviderProps) {
   }, []);
 
   useEffect(() => {
-    console.log(config)
     window.localStorage.setItem('enutyping-config', JSON.stringify(config));
   }, [config]);
   

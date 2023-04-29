@@ -57,7 +57,7 @@ editor-shortcut-syllable-add-desc = Write the exact kana or letters you want the
 editor-shortcut-syllable-remove = Delete the previous syllable
 editor-shortcut-scroll-jump = Navigate to nearest lines/syllables
 editor-shortcut-end-set = Set beatmap's end time
-editor-shortcut-end-set-desc = This is when your last line ends.
+editor-shortcut-end-set-desc = This is when your last line ends. Don't forget to set this!
 editor-shortcut-testing-enter = Enter "{ editor-testing-mode }"
 editor-shortcut-testing-enter-desc = This is where you can test your map from any point, to see how hard it is!
 editor-shortcut-testing-exit = Exit { editor-testing-mode }
@@ -78,9 +78,9 @@ form-mapset-header = Collection Information:
 form-mapset-name = Collection Title
 form-mapset-desc = Description
 form-mapset-icon = Icon Source
-form-mapset-icon-desc = paste the link to an image here!
-form-mapset-submit-create = Create Map and Continue
-form-warning-metadata = Make sure your metadata is correct! However, you can change it after you've started mapping.
+form-mapset-icon-desc = An image link, to serve as your collection's icon in the menu.
+form-mapset-submit-create = Create Collection and Continue
+form-warning-metadata = Make sure your metadata is correct! You can still change it after you've started mapping.
 
 game-leaderboard-header = Leaderboard
 game-mods-header = Map Modifications
@@ -100,7 +100,7 @@ game-submitting = Submitting score...
 game-start-warning-login = Warning: You are not logged in, and your score will not be submitted.
 game-start-message-header = Press Space to play
 game-start-message-subheader = Press Esc to exit during a game
-game-start-offset = Set map offset: 
+game-start-offset = {"Set map offset (ms): "}
 game-start-offset-desc = (Put negative offset if you think syllables are late; positive if you think they're early)
 game-results-header = RESULTS
 game-results-score = Final Score: { $score }
@@ -124,8 +124,8 @@ mapset-info-owner = Owner
 mapset-info-kpm = Avg. Collection KPM
 
 menu-header = Song Select
-menu-search-placeholder = Search for a mapset:
-menu-editor-header = My Beatmapsets
+menu-search-placeholder = Search for a collection:
+menu-editor-header = My Collections
 menu-map-new = Create New Beatmap in Collection
 menu-map-display = { map-display } ({ $kpm } kpm)
 menu-mapset-new = Create New Collection
@@ -137,9 +137,13 @@ menu-mapset-mapcount = { $mapCount ->
 }
 menu-mapset-kpm = Average keys/min: { $kpm }
 menu-warning-mapset-delete = 
-  <Line>Are you sure you want to delete this beatmapset:</Line>
+  <Line>Are you sure you want to delete this collection:</Line>
   <BigLine>{ $name }?</BigLine>
-  <Line>All { $mapCount } beatmap(s) will be deleted.</Line>
+  <Line>{ $mapCount ->
+    [zero] No maps
+    [one] 1 map
+    *[other] All { $mapCount } maps
+  } will be deleted.</Line>
   <Line>This action is permanent and cannot be undone.</Line>
 
 menu-label-filter = Filter: KPM <
@@ -180,8 +184,8 @@ settings-polygraphic-kana-input-false = Disable individual typing of polygraphs
 settings-polygraphic-kana-input-desc = Choose whether you want to be able to type polygraphic kana such as しゃ and っぷ by typing each kana individually. For example, with this setting turned on, you can type しゃ as \"sha\" or \"shixya\".
 
 user-info-join-date = Join Date
-user-info-key-acc = Overall Kana Accuracy
-user-info-kana-acc = Overall Key Accuracy
+user-info-key-acc = Overall Key Accuracy
+user-info-kana-acc = Overall Kana Accuracy
 user-info-play-count = Play Count
 user-info-total-score = Total Score
 
