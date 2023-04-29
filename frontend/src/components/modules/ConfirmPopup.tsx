@@ -67,10 +67,10 @@ const ConfirmPopup = ({ button, warningText, onConfirm }: Props) => {
           {warningText}
           <Buttons>
             <Confirm onClick={() => onConfirm()}>
-              <Line size="1.25em" margin="0">{text(`Delete`)}</Line>
+              <Line size="1.25em" margin="0">{text(`confirm-delete`)}</Line>
             </Confirm>
             <Cancel onClick={() => setIsOpen(false)}>
-              <Line size="1.25em" margin="0">Cancel</Line>
+              <Line size="1.25em" margin="0">{text(`confirm-cancel`)}</Line>
             </Cancel>
           </Buttons>
         </Container>

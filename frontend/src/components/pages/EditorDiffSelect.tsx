@@ -142,7 +142,7 @@ const EditorDiffSelect = ({ user } : Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />
   }
-  const Invalid = elem((<p></p>), `invalid-access-mapset`, {elems: {Link: <Link to="/edit/new" />}});
+  const Invalid = elem((<p></p>), `invalid-access-mapset`, {elems: {LinkTo: <Link to="/edit/new" />}});
   if (status === GOBACK) { return <Navigate to={`/edit`} replace={true} />; }
   if (status === INVALID) { return Invalid; }
   if (status === LOADING || !mapset) { return <Loading />; }
@@ -161,7 +161,7 @@ const EditorDiffSelect = ({ user } : Props) => {
     <>
       <Line as="h1" size="2em">{text(`editing-prefix`)}{name}</Line>
       {elem((<Line as="p" margin="0 0 0.5em 0" />), `diffs-mapset-owner`, {
-        elems: {Link: <Link to={`/user/${owner.id}`}></Link>},
+        elems: {LinkTo: <Link to={`/user/${owner.id}`}></Link>},
         vars: {owner: owner.name},
       })}
       <GamePageContainer>

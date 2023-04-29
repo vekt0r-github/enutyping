@@ -6,15 +6,15 @@ error-mobile-layout-header = デバイス非対応
 error-mobile-layout = 申し訳ありませんが、{ title }はデスクトップサイトだけでプレイできます。
 
 loading = ローディング中...
-not-found = このページは見つかりませんでした。<Link>ホームページへ</Link>
+not-found = このページは見つかりませんでした。<LinkTo>ホームページへ</LinkTo>
 
 editing-prefix = 編集中：
 map-display-default-artist = <作家名>
 map-display-default-title = <曲名>
 map-display-default-diffname = <識別名>
 map-display = { $artist } - { $title } [{ $diffname }]
-invalid-access-map = このビートマップは存在しません。あるいは、編集の権限を持っていません。<Link>新しいのを作りましょうか。</Link>
-invalid-access-mapset = このコレクションは存在しません。あるいは、編集の権限を持っていません。<Link>新しいのを作りましょうか。</Link>
+invalid-access-map = このビートマップは存在しません。あるいは、編集の権限を持っていません。<LinkTo>新しいのを作りましょうか。</LinkTo>
+invalid-access-mapset = このコレクションは存在しません。あるいは、編集の権限を持っていません。<LinkTo>新しいのを作りましょうか。</LinkTo>
 
 ## component-specific stuff
 
@@ -22,8 +22,8 @@ confirm-delete = 消す
 confirm-cancel = キャンセル
 
 diffs-mapset-owner =
-  コレクションの作者：<Link>{ $owner }</Link>
-diffs-header = ビートマップリスト
+  コレクションの作者：<LinkTo>{ $owner }</LinkTo>
+diffs-header = 中のビートマップ
 diffs-map-display =
   <Line>{ $title }</Line>
   <Line>作家：{ $artist }</Line>
@@ -129,7 +129,7 @@ menu-header = ビートマップリスト
 menu-search-placeholder = コレクションを検索して…
 menu-editor-header = 自分のビートマップ
 menu-map-new = ここで新しいビートマップ
-menu-map-display = { map-display } ({ $kpm } kpm)
+menu-map-display = { $title } // { $artist } [{ $diffname }]
 menu-mapset-new = 新しいコレクション
 menu-mapset-delete = コレクション削除
 menu-mapset-owner = 作者：{ $owner }

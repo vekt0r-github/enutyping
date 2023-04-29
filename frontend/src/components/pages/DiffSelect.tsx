@@ -105,7 +105,7 @@ const DiffSelect = ({} : Props) => {
     <>
       <Line as="h1" size="2em">{name}</Line>
       {elem((<Line as="p" margin="0 0 0.5em 0" />), `diffs-mapset-owner`, {
-        elems: {Link: <Link to={`/user/${owner.id}`} />},
+        elems: {LinkTo: <Link to={`/user/${owner.id}`} />},
         vars: {owner: owner.name},
       })}
       <GamePageContainer>

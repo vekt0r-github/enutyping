@@ -54,14 +54,17 @@ const Diff = styled(SubBox)<{color: string, changeHeight?: boolean}>`
     background-color: ${({color}) => `var(--clr-${color}-light)`};
     cursor: pointer;
     ${({changeHeight}) => changeHeight ? "height: auto;" : ''}
-    & > ${Line} {
+    & ${Line} {
       overflow: visible;
       white-space: normal;
     }
   }
-  & > ${Thumbnail} + ${Line} {
-    margin-left: var(--s);
-  }
+`;
+
+const DiffRightSide = styled.span`
+  display: block;
+  margin-left: var(--s);
+  width: calc(100% - 32px); // why does my life have to be like this
 `;
 
 const HoverContainer = styled(MainBox)`
@@ -140,12 +143,14 @@ const MapsetList = ({ getBeatmapsets, mapsets, includeCreate, link } : Props) =>
                     key={map.id}
                   >
                     <YTThumbnail yt_id={map.yt_id} width={32} height={24} />
-                    <Line size="1em" margin="0">{text(`menu-map-display`, {
-                      artist: getArtist(map, config),
-                      title: getTitle(map, config),
-                      diffname: map.diffname,
-                      kpm: Math.round(map.kpm ?? 0),
-                    })}</Line>
+                    <DiffRightSide>
+                      <Line size="1em" margin="0">{text(`menu-map-display`, {
+                        artist: getArtist(map, config),
+                        title: getTitle(map, config),
+                        diffname: map.diffname,
+                        kpm: Math.round(map.kpm ?? 0),
+                      })}</Line>
+                    </DiffRightSide>
                   </Diff>
                 )}
                 {/* below only when in editor mode */}

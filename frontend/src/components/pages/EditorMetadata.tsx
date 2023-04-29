@@ -169,7 +169,7 @@ const EditorMetadata = ({ user } : Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />
   }
-  const Invalid = elem((<p></p>), `invalid-access-map`, {elems: {Link: <Link to="/edit/new" />}});
+  const Invalid = elem((<p></p>), `invalid-access-map`, {elems: {LinkTo: <Link to="/edit/new" />}});
   if (status === GOBACK) { return <Navigate to={`/edit/${mapsetId}`} replace={true} />; }
   if (status === INVALID) { return Invalid; }
   if (status === LOADING || !mapset) { return <Loading />; }

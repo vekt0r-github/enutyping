@@ -8,7 +8,7 @@ const NotFound = () => {
   const elem = getL10nElementFunc();
 
   return elem((<p></p>), `not-found`, {
-    elems: {Link: <Link as="a" href="/" />},
+    elems: {LinkTo: <Link as="a" href="/" />},
   })
 };
 

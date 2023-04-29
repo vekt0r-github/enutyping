@@ -6,15 +6,15 @@ error-mobile-layout-header = Device Not Supported
 error-mobile-layout = { title } is only for wide computers. sorry!
 
 loading = Loading...
-not-found = This page could not be found. <Link>Go Home</Link>
+not-found = This page could not be found. <LinkTo>Go Home</LinkTo>
 
 editing-prefix = {"Editing: "}
 map-display-default-artist = <artist>
 map-display-default-title = <title>
 map-display-default-diffname = <identifier>
 map-display = { $artist } - { $title } [{ $diffname }]
-invalid-access-map = This beatmap doesn't exist, or you don't have the permissions to edit it. <Link>Create a new one?</Link>
-invalid-access-mapset = This collection doesn't exist, or you don't have the permissions to edit it. <Link>Create a new one?</Link>
+invalid-access-map = This beatmap doesn't exist, or you don't have the permissions to edit it. <LinkTo>Create a new one?</LinkTo>
+invalid-access-mapset = This collection doesn't exist, or you don't have the permissions to edit it. <LinkTo>Create a new one?</LinkTo>
 
 ## component-specific stuff
 
@@ -22,7 +22,7 @@ confirm-delete = Delete
 confirm-cancel = Cancel
 
 diffs-mapset-owner =
-  Collection created by <Link>{ $owner }</Link>
+  Collection created by <LinkTo>{ $owner }</LinkTo>
 diffs-header = Select Beatmap:
 diffs-map-display =
   <Line>{ $title }</Line>
@@ -127,7 +127,7 @@ menu-header = Song Select
 menu-search-placeholder = Search for a collection:
 menu-editor-header = My Collections
 menu-map-new = Create New Beatmap in Collection
-menu-map-display = { map-display } ({ $kpm } kpm)
+menu-map-display = { $title } // { $artist } [{ $diffname }]
 menu-mapset-new = Create New Collection
 menu-mapset-delete = Delete Collection
 menu-mapset-owner = created by { $owner }
@@ -140,7 +140,7 @@ menu-warning-mapset-delete =
   <Line>Are you sure you want to delete this collection:</Line>
   <BigLine>{ $name }?</BigLine>
   <Line>{ $mapCount ->
-    [zero] No maps
+    [0] No maps
     [one] 1 map
     *[other] All { $mapCount } maps
   } will be deleted.</Line>
