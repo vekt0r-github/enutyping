@@ -167,14 +167,22 @@ settings-name-change = ユーザー名変更：
 settings-name-change-prompt = 新しいユーザー名：
 settings-site-language = 言語：
 settings-metadata-localization = メタデータローカリゼーション：
-settings-global-offset = 全体オフセット：
-settings-kana-input = 仮名入力
-settings-polygraphic-kana-input = 拗音と促音の入力: 
 settings-metadata-localization-true = 曲名と作家名をローマ字で表示する
 settings-metadata-localization-false = 曲名と作家名を元言語で表示する
+settings-global-offset = 全体オフセット：
 settings-global-offset-desc = それぞれのビートマップのタイミングが全部早い、それとも全部遅いと思ったら、ここでタイミングオフセットを付けられます。
-settings-kana-input-desc = 以下の仮名のローマ字入力の表示方を選んでください。
-settings-polygraphic-kana-input-desc = 「しゃ」や「っぷ」をタイプする時に、二字の仮名を一々に入力する可能性です。例えば、「一々の入力も認める」を選択したら、「しゃ」をタイプする時に、「sha」だけでなく、「shixya」の入力も許されます。
+settings-keyboard-layout = キーボードレイアウト:
+settings-keyboard-layout-kana = 言語入力
+settings-keyboard-layout-romaji = ローマ字入力
+settings-kana-input = 仮名のローマ字入力
+settings-kana-input-desc =
+  以下の仮名のローマ字入力の表示方を選んでください。
+  この設定は、ローマ字入力だけに影響があります。
+settings-polygraphic-kana-input = 拗音と促音の入力: 
+settings-polygraphic-kana-input-desc =
+  「しゃ」や「っぷ」をタイプする時に、二字の仮名を一々に入力する可能性です。
+  例えば、「一々の入力も認める」を選択したら、「しゃ」をタイプする時に、「sha」だけでなく、「shixya」の入力も許されます。
+  この設定は、ローマ字入力だけに影響があります。
 settings-polygraphic-kana-input-true = 拗音と促音の一々の入力も認める
 settings-polygraphic-kana-input-false = 拗音と促音の複合入力だけを認める
 

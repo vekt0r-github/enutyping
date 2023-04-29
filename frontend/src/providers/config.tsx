@@ -11,6 +11,7 @@ export type Config = {
   language: Language;
   localizeMetadata: boolean;
   typePolygraphs: boolean;
+  useKanaLayout: boolean;
   kanaSpellings: {
     し: string,
     ち: string,
@@ -38,6 +39,7 @@ export const defaultConfig = (): Config => ({
   language: getDefaultLanguage(), // shouldn't matter when this runs
   localizeMetadata: false,
   typePolygraphs: true,
+  useKanaLayout: false,
   kanaSpellings: {
     し: "shi", 
     ち: "chi",

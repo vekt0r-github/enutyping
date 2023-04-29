@@ -26,6 +26,7 @@ export type Score = {
 export type Kana = {
   text: string,
   romanizations: string[],
+  hiraganizations: string[],
 };
 
 export type LineData = {

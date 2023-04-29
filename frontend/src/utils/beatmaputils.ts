@@ -186,7 +186,7 @@ export const computeBeatmapKPM = (map: Beatmap) => {
 
 export const computeLineKana = (line: LineData) => {
   let totalKana: number = 0;
-  line.syllables.forEach(({ text }) => {totalKana += parseKana(text, defaultConfig).length});  
+  line.syllables.forEach(({ text }) => {totalKana += parseKana(text, defaultConfig()).length});  
   return totalKana;
 };
 
@@ -237,20 +237,23 @@ export const makeSetFunc = <State>(setState : (state : State | ((oldState: State
 export const getCurrentRomanization = (kana : KanaState[]) => 
   "".concat.apply("", kana.map(ks => ks.prefix + ks.suffix))
 
-const makeInitOrLastKanaState = (kana: Kana, last: boolean): KanaState => ({ 
-  kana: kana, 
-  prefix: last ? kana.romanizations[0] : "", 
-  suffix: last ? "" : kana.romanizations[0], 
-  minKeypresses: computeMinKeypresses(kana), 
-  score: 0,
-});
+const makeInitOrLastKanaState = (kana: Kana, last: boolean, useKanaLayout: boolean): KanaState => {
+  const fullText = useKanaLayout ? kana.hiraganizations[0] : kana.romanizations[0]
+  return { 
+    kana: kana, 
+    prefix: last ? fullText : "", 
+    suffix: last ? "" : fullText, 
+    minKeypresses: computeMinKeypresses(kana), 
+    score: 0,
+  }
+};
 
 export const makeLineStateAt = (currTime: number, lineData: LineData, config: Config, editor = false) : LineState => ({
   line: lineData,
   position: lineData.syllables.filter(s => s.time < currTime).length,
   syllables: lineData.syllables.map((syllable, i, arr) => {
     const kana = parseKana(syllable.text, config, arr[i+1]?.text)
-      .map((kana) => makeInitOrLastKanaState(kana, syllable.time < currTime))
+      .map((kana) => makeInitOrLastKanaState(kana, syllable.time < currTime, config.useKanaLayout))
     return {...syllable,
       position: (editor && currTime >= syllable.time) ? kana.length : 0,
       kana: kana,

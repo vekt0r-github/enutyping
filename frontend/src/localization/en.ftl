@@ -172,16 +172,24 @@ settings-name-change = Change Username:
 settings-name-change-prompt = Requested Name: 
 settings-site-language = Site Language: 
 settings-metadata-localization = Metadata Localization: 
-settings-global-offset = Global Offset: 
-settings-kana-input = Kana Input: 
-settings-polygraphic-kana-input = Polygraphic Kana Input: 
 settings-metadata-localization-true = Display all song metadata in their Romanized versions (i.e. with the English alphabet)
 settings-metadata-localization-false = Display all song metadata in their original languages
+settings-global-offset = Global Offset: 
 settings-global-offset-desc = If you feel that every map you play is consistently late or early, use this to apply an offset to every map automatically.
-settings-kana-input-desc = For each of the following kana, choose how you want it to be romanized.
+settings-keyboard-layout = Keyboard Layout:
+settings-keyboard-layout-kana = Kana/Japanese
+settings-keyboard-layout-romaji = Romaji
+settings-kana-input = Kana Input: 
+settings-kana-input-desc =
+  For each of the following kana, choose how you want it to be romanized.
+  This setting only matters when the Keyboard Layout is set to romaji.
+settings-polygraphic-kana-input = Polygraphic Kana Input: 
+settings-polygraphic-kana-input-desc =
+  Choose whether you want to be able to type polygraphic kana such as しゃ and っぷ by typing each kana individually.
+  For example, with this setting turned on, you can type しゃ as \"sha\" or \"shixya\".
+  This setting only matters when the Keyboard Layout is set to romaji.
 settings-polygraphic-kana-input-true = Enable individual typing of polygraphs
 settings-polygraphic-kana-input-false = Disable individual typing of polygraphs
-settings-polygraphic-kana-input-desc = Choose whether you want to be able to type polygraphic kana such as しゃ and っぷ by typing each kana individually. For example, with this setting turned on, you can type しゃ as \"sha\" or \"shixya\".
 
 user-info-join-date = Join Date
 user-info-key-acc = Overall Key Accuracy

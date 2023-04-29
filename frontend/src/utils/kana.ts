@@ -1,5 +1,8 @@
 import { toRomaji } from "wanakana";
-import { Config, Kana } from "@/utils/types";
+
+import { Config } from "@/providers/config";
+
+import { Kana } from "@/utils/types";
 
 const smallKana = ["ょ", "ゃ", "ゅ", "ぃ", "ぇ", "ぁ", "ぉ", "ぅ"];
 
@@ -25,7 +28,7 @@ export const kanaRespellings = {
 
 const getRomanizations = (kana: string, config: Config) : string[] => {
   kana = kana.toLowerCase();
-  function hasKey<O>(obj: O, key: PropertyKey): key is keyof O {
+  function hasKey<O extends object>(obj: O, key: PropertyKey): key is keyof O {
     return key in obj; // fix ts error even though this looks stupid
   }
   const wanakanaOptions = { customRomajiMapping: config.kanaSpellings };
@@ -59,10 +62,33 @@ const getRomanizations = (kana: string, config: Config) : string[] => {
   else return normals;
 };
 
+const USKeyboard = "`1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:\"ZXCVBNM<>?";
+const JAKeyboard = "ろぬふあうえおやゆよわほへたていすかんなにらせ゛゜むちとしはきくまのりれけつさそひこみもねるめろぬふぁぅぇぉゃゅょをーへたてぃすかんなにらせ「」むちとしはきくまのりれけっさそひこみも、。・";
+const hiraganaToKey = new Map<string, string>();
+for (let i = 0; i < USKeyboard.length; i++) {
+  if (!hiraganaToKey.has(JAKeyboard.charAt(i))) { // lowercase comes earlier
+    hiraganaToKey.set(JAKeyboard.charAt(i), USKeyboard.charAt(i));
+  }
+}
+
+/**
+ * find the sequence of US keyboard presses that would generate this string
+ */
+const getHiraganizations = (kana: string) : string[] => {
+  const chars = kana.normalize('NFD').split('').map(c => {
+    switch (c) {
+      case '\u3099': return '゛';
+      case '\u309A': return '゜';
+      default: return c;
+    }
+  }).map(c => hiraganaToKey.get(c) ?? c);
+  return [chars.reduce((a, b) => a + b)];
+};
+
 const computeKanaAt = (pos: number, config: Config, syllable: string, nextSyllable?: string) => {
   const wanakanaOptions = { customRomajiMapping: config.kanaSpellings };
 
-  let newKana: Kana = {text: "", romanizations: []};
+  let newKana: Kana = {text: "", romanizations: [], hiraganizations: []};
   if (pos >= syllable.length) { return newKana; }
 
   let length = 1;
@@ -81,6 +107,7 @@ const computeKanaAt = (pos: number, config: Config, syllable: string, nextSyllab
   if (syllable[pos] == "ん" && isDoubledN) {
     newKana.romanizations = ["nn"];
   }
+  newKana.hiraganizations = getHiraganizations(newKana.text);
   return newKana;
 };
 

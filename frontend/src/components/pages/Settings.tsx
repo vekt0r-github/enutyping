@@ -223,6 +223,15 @@ const SettingsPage = ({ user, yourUser, setYourUser }: Props) => {
             <p>{text(`settings-global-offset-desc`)}</p>
           </SettingBox>
           <SettingBox>
+            <SettingTitle>{text(`settings-keyboard-layout`)}</SettingTitle>
+            <select name={"keyboard"} value={config.useKanaLayout ? "kana" : "romaji"} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              setConfig({ ...config, useKanaLayout: (e.target.value ==="kana") });
+            }}>
+              <option value={"kana"}>{text(`settings-keyboard-layout-kana`)}</option>
+              <option value={"romaji"}>{text(`settings-keyboard-layout-romaji`)}</option>
+            </select>
+          </SettingBox>
+          <SettingBox>
             <SettingTitle>{text(`settings-kana-input`)}</SettingTitle>
             <p>{text(`settings-kana-input-desc`)}</p>
             <KanaContainer>

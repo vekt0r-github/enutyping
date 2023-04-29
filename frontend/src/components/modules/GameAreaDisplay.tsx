@@ -182,7 +182,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
 
   const set = makeSetFunc(setGameState);
 
-  const { volume } = config;
+  const { volume, useKanaLayout } = config;
 
   const [offset, setOffset] = useState<number>(0);
   const totalOffset = offset + config.offset;
@@ -225,14 +225,15 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
     return syllable.kana[syllable.position];
   }
 
-  const updateKanaAffix = (key : string, sPos: number) : KanaState | undefined => {
+  const updateKanaAffix = (key : string, sPos: number, useKanaLayout: boolean) : KanaState | undefined => {
     const curKana = getKana(sPos);
     if (!curKana) return;
     const {kana, prefix} = curKana;
     const newPrefix = prefix + key;
-    const filteredRomanizations = kana.romanizations.filter(s => s.substring(0, newPrefix.length) == newPrefix);
-    if (filteredRomanizations.length == 0) { return; }
-    const newSuffix = filteredRomanizations[0].substring(newPrefix.length);
+    const options = useKanaLayout ? kana.hiraganizations : kana.romanizations
+    const filtered = options.filter(s => s.substring(0, newPrefix.length) == newPrefix);
+    if (filtered.length == 0) { return; }
+    const newSuffix = filtered[0].substring(newPrefix.length);
     return {...curKana, prefix: newPrefix, suffix: newSuffix};
   }
 
@@ -246,10 +247,11 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
     if (!curKana) return; // finished line or something
 
     const {line, syllables, nBuffer} = lineState ?? {};
-    const key = e.key.toLowerCase();
-    const allowedCharacters = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890-`~ \"'.?!,"; // idk if this is comprehensive
+    const key = useKanaLayout ? e.key : e.key.toLowerCase();
+    const allowedCharacters = // idk if this is comprehensive
+      "`1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:\"ZXCVBNM<>?";
     if(!allowedCharacters.includes(key)) { return; }
-    if(key == "n" && nBuffer) {
+    if(!useKanaLayout && key == "n" && nBuffer) {
       setLineState((s) => {
         s.nBuffer = null;
         s.syllables[nBuffer[0]].kana[nBuffer[1]].prefix += "n";
@@ -261,12 +263,12 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
     const latestActiveSyllable = timeToSyllableIndex(line.syllables, currTime) - 1;
     const error = currTime - syllables![sPos].time;
 
-    const maybeNewKana = updateKanaAffix(key, sPos);
+    const maybeNewKana = updateKanaAffix(key, sPos, useKanaLayout);
     let success = maybeNewKana !== undefined;
     let newKana = maybeNewKana ?? curKana;
     if (!success) { // key is not the next char; set newKana
       for (let newPos = sPos; newPos < latestActiveSyllable; ++newPos) { // try skipping syllables
-        const testNewKana = updateKanaAffix(key, newPos);
+        const testNewKana = updateKanaAffix(key, newPos, useKanaLayout);
         if (testNewKana) {
           sPos = newPos;
           newKana = testNewKana;
