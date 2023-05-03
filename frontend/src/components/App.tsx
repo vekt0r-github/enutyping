@@ -11,13 +11,13 @@ import DiffSelect from "@/components/pages/DiffSelect";
 import Game from "@/components/pages/Game";
 import EditorSongSelect from "@/components/pages/EditorSongSelect";
 import EditorDiffSelect from "@/components/pages/EditorDiffSelect";
-import EditorMetadata from "./pages/EditorMetadata";
+import EditorMapsetMetadata from "@/components/pages/EditorMapsetMetadata";
+import EditorMetadata from "@/components/pages/EditorMetadata";
 import Editor from "@/components/pages/Editor";
 import NotFound from "@/components/pages/NotFound";
 import UserPage from "@/components/pages/UserPage";
 import SettingsPage from "@/components/pages/Settings";
 
-import { configContext } from "@/providers/config";
 import { getL10nFunc } from "@/providers/l10n";
 
 import { get, post } from "@/utils/functions";
@@ -152,12 +152,22 @@ const App = ({} : Props) => {
               user={user}
             />
           }/>
+          <Route path="/edit/new" element={
+            <EditorMapsetMetadata
+              user={user}
+            />
+          }/>
           <Route path="/edit/:mapsetId" element={
             <EditorDiffSelect
               user={user}
             />
           }/>
-          <Route path="/edit/:mapsetId/new" element={
+          <Route path="/edit/:mapsetId/metadata" element={
+            <EditorMapsetMetadata
+              user={user}
+            />
+          }/>
+          <Route path="/edit/:mapsetId/new" element={ // this should also allow new as mapsetId
             <EditorMetadata
               user={user}
             />
@@ -181,7 +191,7 @@ const App = ({} : Props) => {
               yourUser={user}
               setYourUser={setUser}
             />
-          }/>  
+          }/>
           <Route path="*" element={
             <NotFound />
           }/>

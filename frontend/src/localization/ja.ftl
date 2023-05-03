@@ -30,7 +30,6 @@ diffs-map-display =
   <Line>[{ $diffname }] ({ $kpm } kpm)</Line>
 
 editor-header = { editing-prefix }{ map-display }
-editor-change-diffname = 識別名の変更：
 editor-map-edit-metadata = メタデータ編集
 editor-map-delete = ビートマップ削除
 editor-warning-map-delete = 
@@ -56,7 +55,7 @@ editor-shortcut-line-add-desc =
 ### You can join or split lines to make the beatmap more readable!
 editor-shortcut-line-remove = 直前のラインを削除する
 editor-shortcut-syllable-add = ここで新しいシラブルを置く
-editor-shortcut-syllable-add-desc = プレーヤーに入力させたい仮名や文字を書きます。
+editor-shortcut-syllable-add-desc = 曲のそれぞれの音節に、プレーヤーに入力させたい仮名や文字を書きます。
 editor-shortcut-syllable-remove = 直前のシラブルを削除する
 editor-shortcut-scroll-jump = ラインとシラブルを追ってタイムラインを移動する
 editor-shortcut-end-set = ビートマップの終了時間を設定する
@@ -82,7 +81,8 @@ form-mapset-desc = 記述
 form-mapset-icon = アイコンのリンク
 form-mapset-icon-desc = メニューでのアイコンとして、画像リンクを入れてください。
 form-mapset-submit-create = コレクションを作成する
-form-warning-metadata = メタデータを確認してください。しかし、このデータは全部後で変更できます。
+form-mapset-submit-update = コレクションを更新する
+form-warning-metadata = 入力内容を確認してください。しかし、このデータは全部後で変更できます。
 
 game-leaderboard-header = リーダーボード
 game-mods-header = モディフィケーション
@@ -103,7 +103,7 @@ game-start-warning-login = 警告：あなたはログインしていないた�
 game-start-message-header = Spaceを押したらスタート！
 game-start-message-subheader = ゲーム中ではEscで終了できます。
 game-start-offset = オフセット(ms)：
-game-start-offset-desc = （ビートマップのシラブルは音楽に対して遅かったら、負数を入れます。早かったら、正数を入れます。）
+game-start-offset-desc = （ビートマップのタイミングは音楽に対して遅かったら、負数を入れます。早かったら、正数を入れます。）
 game-results-header = リザルト
 game-results-score = ファイナルスコア：{ $score }
 
@@ -116,6 +116,7 @@ login-header = ログイン
 map-info = ビートマップ情報
 map-info-title = 曲名
 map-info-artist = 作家名
+map-info-diffname = 識別名
 map-info-kpm = マップKPM
 map-info-source = 動画リンク
 map-info-source-link = YouTube

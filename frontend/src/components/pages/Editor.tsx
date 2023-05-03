@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState }  from "react";
-import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
 import EditorArea from "@/components/modules/EditorArea";
@@ -8,36 +8,29 @@ import EditorShortcutsDisplay from "@/components/modules/EditorShortcutsDisplay"
 import ConfirmPopup from "@/components/modules/ConfirmPopup";
 
 import { getL10nFunc, getL10nElementFunc } from '@/providers/l10n';
-import { Config, configContext } from "@/providers/config";
+import { configContext } from "@/providers/config";
 
-import { get, post, put, httpDelete } from "@/utils/functions";
+import { get, put, httpDelete } from "@/utils/functions";
 import { User, Beatmap } from "@/utils/types";
 import { getArtist, getTitle, processBeatmap } from '@/utils/beatmaputils';
 import { withParamsAsKey } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Line, Sidebar, GamePageContainer, Link, NewButton, DeleteButton } from '@/utils/styles';
+import { Line, Sidebar, GamePageContainer, Link, NewButton, DeleteButton } from '@/utils/styles';
 
 type Props = {
   user: User | null,
 };
 
-enum Status { LOADING, LOADED, SUBMITTING, INVALID, NO_PERMS, CREATED_DIFF };
-const { LOADING, LOADED, SUBMITTING, INVALID, NO_PERMS, CREATED_DIFF } = Status;
+enum Status { LOADING, LOADED, SUBMITTING, INVALID, NO_PERMS };
+const { LOADING, LOADED, SUBMITTING, INVALID, NO_PERMS } = Status;
 
 type BeatmapState = {
   status: Status,
   beatmap?: Beatmap,
   lastSavedBeatmap?: Beatmap,
 };
-
-const GameFile = styled.textarea`
-  width: 100%;
-  max-width: fill-available;
-  height: 450px;
-  resize: none;
-`;
 
 const DiffName = styled.input`
   width: 170px;
@@ -50,12 +43,8 @@ const Editor = ({ user } : Props) => {
   const elem = getL10nElementFunc();
   const config = useContext(configContext);
 
-  // TODO: button to edit metadata
-
   const navigate = useNavigate();
   const { mapId, mapsetId } = useParams();
-  const [searchParams] = useSearchParams();
-  const copyOf = searchParams.get('copy');
 
   const [state, setState] = useState<BeatmapState>({ status: LOADING });
   /**
@@ -131,7 +120,6 @@ const Editor = ({ user } : Props) => {
   }
   const Invalid = elem((<p></p>), `invalid-access-map`, {elems: {LinkTo: <Link to="/edit/new" />}});
   if (status === LOADING) { return <Loading />; }
-  if (status === CREATED_DIFF) { return <Navigate to={`/edit/${mapsetId}/${beatmap!.id}`} />; }
   if (status === NO_PERMS) { return Invalid; }
   if (status === INVALID || !beatmap) { return Invalid; }
   const {diffname, kpm} = beatmap;
@@ -158,15 +146,6 @@ const Editor = ({ user } : Props) => {
           <MapInfoDisplay 
             {...beatmap}
           />
-          <p>
-            {text(`editor-change-diffname`)}
-            <DiffName
-              value={diffname}
-              onChange={(e : React.ChangeEvent<HTMLInputElement>) => {
-                setDiffname(e.target.value);
-              }}
-            />
-          </p>
           <NewButton as={Link} to={`/edit/${mapsetId}/${mapId}/metadata`}>
             <Line size="1em" margin="0">{text(`editor-map-edit-metadata`)}</Line>
           </NewButton>

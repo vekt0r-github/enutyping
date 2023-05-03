@@ -30,7 +30,6 @@ diffs-map-display =
   <Line>[{ $diffname }] ({ $kpm } kpm)</Line>
 
 editor-header = { editing-prefix }{ map-display }
-editor-change-diffname = Change identifier:
 editor-map-edit-metadata = Edit Metadata
 editor-map-delete = Delete Beatmap
 editor-warning-map-delete = 
@@ -80,6 +79,7 @@ form-mapset-desc = Description
 form-mapset-icon = Icon Source
 form-mapset-icon-desc = An image link, to serve as your collection's icon in the menu.
 form-mapset-submit-create = Create Collection and Continue
+form-mapset-submit-update = Update Collection Metadata
 form-warning-metadata = Make sure your metadata is correct! You can still change it after you've started mapping.
 
 game-leaderboard-header = Leaderboard
@@ -114,6 +114,7 @@ login-header = Login
 map-info = Map Info
 map-info-title = Title
 map-info-artist = Artist
+map-info-diffname = Identifier
 map-info-kpm = Average KPM
 map-info-source = Source Video
 map-info-source-link = Link (YouTube)

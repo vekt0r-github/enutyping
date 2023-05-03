@@ -27,6 +27,10 @@ def process_beatmap(beatmap):
     source = f"https://www.youtube.com/watch?v={beatmap['yt_id']}"
     return { **beatmap, 'source' : source }
 
+################################################################
+######################### USER METHODS #########################
+################################################################
+
 @api.route('/me/changename', methods=['POST'])
 @login_required
 def change_name(user_id):
@@ -74,6 +78,10 @@ def get_users():
     res = users_schema.dump(users)
     return { 'users': res }
 
+################################################################
+######################### BEATMAP METHODS #########################
+################################################################
+
 @api.route('/beatmaps/<int:beatmap_id>', methods=['GET'])
 def get_beatmap_with_set_and_scores(beatmap_id):
     beatmap = Beatmap.query.get(beatmap_id)
@@ -91,71 +99,6 @@ def get_beatmap_with_set_and_scores(beatmap_id):
     scores_result = scores_schema.dump(scores)
     beatmapset_result = beatmapset_schema.dump(beatmap.beatmapset)
     return { **process_beatmap(beatmap_result), 'scores' : scores_result, 'beatmapset' : beatmapset_result }
-
-@api.route('/beatmaps/<int:beatmap_id>', methods=['PUT'])
-@login_required
-def update_beatmap(user_id, beatmap_id):
-    # TODO: can actually change metadata after creation now!
-    # TODO: do we need to run process_beatmap on res
-    '''
-    Data
-    ----
-    SOME SUBSET OF THE FOLLOWING:
-    beatmapset_id
-    artist
-    title
-    artist_original
-    title_original
-    yt_id
-    preview_point
-    duration
-    diffname
-    content
-    kpm
-    '''
-    json_data = request.get_json()
-    if not json_data:
-        return 'No input provided', 400
-    try:
-        data = beatmap_schema.load(json_data)
-    except ValidationError as err:
-        return err.messages, 400
-
-    beatmap = Beatmap.query.get(beatmap_id)
-    if not beatmap:
-        return 'Beatmap does not exist!', 400
-    bms_id = beatmap.beatmapset_id
-
-    exists_subq = Beatmapset.query.filter(
-            Beatmapset.owner_id == user_id,
-            Beatmapset.id == bms_id).exists()
-    exists = db_session.query(exists_subq).scalar()
-    if not exists:
-        return 'Beatmapset does not exist or you do not own it!', 400
-
-    for k, v in data.items():
-        setattr(beatmap, k, v)
-    db_session.commit()
-    res = beatmap_schema.dump(beatmap)
-    return res
-
-@api.route('/beatmaps/<int:beatmap_id>', methods=['DELETE'])
-@login_required
-def delete_beatmap(user_id, beatmap_id):
-    beatmap = Beatmap.query.get(beatmap_id)
-    if not beatmap:
-        return 'Beatmap does not exist!', 400
-    bms_id = beatmap.beatmapset_id
-
-    exists_subq = Beatmapset.query.filter(
-            Beatmapset.owner_id == user_id,
-            Beatmapset.id == bms_id).exists()
-    exists = db_session.query(exists_subq).scalar()
-    if not exists:
-        return 'Beatmapset does not exist or you do not own it!', 400
-    db_session.delete(beatmap)
-    db_session.commit()
-    return { 'success': True, 'beatmapset_id': bms_id }
 
 @api.route('/beatmaps', methods=['POST'])
 @login_required
@@ -201,6 +144,61 @@ def add_beatmap(user_id):
 
     res = beatmap_schema.dump(beatmap)
     return res, 201
+
+@api.route('/beatmaps/<int:beatmap_id>', methods=['PUT'])
+@login_required
+def update_beatmap(user_id, beatmap_id):
+    # TODO: do we need to run process_beatmap on res
+    '''
+    Data: some subset of fields for add method, except for beatmapset_id
+    '''
+    json_data = request.get_json()
+    if not json_data:
+        return 'No input provided', 400
+    try:
+        data = beatmap_schema.load(json_data)
+    except ValidationError as err:
+        return err.messages, 400
+
+    beatmap = Beatmap.query.get(beatmap_id)
+    if not beatmap:
+        return 'Beatmap does not exist!', 400
+    bms_id = beatmap.beatmapset_id
+
+    exists_subq = Beatmapset.query.filter(
+            Beatmapset.owner_id == user_id,
+            Beatmapset.id == bms_id).exists()
+    exists = db_session.query(exists_subq).scalar()
+    if not exists:
+        return 'Beatmapset does not exist or you do not own it!', 400
+
+    for k, v in data.items():
+        setattr(beatmap, k, v)
+    db_session.commit()
+    res = beatmap_schema.dump(beatmap)
+    return res
+
+@api.route('/beatmaps/<int:beatmap_id>', methods=['DELETE'])
+@login_required
+def delete_beatmap(user_id, beatmap_id):
+    beatmap = Beatmap.query.get(beatmap_id)
+    if not beatmap:
+        return 'Beatmap does not exist!', 400
+    bms_id = beatmap.beatmapset_id
+
+    exists_subq = Beatmapset.query.filter(
+            Beatmapset.owner_id == user_id,
+            Beatmapset.id == bms_id).exists()
+    exists = db_session.query(exists_subq).scalar()
+    if not exists:
+        return 'Beatmapset does not exist or you do not own it!', 400
+    db_session.delete(beatmap)
+    db_session.commit()
+    return { 'success': True, 'beatmapset_id': bms_id }
+
+################################################################
+######################### MAPSET METHODS #########################
+################################################################
 
 @api.route('/beatmapsets/<int:beatmapset_id>', methods=['GET'])
 def get_beatmapset_with_diffs_and_scores(beatmapset_id):
@@ -250,6 +248,30 @@ def add_beatmapset(user_id):
     print(res)
     return res, 201
 
+@api.route('/beatmapsets/<int:beatmapset_id>', methods=['PUT'])
+@login_required
+def update_beatmapset(user_id, beatmapset_id):
+    '''
+    Data: some subset of fields for add method
+    '''
+    json_data = request.get_json()
+    if not json_data:
+        return 'No input provided', 400
+    try:
+        data = beatmapset_schema.load(json_data)
+    except ValidationError as err:
+        return err.messages, 400
+
+    bmset = Beatmapset.query.get(beatmapset_id)
+    if not bmset or bmset.owner_id != user_id:
+        return 'Beatmapset does not exist or you do not own it!', 400
+
+    for k, v in data.items():
+        setattr(bmset, k, v)
+    db_session.commit()
+    res = beatmapset_schema.dump(bmset)
+    return res
+
 @api.route('/beatmapsets/<int:beatmapset_id>', methods=['DELETE'])
 @login_required
 def delete_beatmapset(user_id, beatmapset_id):
@@ -261,6 +283,10 @@ def delete_beatmapset(user_id, beatmapset_id):
     db_session.delete(beatmap_set)
     db_session.commit()
     return { 'success': True }
+
+################################################################
+######################### OTHER METHODS #########################
+################################################################
 
 @api.route('/scores', methods=['POST'])
 @login_required
