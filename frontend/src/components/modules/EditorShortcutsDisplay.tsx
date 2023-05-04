@@ -46,7 +46,8 @@ const InfoLabel = styled(Line)`
 const InfoInst = styled(Line)`
   display: inline-block;
   white-space: normal;
-`
+  width: calc(100% - 100px); // why does my life have to be like this
+`;
 
 const InfoDesc = styled(SubBox)`
   position: absolute;
@@ -56,7 +57,7 @@ const InfoDesc = styled(SubBox)`
   white-space: normal;
   font-size: 0.8em;
   z-index: 1;
-`
+`;
 
 const InfoToggle = styled.div<{active: boolean}>`
   cursor: pointer;
@@ -75,7 +76,7 @@ const EditorShortcutsDisplay = ({  } : Props) => {
 
   return (
     <Sidebar>
-      <Line as="h2" size="1.5em" margin="0.75em 0">Editor How-To</Line>
+      <Line as="h2" size="1.5em" margin="0.75em 0">{text(`editor-shortcut-header`)}</Line>
       {info.map((line, i) => {
         const [key, inst, desc] = line;
         const active = i === curr;

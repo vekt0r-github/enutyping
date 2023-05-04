@@ -17,7 +17,7 @@ import { withParamsAsKey } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { Line, Sidebar, GamePageContainer, Link, NewButton, DeleteButton } from '@/utils/styles';
+import { Line, Sidebar, GamePageContainer, Link, NeutralButton, DeleteButton } from '@/utils/styles';
 
 type Props = {
   user: User | null,
@@ -146,9 +146,13 @@ const Editor = ({ user } : Props) => {
           <MapInfoDisplay 
             {...beatmap}
           />
-          <NewButton as={Link} to={`/edit/${mapsetId}/${mapId}/metadata`}>
+          <Line as="h2" size="1.5em">{text(`editor-section-actions`)}</Line>
+          <NeutralButton as={Link} to={`/play/${mapsetId}/${mapId}`}>
+            <Line size="1em" margin="0">{text(`to-play`)}</Line>
+          </NeutralButton>
+          <NeutralButton as={Link} to={`/edit/${mapsetId}/${mapId}/metadata`}>
             <Line size="1em" margin="0">{text(`editor-map-edit-metadata`)}</Line>
-          </NewButton>
+          </NeutralButton>
           <ConfirmPopup 
             button={<DeleteButton>
               <Line size="3.5em" margin="-12px 0px 0 0" style={{'width': '40px'}}>-</Line>

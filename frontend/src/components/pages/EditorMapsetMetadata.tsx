@@ -112,7 +112,7 @@ const EditorMapsetMetadata = ({ user } : Props) => {
   };  
 
   useEffect(() => {
-    if (mapsetId === undefined) {
+    if (isNewMapset) {
       setStatus(LOADED);
       return;
     }

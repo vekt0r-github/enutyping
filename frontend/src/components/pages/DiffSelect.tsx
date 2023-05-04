@@ -10,17 +10,19 @@ import { getL10nFunc, getL10nElementFunc } from '@/providers/l10n';
 import { Config, configContext } from "@/providers/config";
 
 import { get } from "@/utils/functions";
-import { Beatmapset, BeatmapMetadata } from "@/utils/types";
+import { Beatmapset, BeatmapMetadata, User } from "@/utils/types";
 import { getArtist, getTitle } from "@/utils/beatmaputils"
 import { withParamsAsKey } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Line, Link, Sidebar, GamePageContainer, Thumbnail } from '@/utils/styles';
+import { MainBox, Line, Link, Sidebar, GamePageContainer, Thumbnail, NeutralButton } from '@/utils/styles';
 
 import { GameContainer, BottomHalf, StatBox, Overlay as GameOverlay } from "@/components/modules/GameAreaDisplay";
 
-type Props = {};
+type Props = {
+  user: User | null;
+};
 
 export const Overlay = styled(GameOverlay)`
   padding: var(--m) 0;
@@ -58,7 +60,7 @@ const StyledThumbnail = (base: Parameters<typeof styled>[0]) => styled(base)`
 const MainYTThumbnail = StyledThumbnail(YTThumbnail);
 const MainThumbnail = Thumbnail;
 
-const DiffSelect = ({} : Props) => {
+const DiffSelect = ({user} : Props) => {
   const text = getL10nFunc();
   const elem = getL10nElementFunc();
   const config = useContext(configContext);
@@ -112,6 +114,11 @@ const DiffSelect = ({} : Props) => {
         <Sidebar>
           <MapsetInfoDisplay {...mapset} />
           <p>{mapset.description}</p>
+          {user && user.id === owner.id ?
+            <NeutralButton as={Link} to={`/edit/${mapsetId}`}>
+              <Line size="1em" margin="0">{text(`to-editor`)}</Line>
+            </NeutralButton>
+          : null}
         </Sidebar>
         <GameContainer>
           <BottomHalf>
@@ -123,18 +130,17 @@ const DiffSelect = ({} : Props) => {
             <StatBox />
           </BottomHalf>
           <Overlay>
-            <Line as="h2" size="1.5em" margin="1.5em 0">{text(`diffs-header`)}</Line>
+            <Line as="h2" size="1.5em" margin="1.5em 0">{text(`diffs-header`, {name})}</Line>
             <DiffsContainer>
               {beatmaps.map((map) => 
                 <Diff
                   as={Link}
                   to={`/play/${mapset.id}/${map.id}`}
                   key={map.id}
-                  tabindex={0}
                   onMouseEnter={() => setSelectedMap(map)}
                   onFocus={() => setSelectedMap(map)}
                   onMouseLeave={() => setSelectedMap(undefined)}
-                  onFocusOut={() => setSelectedMap(undefined)}
+                  onBlur={() => setSelectedMap(undefined)}
                 >
                   <YTThumbnail yt_id={map.yt_id} width={32} height={24} />
                   {elem((<></>), `diffs-map-display`, {

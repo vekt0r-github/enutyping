@@ -140,7 +140,9 @@ const App = ({} : Props) => {
             <SongSelect />
           }/>
           <Route path="/play/:mapsetId" element={
-            <DiffSelect />
+            <DiffSelect
+              user={user}
+            />
           }/>
           <Route path="/play/:mapsetId/:mapId" element={
             <Game

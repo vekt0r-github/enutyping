@@ -18,7 +18,7 @@ import styled from 'styled-components';
 import '@/utils/styles.css';
 import { 
   Line, Link, SubBox, Sidebar, 
-  GamePageContainer, 
+  GamePageContainer, NeutralButton
 } from '@/utils/styles';
 import SpeedSelect from "../modules/SpeedSelect";
 
@@ -75,10 +75,9 @@ const Game = ({ user } : Props) => {
   const [map, setMap] = useState<Beatmap | null>();
   if (map === undefined) { return <Loading />; }
   if (map === null) { return <NotFound />; }
-  const {beatmapset, yt_id, source, preview_point, diffname, lines, kpm, scores} = map;
-  const {owner, beatmaps} = beatmapset;
+  const {beatmapset, diffname} = map;
+  const {owner} = beatmapset;
   const [artist, title] = map ? [getArtist(map, config), getTitle(map, config)] : [undefined, undefined];
-
 
   return (
     <>
@@ -91,6 +90,11 @@ const Game = ({ user } : Props) => {
             setSpeed={setSpeed}
             availableSpeeds={availableSpeeds}
           />
+          {user && user.id === owner.id ?
+            <NeutralButton as={Link} to={`/edit/${mapsetId}/${mapId}`}>
+              <Line size="1em" margin="0">{text(`to-editor`)}</Line>
+            </NeutralButton>
+          : null}
         </Sidebar>
         <GameArea
           user={user}

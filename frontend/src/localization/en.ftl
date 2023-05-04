@@ -9,6 +9,8 @@ loading = Loading...
 not-found = This page could not be found. <LinkTo>Go Home</LinkTo>
 
 editing-prefix = {"Editing: "}
+to-play = Open in Play View
+to-editor = Open in Editor
 map-display-default-artist = <artist>
 map-display-default-title = <title>
 map-display-default-diffname = <identifier>
@@ -28,8 +30,10 @@ diffs-map-display =
   <Line>{ $title }</Line>
   <Line>by { $artist }</Line>
   <Line>[{ $diffname }] ({ $kpm } kpm)</Line>
+diffs-section-actions = Manage Collection
 
 editor-header = { editing-prefix }{ map-display }
+editor-section-actions = Manage Beatmap
 editor-map-edit-metadata = Edit Metadata
 editor-map-delete = Delete Beatmap
 editor-warning-map-delete = 
@@ -40,6 +44,7 @@ editor-testing-mode = Testing Mode
 editor-timing-bpm = {"Current BPM: "}
 editor-timing-bpm-none = None—press 'T' to set a timing point
 editor-unsaved = *Unsaved Changes* (Ctrl+S to save)
+editor-shortcut-header = Editor How-To
 editor-shortcut-play-pause = Play/Pause
 editor-shortcut-scroll = Navigate the timeline
 editor-shortcut-save = Save beatmap
@@ -127,7 +132,8 @@ mapset-info-kpm = Avg. Collection KPM
 menu-header = Song Select
 menu-search-placeholder = Search for a collection:
 menu-editor-header = My Collections
-menu-map-new = Create New Beatmap in Collection
+menu-map-new = Create New Beatmap
+menu-map-new-diff = Create New Beatmap in Collection
 menu-map-display = { $title } // { $artist } [{ $diffname }]
 menu-mapset-new = Create New Collection
 menu-mapset-delete = Delete Collection

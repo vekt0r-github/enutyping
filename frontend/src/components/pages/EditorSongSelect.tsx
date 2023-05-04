@@ -20,8 +20,8 @@ type Props = {
   user: User | null,
 };
 
-const NewMapset = styled(MainBox)`
-  background-color: var(--clr-create);
+const NewMapBox = styled(MainBox)`
+  background-color: var(--clr-create-map);
   height: 90px;
   min-width: 360px;
   max-width: 480px;
@@ -34,8 +34,15 @@ const NewMapset = styled(MainBox)`
   position: relative;
   transition: var(--tt-short);
   &:hover, &:focus {
-    background-color: var(--clr-create-light);
+    background-color: var(--clr-create-map-light);
     color: black;
+  }
+`;
+
+const NewMapsetBox = styled(NewMapBox)`
+  background-color: var(--clr-create-mapset);
+  &:hover, &:focus {
+    background-color: var(--clr-create-mapset-light);
   }
 `;
 
@@ -56,31 +63,10 @@ const EditorSongSelect = ({ user } : Props) => {
   let sortFunc = sortFuncs[sortLabel];
   if (sortReverse) sortFunc = sortFunc.reverse();
 
-  // Scuffed code 2
-
-  // const newDiff = () : BeatmapMetadata => ({
-  //   id: "new",
-  //   artist: ;
-  //   title: ;
-  //   artist_original: ;
-  //   title_original: ;
-  //   yt_id: '';
-  //   source?: ; // created from yt_id on backend
-  //   preview_point: ;
-  //   duration: ;
-  //   diffname: "Create new beatmap in this group",
-  //   kpm: 0
-  // });
-
   const filteredMapsets = mapsets?.filter((set: Beatmapset) => {  
     const lowercaseQuery = searchQuery.toLowerCase();
     return JSON.stringify(set).toLowerCase().includes(lowercaseQuery);
-  })
-  // .map((set: Beatmapset) => ({ ...set,
-  //   beatmaps: [ ...set.beatmaps,
-  //     newDiff(),
-  //   ],
-  // }));
+  });
 
   filteredMapsets?.sort(sortFunc);
 
@@ -116,10 +102,14 @@ const EditorSongSelect = ({ user } : Props) => {
       <SongsContainer>
         {(filteredMapsets === undefined) ? <Loading /> :
           <>
-            <NewMapset as={Link} to='/edit/new'>
+            <NewMapsetBox as={Link} to='/edit/new'>
               <Line size="6em" margin="-5px 20px 0 0">+</Line>
               <BlackLine as="h2" size="1.5em">{text(`menu-mapset-new`)}</BlackLine>
-            </NewMapset>
+            </NewMapsetBox>
+            <NewMapBox as={Link} to='/edit/new/new'>
+              <Line size="6em" margin="-5px 20px 0 0">+</Line>
+              <BlackLine as="h2" size="1.5em">{text(`menu-map-new`)}</BlackLine>
+            </NewMapBox>
             <MapsetList 
               getBeatmapsets={getBeatmapsets}
               mapsets={filteredMapsets}

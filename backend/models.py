@@ -116,7 +116,7 @@ def init_db():
             owner_id="8484892osu",
             name="flos",
             description="猫又おかゆ",
-            icon_url="http://img.youtube.com/vi/4muYzftomAE/default.jpg"),
+            icon_url="http://img.youtube.com/vi/4muYzftomAE/hqdefault.jpg"),
         Beatmap(id=1337, \
             beatmapset_id=1337, \
             artist='Nekomata Okayu', \
@@ -171,7 +171,7 @@ def init_db():
             owner_id="1234", \
             name="Bo en - My Time",
             description="from OMORI",
-            icon_url="http://img.youtube.com/vi/erzgjfU271g/default.jpg"),
+            icon_url="http://img.youtube.com/vi/erzgjfU271g/hqdefault.jpg"),
         Beatmap(id=2730, \
             beatmapset_id=6789, \
             artist='Bo en', \
@@ -188,7 +188,7 @@ def init_db():
             owner_id="8484892osu", \
             name="カナデトモスソラ",
             description="25時、ナイトコードで。 × 巡音ルカ ",
-            icon_url="http://img.youtube.com/vi/AICkt9OIFKA/default.jpg"),
+            icon_url="http://img.youtube.com/vi/AICkt9OIFKA/hqdefault.jpg"),
         Beatmap(id=2731, \
             beatmapset_id=7270, \
             artist='25-ji, Nightcord de. x Megurine Luka', \

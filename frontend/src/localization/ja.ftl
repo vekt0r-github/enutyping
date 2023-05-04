@@ -9,6 +9,8 @@ loading = ローディング中...
 not-found = このページは見つかりませんでした。<LinkTo>ホームページへ</LinkTo>
 
 editing-prefix = 編集中：
+to-play = プレイで見る
+to-editor = エディターで編集
 map-display-default-artist = <作家名>
 map-display-default-title = <曲名>
 map-display-default-diffname = <識別名>
@@ -23,13 +25,15 @@ confirm-cancel = キャンセル
 
 diffs-mapset-owner =
   コレクションの作者：<LinkTo>{ $owner }</LinkTo>
-diffs-header = 中のビートマップ
+diffs-header = 「{ $name }」のビートマップ
 diffs-map-display =
   <Line>{ $title }</Line>
   <Line>作家：{ $artist }</Line>
   <Line>[{ $diffname }] ({ $kpm } kpm)</Line>
+diffs-section-actions = コレクションのアクション
 
 editor-header = { editing-prefix }{ map-display }
+editor-section-actions = ビートマップのアクション
 editor-map-edit-metadata = メタデータ編集
 editor-map-delete = ビートマップ削除
 editor-warning-map-delete = 
@@ -40,6 +44,7 @@ editor-testing-mode = テスティング中
 editor-timing-bpm = 現在のBPM：
 editor-timing-bpm-none = 未設定—「T」を押したら、タイミングポイントを配置できます。
 editor-unsaved = *未保存変更* (Ctrl+Sで保存する)
+editor-shortcut-header = エディターの使い方
 editor-shortcut-play-pause = 再生・一時停止
 editor-shortcut-scroll = 拍子を追ってタイムラインを移動する
 editor-shortcut-save = ビートマップを保存する
@@ -57,7 +62,7 @@ editor-shortcut-line-remove = 直前のラインを削除する
 editor-shortcut-syllable-add = ここで新しいシラブルを置く
 editor-shortcut-syllable-add-desc = 曲のそれぞれの音節に、プレーヤーに入力させたい仮名や文字を書きます。
 editor-shortcut-syllable-remove = 直前のシラブルを削除する
-editor-shortcut-scroll-jump = ラインとシラブルを追ってタイムラインを移動する
+editor-shortcut-scroll-jump = ラインとシラブルを追って移動する
 editor-shortcut-end-set = ビートマップの終了時間を設定する
 editor-shortcut-end-set-desc = 終了時間は最後のラインが終わる瞬間です。この設定を忘れないで下さい。
 editor-shortcut-testing-enter = テスティングモードに入る
@@ -129,7 +134,8 @@ mapset-info-kpm = 平均KPM
 menu-header = ビートマップリスト
 menu-search-placeholder = コレクションを検索して…
 menu-editor-header = 自分のビートマップ
-menu-map-new = ここで新しいビートマップ
+menu-map-new = 新しいビートマップ
+menu-map-new-diff = コレクションに新しいビートマップ
 menu-map-display = { $title } // { $artist } [{ $diffname }]
 menu-mapset-new = 新しいコレクション
 menu-mapset-delete = コレクション削除

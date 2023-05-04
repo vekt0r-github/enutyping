@@ -24,8 +24,12 @@
   --clr-secondary-dim: var(--gray0);
   --clr-secondary: var(--gray05);
   --clr-secondary-light: var(--gray1);
-  --clr-create: var(--green);
-  --clr-create-light: var(--teal);
+  --clr-create-map: var(--green);
+  --clr-create-map-light: var(--teal);
+  --clr-create-mapset: var(--blue);
+  --clr-create-mapset-light: var(--sky);
+  --clr-delete-map: var(--red);
+  --clr-delete-map-light: var(--maroon);
   --clr-warn: var(--red);
   --clr-warn-light: var(--maroon);
   --clr-neutral: var(--black1);

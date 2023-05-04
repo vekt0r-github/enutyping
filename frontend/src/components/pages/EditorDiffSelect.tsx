@@ -17,7 +17,7 @@ import { withParamsAsKey } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { Line, Link, GamePageContainer, Sidebar, DeleteButton, NewButton, Thumbnail } from '@/utils/styles';
+import { Line, Link, GamePageContainer, Sidebar, NeutralButton, DeleteButton, NewButton, Thumbnail } from '@/utils/styles';
 
 import { GameContainer, BottomHalf, StatBox } from "@/components/modules/GameAreaDisplay";
 import { Overlay, DiffsContainer, Diff } from "@/components/pages/DiffSelect";
@@ -115,9 +115,13 @@ const EditorDiffSelect = ({ user } : Props) => {
         <Sidebar>
           <MapsetInfoDisplay {...mapset} />
           <p>{mapset.description}</p>
-          <NewButton as={Link} to={`/edit/${mapsetId}/metadata`}>
+          <Line as="h2" size="1.5em">{text(`diffs-section-actions`)}</Line>
+          <NeutralButton as={Link} to={`/play/${mapsetId}`}>
+            <Line size="1em" margin="0">{text(`to-play`)}</Line>
+          </NeutralButton>
+          <NeutralButton as={Link} to={`/edit/${mapsetId}/metadata`}>
             <Line size="1em" margin="0">{text(`editor-map-edit-metadata`)}</Line>
-          </NewButton>
+          </NeutralButton>
           <ConfirmPopup 
             button={<DeleteButton>
               <Line size="3.5em" margin="-12px 0px 0 0" style={{'width': '40px'}}>-</Line>
@@ -146,18 +150,17 @@ const EditorDiffSelect = ({ user } : Props) => {
             <StatBox />
           </BottomHalf>
           <Overlay>
-            <Line as="h2" size="1.5em" margin="1.5em 0">{text(`diffs-header`)}</Line>
+            <Line as="h2" size="1.5em" margin="1.5em 0">{text(`diffs-header`, {name})}</Line>
             <DiffsContainer>
               {beatmaps.map((map) => 
                 <Diff
                   as={Link}
                   to={`/edit/${mapset.id}/${map.id}`}
                   key={map.id}
-                  tabindex={0}
                   onMouseEnter={() => setSelectedMap(map)}
                   onFocus={() => setSelectedMap(map)}
                   onMouseLeave={() => setSelectedMap(undefined)}
-                  onFocusOut={() => setSelectedMap(undefined)}
+                  onBlur={() => setSelectedMap(undefined)}
                 >
                   <YTThumbnail yt_id={map.yt_id} width={32} height={24} />
                   {elem((<></>), `diffs-map-display`, {
@@ -175,7 +178,7 @@ const EditorDiffSelect = ({ user } : Props) => {
               )}
               <NewButton as={Link} to={`/edit/${mapset.id}/new`}>
                 <Line size="3.5em" margin="-3px -4px 0 -8px" style={{'width': '40px'}}>+</Line>
-                <Line size="1em" margin="0">{text(`menu-map-new`)}</Line>
+                <Line size="1em" margin="0">{text(`menu-map-new-diff`)}</Line>
               </NewButton>
             </DiffsContainer>
           </Overlay>

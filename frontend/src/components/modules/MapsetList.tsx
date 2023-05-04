@@ -158,11 +158,11 @@ const MapsetList = ({ getBeatmapsets, mapsets, includeCreate, link } : Props) =>
                   <Diff
                     as={Link} 
                     to={link(mapset.id, "new")} 
-                    color={"create"}
+                    color={"create-map"}
                     key={"new"}
                   >
                     <BlackLine size="2.5em" margin="-1.5px 8px 0 0">+</BlackLine>
-                    <BlackLine size="1em">{text(`menu-map-new`)}</BlackLine>
+                    <BlackLine size="1em">{text(`menu-map-new-diff`)}</BlackLine>
                   </Diff>
                   <ConfirmPopup 
                     button={<Diff color="warn">

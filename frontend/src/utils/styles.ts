@@ -160,31 +160,38 @@ export const Button = styled(MainBox)`
   align-items: center;
   transition: var(--tt-short);
   padding: 0 var(--l);
-  margin: var(--m);
+  margin: var(--s);
   border-radius: var(--m);
   &:hover, &:focus {
     background-color: var(--clr-primary-light);
   }
 `;
 
-export const NewButton = styled(Button)`
+export const NeutralButton = styled(Button)`
   align-self: center;
   font-size: 1em;
   font-family: "Open Sans";
   border: 0;
-  background-color: var(--clr-create);
+  background-color: var(--clr-secondary);
 	color: black;
   cursor: pointer;
   &:hover, &:focus {
-    background-color: var(--clr-create-light);
+    background-color: var(--clr-secondary-light);
 		color: black;
   }
 `;
 
-export const DeleteButton = styled(NewButton)`
-  background-color: var(--red);
+export const NewButton = styled(NeutralButton)`
+background-color: var(--clr-create-map);
   &:hover, &:focus {
-    background-color: var(--maroon);
+    background-color: var(--clr-create-map-light);
+  }
+`;
+
+export const DeleteButton = styled(NeutralButton)`
+  background-color: var(--clr-delete-map);
+  &:hover, &:focus {
+    background-color: var(--clr-delete-map-light);
   }
 `;
 

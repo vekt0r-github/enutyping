@@ -120,7 +120,7 @@ const Container = styled.div`
   z-index: 0;
   & > ${SliderOuterContainer} { display: none; }
   &:hover > ${SliderOuterContainer},
-  &:focus > ${SliderOuterContainer} { display: block; }
+  &:focus-within > ${SliderOuterContainer} { display: block; }
 `;
 
 const Volume = () => {

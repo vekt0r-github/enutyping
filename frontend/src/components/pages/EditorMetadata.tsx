@@ -94,15 +94,28 @@ const EditorMetadata = ({ user } : Props) => {
   // if creating a new map, mapId is undefined
   // if editing an existing map's metadata, it's not
   const { mapsetId, mapId } = useParams();
+  const isNewMapset = (mapsetId === 'new');
   const isNewMap = (mapId === undefined);
 
-  const createOrUpdateMap = () => {
+  const createOrUpdateMap = async () => {
     const {artist, title, artist_original, title_original, yt_id, preview_point, diffname} = map;
-    let duration = (player?.getDuration() ?? 0) * 1000;
-    if (!mapset || !artist || !title || !artist_original || !title_original || !yt_id || !duration || !diffname) { return; }
+    const duration = (player?.getDuration() ?? 0) * 1000;
+    if (!artist || !title || !artist_original || !title_original || !yt_id || !duration || !diffname) { return; }
+    let mapsetId, newMapset : Beatmapset;
+    if (isNewMapset) { // automatically generate collection title from artist and title
+      newMapset = await post(`/api/beatmapsets`, {
+        name: getTitle(map, config), // match the user's current setting
+        description: getArtist(map, config),
+        icon_url: `http://img.youtube.com/vi/${yt_id}/hqdefault.jpg`
+      });
+      mapsetId = newMapset.id;
+    } else {
+      mapsetId = mapset?.id;
+    }
+    if (!mapsetId) return;
     const data = {
       artist, title, artist_original, title_original, yt_id, preview_point, duration, diffname,
-      beatmapset_id: mapset.id,
+      beatmapset_id: mapsetId,
     };
     const callback = (beatmap : BeatmapMetadata) => {
       setState(({map, mapset}) => ({
@@ -110,7 +123,7 @@ const EditorMetadata = ({ user } : Props) => {
         map: { ...map,
           id: beatmap.id,
         },
-        mapset: mapset,
+        mapset: mapset ?? newMapset,
       }));
     }
     if (isNewMap) {
@@ -125,6 +138,11 @@ const EditorMetadata = ({ user } : Props) => {
   };  
   
   useEffect(() => {
+    console.log(isNewMapset)
+    if (isNewMapset) {
+      setStatus(LOADED);
+      return;
+    }
     get(`/api/beatmapsets/${mapsetId}`)
       .then((beatmapset) => {
         if (!beatmapset || !beatmapset.id) {
@@ -136,7 +154,7 @@ const EditorMetadata = ({ user } : Props) => {
         }
       })
       .then(() => {
-        if (mapId === undefined) {
+        if (isNewMap) {
           setStatus(LOADED);
           return;
         }
@@ -172,8 +190,8 @@ const EditorMetadata = ({ user } : Props) => {
   const Invalid = elem((<p></p>), `invalid-access-map`, {elems: {LinkTo: <Link to="/edit/new" />}});
   if (status === GOBACK) { return <Navigate to={`/edit/${mapsetId}`} replace={true} />; }
   if (status === INVALID) { return Invalid; }
-  if (status === LOADING || !mapset) { return <Loading />; }
-  if (status === FINISHED) { return <Navigate to={`/edit/${mapsetId}/${map.id}`} replace={true} />; }
+  if (status === LOADING) { return <Loading />; }
+  if (status === FINISHED) { return <Navigate to={`/edit/${mapset?.id}/${map.id}`} replace={true} />; }
   const {yt_id, diffname} = map;
   const [artist, title] = [getArtist(map, config), getTitle(map, config)];
 
@@ -196,8 +214,10 @@ const EditorMetadata = ({ user } : Props) => {
             {...map}
             source={yt_id.length ? `https://www.youtube.com/watch?v=${yt_id}` : ''}
           />
-          <MapsetInfoDisplay {...mapset} />
-          <p>{mapset.description}</p>
+          {mapset ? <>
+            <MapsetInfoDisplay {...mapset} />
+            <p>{mapset.description}</p>
+          </> : null}
         </Sidebar>
         <GameContainer>
           <BottomHalf>
