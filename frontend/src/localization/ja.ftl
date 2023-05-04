@@ -108,7 +108,7 @@ game-stats-incorrect-keys = 不正確な打鍵
 game-stats-kana-typed = タイプできた仮名
 game-stats-kana-missed = 欠測した仮名
 game-stats-key-acc = 打鍵正確率
-game-stats-kana-acc = 仮名正確率
+game-stats-kana-acc = 仮名完成率
 game-stats-score = スコア
 game-stats-kpm = KPM
 game-map-stats-kpm = マップKPM
@@ -205,7 +205,7 @@ settings-polygraphic-kana-input-false = 拗音と促音の複合入力だけを�
 
 user-info-join-date = 入会日
 user-info-key-acc = 平均打鍵正確率
-user-info-kana-acc = 平均仮名正確率
+user-info-kana-acc = 平均仮名完成率
 user-info-play-count = プレイ回数
 user-info-total-score = トータルスコア
 

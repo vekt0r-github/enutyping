@@ -14,9 +14,9 @@ import {
   makeLineStateAt,
   makeSetFunc,
   timeToLineIndex, 
-  updateStatsOnLineEnd,
   GAME_FPS,
 } from '@/utils/beatmaputils';
+import { updateStateOnLineEnd } from "@/utils/gameplayutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -45,6 +45,7 @@ const makeInitState = (lines: LineData[], config: Config, speed: number) : GameS
   currTime: undefined, // maintained via timer independent of video
   lines: lines.map((lineData) => makeLineStateAt(0, lineData, config)),
   stats: initStatsState(),
+  keyLog: [],
 });
 
 const GameArea = ({ user, beatmap, speed, afterGameEnd, setAvailableSpeeds } : Props) => {
@@ -60,7 +61,6 @@ const GameArea = ({ user, beatmap, speed, afterGameEnd, setAvailableSpeeds } : P
   // const [duration, setDuration] = useState<number>(Infinity);
 
   const {status, offset, currTime, lines, stats} = gameState;
-	const scoreMultiplier = Math.pow(speed, 1 / speed);
   const currIndex = (currTime !== undefined) ? timeToLineIndex(beatmap.lines, currTime * speed) : undefined;
 
   const prepareStartGame = () => {
@@ -69,7 +69,8 @@ const GameArea = ({ user, beatmap, speed, afterGameEnd, setAvailableSpeeds } : P
   }
 
   const submitScore = () => {
-    setGameState((state) => ({ ...state,
+    setGameState((state) => ({
+      ...updateStateOnLineEnd(state, lines.length),
       status: GameStatus.SUBMITTING,
     }));
   };
@@ -117,7 +118,7 @@ const GameArea = ({ user, beatmap, speed, afterGameEnd, setAvailableSpeeds } : P
     if (currIndex === lines.length) {
       submitScore();
     } else if (currIndex > 0) {
-      set('stats')((oldStats) => updateStatsOnLineEnd(oldStats, lines[currIndex-1].line));
+      setGameState((state) => updateStateOnLineEnd(state, currIndex));
     }
   }, [currIndex]);
 
@@ -131,6 +132,8 @@ const GameArea = ({ user, beatmap, speed, afterGameEnd, setAvailableSpeeds } : P
       key_accuracy: stats.hits / (stats.hits + stats.misses),
 			speed_modification: speed ?? 1,
       kana_accuracy: stats.kanaHits / stats.totalKana
+      // if replay ever does get sent to the server
+      // server will also need to store useKanaKeyboard
     }
     post('/api/scores', data).then((score) => {
       afterGameEnd();

@@ -105,6 +105,11 @@ export type LineState = {
   nBuffer: [number, number] | null,
 };
 
+type KeyEvent = {
+  key: string,
+  timestamp: number,
+}
+
 export type GameState = {
   status: GameStatus,
   offset: number,
@@ -118,6 +123,7 @@ export type GameState = {
     totalKana: number, // total for all previous (not current) lines
     score: number,
   },
+  keyLog: KeyEvent[] // {key, timestamp}
 };
 
 export type MapsetID = number|"new" // new for linking to editor

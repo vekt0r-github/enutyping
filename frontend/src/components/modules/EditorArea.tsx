@@ -16,7 +16,6 @@ import {
   makeLineStateAt,
   makeSetFunc,
   timeToLineIndex, 
-  updateStatsOnLineEnd,
   GAME_FPS,
   timeToSyllableIndex,
   writeBeatmap,
@@ -26,6 +25,7 @@ import {
   getTimeOfBeat,
   timeToBeatNumber,
 } from '@/utils/beatmaputils';
+import { updateStateOnLineEnd } from "@/utils/gameplayutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -119,6 +119,7 @@ const makeStateAt = (lines: LineData[], config: Config, currTime?: number, statu
   currTime: currTime ?? 0, // maintained via timer independent of video
   lines: lines.map((lineData) => makeLineStateAt(currTime ?? 0, lineData, config, true)),
   stats: initStatsState(),
+  keyLog: [],
 });
 
 
@@ -525,7 +526,7 @@ const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap }
     if (currIndex === lines.length) {
       // set('status')(GameStatus.PAUSED);
     } else if (currIndex > 0) {
-      set('stats')((oldStats) => updateStatsOnLineEnd(oldStats, lines[currIndex-1]));
+      setGameState((state) => updateStateOnLineEnd(state, currIndex));
     }
   }, [currIndex]);
   

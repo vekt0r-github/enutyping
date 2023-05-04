@@ -1,5 +1,5 @@
 import { defaultConfig, Config } from '@/providers/config';
-import { Beatmap, Beatmapset, LineData, GameState, Kana, LineState, TimingPoint, KanaState, BeatmapMetadata } from '@/utils/types';
+import { Beatmap, Beatmapset, LineData, Kana, LineState, TimingPoint, KanaState, BeatmapMetadata } from '@/utils/types';
 import { computeMinKeypresses, parseKana } from '@/utils/kana';
 import getTextWidth from "@/utils/widths";
 
@@ -157,7 +157,7 @@ export const lastLineOrSyllableTime = (lines: LineData[]) => {
   return syllables[syllables.length - 1].time;
 };
 
-const computeLineKeypresses = (line: LineData) => {
+export const computeLineKeypresses = (line: LineData) => {
   let keypresses: number = 0;
   line.syllables.forEach(({ kana }) => {
     kana.forEach((k) => {
@@ -188,40 +188,6 @@ export const computeLineKana = (line: LineData) => {
   let totalKana: number = 0;
   line.syllables.forEach(({ text }) => {totalKana += parseKana(text, defaultConfig()).length});  
   return totalKana;
-};
-
-/**
- * update stats, including the scoring function
- * @param oldStats 
- * @param hit how many hits to count keypress as
- * @param miss how many misses to count keypress as
- * @param endKana whether this keypress finishes a kana
- * @param scoreMultiplier given by active mods
- * @param scoreEarned how much score to add before multiplier
- * @returns object of {newStats: GameState['stats'], scoreEarned: number}
- */
-export const updateStatsOnKeyPress = (
-  oldStats: GameState['stats'], 
-  hit: number, 
-  miss: number, 
-  endKana: boolean, 
-  scoreMultiplier: number,
-  scoreEarned: number,
-) => {
-  return { ...oldStats,
-    hits: oldStats.hits + hit,
-    misses: oldStats.misses + miss,
-    kanaHits: oldStats.kanaHits + (endKana ? 1 : 0),
-    score: oldStats.score + scoreEarned * scoreMultiplier,
-  };
-};
-
-export const updateStatsOnLineEnd = (oldStats: GameState['stats'], line: LineData) => {
-  const newTotalKana = oldStats.totalKana + computeLineKana(line); // should be prev line
-  return { ...oldStats,
-    totalKana: newTotalKana,
-    kanaMisses: newTotalKana - oldStats.kanaHits,
-  };
 };
 
 // sorry but ehhhhh

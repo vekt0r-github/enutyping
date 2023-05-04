@@ -13,7 +13,8 @@ import {
   User, Beatmap, LineData,
   GameStatus, GameState, LineState, KanaState,
 } from "@/utils/types";
-import { computeLineKPM, makeSetFunc, timeToLineIndex, timeToSyllableIndex, updateStatsOnKeyPress } from '@/utils/beatmaputils';
+import { computeLineKPM, computeLineKeypresses, makeSetFunc, timeToLineIndex, timeToSyllableIndex } from '@/utils/beatmaputils';
+import { makeUpdateGameState } from "@/utils/gameplayutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -126,9 +127,20 @@ type ComputedStats = GameState["stats"] & {
   kanaAcc: string;
 };
 
-const getComputedStats = ({currTime, stats}: GameState): ComputedStats => {
+const getComputedStats = (time: number | undefined, {lines, stats}: GameState): ComputedStats => {
   const {hits, misses, kanaHits, kanaMisses} = stats;
-  const currentKPM = currTime ? (Math.round(hits * 60000 / currTime)) : 0;
+  let drainTime: number = 0;
+  if (time) {
+    for (const {line} of lines) {
+      if (computeLineKeypresses(line) === 0) { continue; }
+      if (line.endTime > time) {
+        drainTime += Math.max(time - line.startTime, 0);
+        break;
+      }
+      drainTime += (line.endTime - line.startTime);
+    };
+  }
+  const currentKPM = drainTime ? (Math.round(hits * 60000 / drainTime)) : 0;
   const keyAcc = acc(hits, misses).toFixed(2);
   const kanaAcc = acc(kanaHits, kanaMisses).toFixed(2);
   return {...stats, currentKPM, keyAcc, kanaAcc};
@@ -180,25 +192,16 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
   const config = useContext(configContext);
   const text = getL10nFunc();
 
-  const set = makeSetFunc(setGameState);
-
   const { volume, useKanaLayout } = config;
 
   const [offset, setOffset] = useState<number>(0);
   const totalOffset = offset + config.offset;
 
   const {status, currTime, lines, stats} = gameState;
-  const computedStats = getComputedStats(gameState);
 	const adjustedTime = currTime ? currTime * speed : currTime;
+  const computedStats = getComputedStats(adjustedTime, gameState);
   const currIndex = (adjustedTime !== undefined) ? timeToLineIndex(beatmap.lines, adjustedTime) : undefined;
   const lineState = currIndex !== undefined ? lines[currIndex] : undefined;
-  const setLineState = (makeNewLineState: (oldLineState: LineState) => LineState) => {
-    if (currIndex === undefined) { return; }
-    set('lines')((oldLines) => {
-      oldLines[currIndex] = makeNewLineState(oldLines[currIndex]);
-      return oldLines;
-    });
-  }
 
   const startGame = (offset: number) => {
     if (status !== GameStatus.STARTQUEUED) { return; }
@@ -217,96 +220,16 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
   const isPlayingGame = isActive && status === GameStatus.PLAYING;
 
   const scoreMultiplier = Math.pow(speed, 1/speed);
-
-  const getKana = (sPos: number) : KanaState | undefined => {
-    if (!lineState) { return; }
-    const syllable = lineState.syllables[sPos];
-    if (!syllable) { return; }
-    return syllable.kana[syllable.position];
-  }
-
-  const updateKanaAffix = (key : string, sPos: number, useKanaLayout: boolean) : KanaState | undefined => {
-    const curKana = getKana(sPos);
-    if (!curKana) return;
-    const {kana, prefix} = curKana;
-    const newPrefix = prefix + key;
-    const options = useKanaLayout ? kana.hiraganizations : kana.romanizations
-    const filtered = options.filter(s => s.substring(0, newPrefix.length) == newPrefix);
-    if (filtered.length == 0) { return; }
-    const newSuffix = filtered[0].substring(newPrefix.length);
-    return {...curKana, prefix: newPrefix, suffix: newSuffix};
-  }
+  const updateGameState = makeUpdateGameState(useKanaLayout, scoreMultiplier);
 
   const handleKeyPress = (e: KeyboardEvent) => {
     if (["Escape"].includes(e.key)) { return; } // GameArea is handling it
     if ([GameStatus.PAUSED, GameStatus.AUTOPLAYING].includes(status)) { return; }
-    if (lineState === undefined || currTime === undefined) { return; }
+    if (lineState === undefined || adjustedTime === undefined) { return; }
     if (lineState.syllables.length === 0) { return; }
-    let sPos = lineState.position;
-    const curKana = getKana(sPos);
-    if (!curKana) return; // finished line or something
-
-    const {line, syllables, nBuffer} = lineState ?? {};
-    const key = useKanaLayout ? e.key : e.key.toLowerCase();
-    const allowedCharacters = // idk if this is comprehensive
-      "`1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:\"ZXCVBNM<>?";
-    if(!allowedCharacters.includes(key)) { return; }
-    if(!useKanaLayout && key == "n" && nBuffer) {
-      setLineState((s) => {
-        s.nBuffer = null;
-        s.syllables[nBuffer[0]].kana[nBuffer[1]].prefix += "n";
-        return s;
-      });
-      return;
-    }
-
-    const latestActiveSyllable = timeToSyllableIndex(line.syllables, currTime) - 1;
-    const error = currTime - syllables![sPos].time;
-
-    const maybeNewKana = updateKanaAffix(key, sPos, useKanaLayout);
-    let success = maybeNewKana !== undefined;
-    let newKana = maybeNewKana ?? curKana;
-    if (!success) { // key is not the next char; set newKana
-      for (let newPos = sPos; newPos < latestActiveSyllable; ++newPos) { // try skipping syllables
-        const testNewKana = updateKanaAffix(key, newPos, useKanaLayout);
-        if (testNewKana) {
-          sPos = newPos;
-          newKana = testNewKana;
-          success = true; // wow it worked
-          break;
-        }
-      }
-    }
-    const {kana, prefix, suffix, minKeypresses} = newKana; // no updated score
-    let hit = 0, miss = 0;
-    if (success) {
-      if (prefix.length === 1) { hit = 1; } // first hit
-      if (suffix === "") { hit += minKeypresses - 1; } // last hit
-    } else { miss = 1; }
-    newKana.score += calcScoreAndUpdateStats(hit, miss, suffix === "", error);
-    setLineState(({line, syllables, nBuffer}) => {
-      let {position: kPos, kana: kanaList} = syllables[sPos];
-      kanaList[kPos] = newKana; // should be safe
-      if (suffix === "") {
-        nBuffer = (prefix === "n" && kana.text == "ん") ? [sPos, kPos] : null;
-        kPos++;
-        syllables[sPos].position = kPos;
-        if (!kanaList[kPos]) { sPos++; } 
-        // if getKana(position) still undefined, line is over
-      }
-      return {line, position: sPos, syllables, nBuffer};
-    });
+    setGameState((state) => updateGameState(state, e.key, adjustedTime));
   };
 
-  const calcScoreAndUpdateStats = (hit: number, miss: number, endKana: boolean, error: number) => {
-    const effectiveError = error < 0 ? -3 * error : error // penalize early hits more
-    const timingMultiplier = 1 + 4 * Math.pow(0.5, (effectiveError / 1000));
-    let scoreEarned = -5 * miss;
-    scoreEarned += 5 * hit * timingMultiplier;
-    set('stats')((oldStats) => updateStatsOnKeyPress(oldStats, hit, miss, endKana, scoreMultiplier, scoreEarned));
-    return scoreEarned;
-  };
-  
   return (
     <GameContainer>
 				<> 
