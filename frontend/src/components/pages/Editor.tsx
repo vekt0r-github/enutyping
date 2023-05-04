@@ -10,14 +10,15 @@ import ConfirmPopup from "@/components/modules/ConfirmPopup";
 import { getL10nFunc, getL10nElementFunc } from '@/providers/l10n';
 import { configContext } from "@/providers/config";
 
-import { get, put, httpDelete } from "@/utils/functions";
+import { get, put, httpDelete, post } from "@/utils/functions";
 import { User, Beatmap } from "@/utils/types";
 import { getArtist, getTitle, processBeatmap } from '@/utils/beatmaputils';
 import { withParamsAsKey } from "@/utils/componentutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { Line, Sidebar, GamePageContainer, Link, NeutralButton, DeleteButton } from '@/utils/styles';
+import { Line, Sidebar, GamePageContainer, Link, NeutralButton, DeleteButton, NewButton } from '@/utils/styles';
+import MapsetSelectPopup from "../modules/MapsetSelectPopup";
 
 type Props = {
   user: User | null,
@@ -32,10 +33,15 @@ type BeatmapState = {
   lastSavedBeatmap?: Beatmap,
 };
 
-const DiffName = styled.input`
-  width: 170px;
-  font-size: 1em;
-  font-family: "Open Sans";
+const ActionsContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  & a, & button {
+    box-sizing: border-box;
+    width: 150px;
+    display: flex;
+    justify-content: center;
+  }
 `;
 
 const Editor = ({ user } : Props) => {
@@ -80,9 +86,8 @@ const Editor = ({ user } : Props) => {
   useEffect(() => {
     if (state.status !== SUBMITTING) { return; }
     if (!beatmap) { return; }
-    if (!beatmap.content.length || !beatmap.diffname.length) { return; }
+    if (!beatmap.content.length) { return; }
     const data = {
-      diffname: diffname,
       kpm: kpm,
       content: beatmap.content,
     }
@@ -92,7 +97,6 @@ const Editor = ({ user } : Props) => {
         // unsure whether should use current state value or returned value
         processAndLoad((beatmap) => beatmap, true);
       })
-      .catch((err) => console.log(err));
   }, [state]);
   
   // handle loading map
@@ -129,12 +133,6 @@ const Editor = ({ user } : Props) => {
     processAndLoad((oldBeatmap) => oldBeatmap ? { ...oldBeatmap,
       content: content,
     } : undefined, saved);
-  const setDiffname = (diffname : string) => {
-    
-    processAndLoad((oldBeatmap) => oldBeatmap ? { ...oldBeatmap,
-      diffname: diffname,
-    } : undefined);
-  }
 
   return (
     <>
@@ -147,26 +145,49 @@ const Editor = ({ user } : Props) => {
             {...beatmap}
           />
           <Line as="h2" size="1.5em">{text(`editor-section-actions`)}</Line>
-          <NeutralButton as={Link} to={`/play/${mapsetId}/${mapId}`}>
-            <Line size="1em" margin="0">{text(`to-play`)}</Line>
-          </NeutralButton>
-          <NeutralButton as={Link} to={`/edit/${mapsetId}/${mapId}/metadata`}>
-            <Line size="1em" margin="0">{text(`editor-map-edit-metadata`)}</Line>
-          </NeutralButton>
-          <ConfirmPopup 
-            button={<DeleteButton>
-              <Line size="3.5em" margin="-12px 0px 0 0" style={{'width': '40px'}}>-</Line>
-              <Line size="1em" margin="0">{text(`editor-map-delete`)}</Line>
-            </DeleteButton>}
-            warningText={elem((<></>), `editor-warning-map-delete`, {
-              elems: {
-                Line: <Line size="1.25em" margin="1.5em 0 0 0" />,
-                BigLine: <Line size="1.75em" margin="1.5em 0 0 0" />,
-              },
-              vars: {title, artist, diffname}
-            })}
-            onConfirm={handleDeleteBeatmap}
-          />
+          <ActionsContainer>
+            <NeutralButton as={Link} to={`/play/${mapsetId}/${mapId}`}>
+              {text(`to-play`)}
+            </NeutralButton>
+            <NeutralButton as={Link} to={`/edit/${mapsetId}/${mapId}/metadata`}>
+              {text(`editor-map-edit-metadata`)}
+            </NeutralButton>
+            <MapsetSelectPopup
+              user={user}
+              button={<NewButton>
+                <Line size="1em" margin="0">{text(`copy-map-button`)}</Line>
+              </NewButton>}
+              onSelect={(destMapsetId) => {
+                // copy to selected collection
+                // it's dumb to not check if map's saved, but theoretically
+                // the user can just copy it back if they messed up...
+                const {artist, title, artist_original, title_original, yt_id, preview_point, diffname} = beatmap; // metadata
+                const {kpm, content} = beatmap; // non-metadata
+                const data = {artist, title, artist_original, title_original, yt_id, preview_point, diffname, kpm, content,
+                  beatmapset_id: destMapsetId};
+                post(`/api/beatmaps`, {...data, id: undefined})
+                  .then((beatmapRes) => {
+                    // redirect to new page
+                    // not using navigate; hope nothing bad happens
+                    window.location.assign(`/edit/${destMapsetId}/${beatmapRes.id}`);
+                  });
+              }}
+            />
+            <ConfirmPopup 
+              button={<DeleteButton>
+                <Line size="3.5em" margin="-12px 0 0 -16px" style={{'width': '40px'}}>-</Line>
+                <Line size="1em" margin="0">{text(`editor-map-delete`)}</Line>
+              </DeleteButton>}
+              warningText={elem((<></>), `editor-warning-map-delete`, {
+                elems: {
+                  Line: <Line size="1.25em" margin="1em 0 0 0"/>,
+                  BigLine: <Line size="1.75em" margin="1em 0 0.5em 0"/>,
+                },
+                vars: {title, artist, diffname}
+              })}
+              onConfirm={handleDeleteBeatmap}
+            />
+          </ActionsContainer>
         </Sidebar>
         <EditorArea
           user={user}

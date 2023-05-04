@@ -5,46 +5,18 @@ import MapsetList from "@/components/modules/MapsetList";
 import Loading from "@/components/modules/Loading";
 
 import { getL10nFunc } from '@/providers/l10n';
-import { Config } from "@/providers/config";
 
-import { get, post } from "@/utils/functions";
-import { User, Beatmapset, BeatmapMetadata } from "@/utils/types";
+import { get } from "@/utils/functions";
+import { User, Beatmapset } from "@/utils/types";
 import { sortFuncs } from "@/components/pages/SongSelect";
 import { withLabel } from "@/utils/componentutils";
 
-import styled from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Link, Line, BlackLine, SearchBar, SearchContainer, SongsContainer } from '@/utils/styles';
+import { SearchBar, SearchContainer, SongsContainer } from '@/utils/styles';
 
 type Props = {
   user: User | null,
 };
-
-const NewMapBox = styled(MainBox)`
-  background-color: var(--clr-create-map);
-  height: 90px;
-  min-width: 360px;
-  max-width: 480px;
-  margin: var(--s);
-  box-sizing: content-box;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: black;
-  position: relative;
-  transition: var(--tt-short);
-  &:hover, &:focus {
-    background-color: var(--clr-create-map-light);
-    color: black;
-  }
-`;
-
-const NewMapsetBox = styled(NewMapBox)`
-  background-color: var(--clr-create-mapset);
-  &:hover, &:focus {
-    background-color: var(--clr-create-mapset-light);
-  }
-`;
 
 const editorSortFuncs = {
   "menu-sorting-date": sortFuncs["menu-sorting-date"],
@@ -101,22 +73,13 @@ const EditorSongSelect = ({ user } : Props) => {
       </SearchContainer>
       <SongsContainer>
         {(filteredMapsets === undefined) ? <Loading /> :
-          <>
-            <NewMapsetBox as={Link} to='/edit/new'>
-              <Line size="6em" margin="-5px 20px 0 0">+</Line>
-              <BlackLine as="h2" size="1.5em">{text(`menu-mapset-new`)}</BlackLine>
-            </NewMapsetBox>
-            <NewMapBox as={Link} to='/edit/new/new'>
-              <Line size="6em" margin="-5px 20px 0 0">+</Line>
-              <BlackLine as="h2" size="1.5em">{text(`menu-map-new`)}</BlackLine>
-            </NewMapBox>
-            <MapsetList 
-              getBeatmapsets={getBeatmapsets}
-              mapsets={filteredMapsets}
-              includeCreate={true}
-              link={(mapsetId, mapId) => `/edit/${mapsetId}/${mapId??''}`} 
-            />
-          </>}
+          <MapsetList 
+            getBeatmapsets={getBeatmapsets}
+            mapsets={filteredMapsets}
+            includeMapsetCreate={true}
+            includeMapCreate={true}
+            link={(mapsetId, mapId) => `/edit/${mapsetId}/${mapId??''}`} 
+          />}
       </SongsContainer>
     </>
   );

@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { getL10nFunc } from '@/providers/l10n';
 
 import '@/utils/styles.css'
-import { Line, MainBox, DeleteButton } from '@/utils/styles';
+import { Line, MainBox, DeleteButton, NeutralButton } from '@/utils/styles';
 
 type Props = {
   button: JSX.Element,
@@ -22,7 +22,7 @@ const OverlayContainer = styled.div`
   background-color: var(--clr-overlay);
 `;
 
-const Container = styled(MainBox)`
+export const Container = styled(MainBox)`
   position: absolute;
   top: 50%;
   left: 50%;
@@ -32,25 +32,11 @@ const Container = styled(MainBox)`
   display: flex;
   flex-direction: column;
   align-items: center;
-/*   
-  & ${Line} { 
-    background-color: var(--clr-warn);
-    color: black;
-  }; */
 `;
 
 const Buttons = styled.div`
   margin: auto 0;
   display: flex;
-`;
-
-const Confirm = styled(DeleteButton)``;
-
-const Cancel = styled(DeleteButton)`
-  background-color: var(--clr-darkgrey);
-  &:hover, &:focus {
-    background-color: var(--clr-medgrey);
-  }
 `;
 
 const ConfirmPopup = ({ button, warningText, onConfirm }: Props) => {
@@ -66,12 +52,12 @@ const ConfirmPopup = ({ button, warningText, onConfirm }: Props) => {
         }}>
           {warningText}
           <Buttons>
-            <Confirm onClick={() => onConfirm()}>
+            <DeleteButton onClick={() => onConfirm()}>
               <Line size="1.25em" margin="0">{text(`confirm-delete`)}</Line>
-            </Confirm>
-            <Cancel onClick={() => setIsOpen(false)}>
+            </DeleteButton>
+            <NeutralButton onClick={() => setIsOpen(false)}>
               <Line size="1.25em" margin="0">{text(`confirm-cancel`)}</Line>
-            </Cancel>
+            </NeutralButton>
           </Buttons>
         </Container>
       </OverlayContainer> : null}

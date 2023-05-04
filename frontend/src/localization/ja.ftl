@@ -10,7 +10,7 @@ not-found = このページは見つかりませんでした。<LinkTo>ホーム
 
 editing-prefix = 編集中：
 to-play = プレイで見る
-to-editor = エディターで編集
+to-editor = 編集する
 map-display-default-artist = <作家名>
 map-display-default-title = <曲名>
 map-display-default-diffname = <識別名>
@@ -23,6 +23,16 @@ invalid-access-mapset = このコレクションは存在しません。ある�
 confirm-delete = 消す
 confirm-cancel = キャンセル
 
+copy-map-button = コピーする
+copy-map-header = コピー先のコレクション選択
+copy-map-cancel = キャンセル
+copy-map-confirm-dialog =
+  <Line>このビートマップを以下のコレクション：</Line>
+  <BigLine>{ $name }</BigLine>
+  <Line>へコピーしても宜しいでしょうか。</Line>
+copy-map-select = はい
+copy-map-back = いいえ
+
 diffs-mapset-owner =
   コレクションの作者：<LinkTo>{ $owner }</LinkTo>
 diffs-header = 「{ $name }」のビートマップ
@@ -34,10 +44,10 @@ diffs-section-actions = コレクションのアクション
 
 editor-header = { editing-prefix }{ map-display }
 editor-section-actions = ビートマップのアクション
-editor-map-edit-metadata = メタデータ編集
-editor-map-delete = ビートマップ削除
+editor-map-edit-metadata = メタデータ
+editor-map-delete = 削除
 editor-warning-map-delete = 
-  <Line>以下のビートマップを削除してよろしいですか。</Line>
+  <Line>以下のビートマップを削除しても宜しいでしょうか。</Line>
   <BigLine>{ map-display }</BigLine>
   <Line>削除すれば、元に戻すことはできません。</Line>
 editor-testing-mode = テスティング中
@@ -143,7 +153,7 @@ menu-mapset-owner = 作者：{ $owner }
 menu-mapset-mapcount = マップ数：{ $mapCount }
 menu-mapset-kpm = 平均KPM：{ $kpm }
 menu-warning-mapset-delete = 
-  <Line>以下のコレクションを削除してよろしいですか。</Line>
+  <Line>以下のコレクションを削除しても宜しいでしょうか。</Line>
   <BigLine>{ $name }</BigLine>
   <Line>コレクションにあるビートマップ（{ $mapCount }）は全部削除されます。</Line>
   <Line>削除すれば、元に戻すことはできません。</Line>

@@ -116,7 +116,7 @@ const DiffSelect = ({user} : Props) => {
           <p>{mapset.description}</p>
           {user && user.id === owner.id ?
             <NeutralButton as={Link} to={`/edit/${mapsetId}`}>
-              <Line size="1em" margin="0">{text(`to-editor`)}</Line>
+              {text(`to-editor`)}
             </NeutralButton>
           : null}
         </Sidebar>

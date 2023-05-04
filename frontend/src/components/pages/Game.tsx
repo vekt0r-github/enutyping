@@ -9,7 +9,7 @@ import { MapInfoDisplay } from "@/components/modules/InfoDisplay";
 import { getL10nFunc } from '@/providers/l10n';
 import { Config, configContext } from "@/providers/config";
 
-import { get } from "@/utils/functions";
+import { get, post } from "@/utils/functions";
 import { User, Beatmap } from "@/utils/types";
 import { getArtist, getTitle, processBeatmap } from '@/utils/beatmaputils';
 import { withParamsAsKey } from "@/utils/componentutils";
@@ -18,9 +18,10 @@ import styled from 'styled-components';
 import '@/utils/styles.css';
 import { 
   Line, Link, SubBox, Sidebar, 
-  GamePageContainer, NeutralButton
+  GamePageContainer, NeutralButton, NewButton
 } from '@/utils/styles';
 import SpeedSelect from "../modules/SpeedSelect";
+import MapsetSelectPopup from "../modules/MapsetSelectPopup";
 
 type Props = {
   user: User | null,
@@ -48,6 +49,17 @@ const UserAvatar = styled.img`
   width:30px;
 `;
 
+const ActionsContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  & a, & button {
+    box-sizing: border-box;
+    width: 150px;
+    /* text-align: center; */
+    display: flex;
+    justify-content: center;
+  }
+`;
 
 const Game = ({ user } : Props) => {
   const text = getL10nFunc();
@@ -90,11 +102,32 @@ const Game = ({ user } : Props) => {
             setSpeed={setSpeed}
             availableSpeeds={availableSpeeds}
           />
-          {user && user.id === owner.id ?
-            <NeutralButton as={Link} to={`/edit/${mapsetId}/${mapId}`}>
-              <Line size="1em" margin="0">{text(`to-editor`)}</Line>
-            </NeutralButton>
-          : null}
+          <ActionsContainer>
+            {user ? 
+              <MapsetSelectPopup
+                user={user}
+                button={<NewButton>{text(`copy-map-button`)}</NewButton>}
+                onSelect={(destMapsetId) => {
+                  // copy to selected collection
+                  const {artist, title, artist_original, title_original, yt_id, preview_point, diffname} = map; // metadata
+                  const {kpm, content} = map; // non-metadata
+                  const data = {artist, title, artist_original, title_original, yt_id, preview_point, diffname, kpm, content,
+                    beatmapset_id: destMapsetId};
+                  post(`/api/beatmaps`, {...data, id: undefined})
+                    .then((beatmapRes) => {
+                      // redirect to new page
+                      // not using navigate; hope nothing bad happens
+                      window.location.assign(`/edit/${destMapsetId}/${beatmapRes.id}`);
+                    });
+                }}
+              />
+            : null}
+            {user && user.id === owner.id ?
+              <NeutralButton as={Link} to={`/edit/${mapsetId}/${mapId}`}>
+                {text(`to-editor`)}
+              </NeutralButton>
+            : null}
+          </ActionsContainer>
         </Sidebar>
         <GameArea
           user={user}

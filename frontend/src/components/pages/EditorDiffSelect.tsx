@@ -47,6 +47,25 @@ const MainYTThumbnail = styled(YTThumbnail)`
   z-index: 1;
 `;
 
+const ActionsContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    'a b'
+    'c c';
+  /* this whole thing is so scuffed i hate it */
+  & > a, & > button {
+    box-sizing: border-box;
+    width: 150px;
+    display: flex;
+    justify-content: center;
+  }
+  & > div {
+    margin: auto;
+    grid-area: c;
+  }
+`;
+
 const EditorDiffSelect = ({ user } : Props) => {
   const text = getL10nFunc();
   const elem = getL10nElementFunc();
@@ -116,29 +135,31 @@ const EditorDiffSelect = ({ user } : Props) => {
           <MapsetInfoDisplay {...mapset} />
           <p>{mapset.description}</p>
           <Line as="h2" size="1.5em">{text(`diffs-section-actions`)}</Line>
-          <NeutralButton as={Link} to={`/play/${mapsetId}`}>
-            <Line size="1em" margin="0">{text(`to-play`)}</Line>
-          </NeutralButton>
-          <NeutralButton as={Link} to={`/edit/${mapsetId}/metadata`}>
-            <Line size="1em" margin="0">{text(`editor-map-edit-metadata`)}</Line>
-          </NeutralButton>
-          <ConfirmPopup 
-            button={<DeleteButton>
-              <Line size="3.5em" margin="-12px 0px 0 0" style={{'width': '40px'}}>-</Line>
-              <Line size="1em" margin="0">{text(`menu-mapset-delete`)}</Line>
-            </DeleteButton>}
-            warningText={elem((<></>), `menu-warning-mapset-delete`, {
-              elems: {
-                Line: <Line size="1.25em" margin="1.5em 0 0 0" />,
-                BigLine: <Line size="1.75em" margin="1.5em 0 0 0" />,
-              },
-              vars: {
-                name: mapset.name,
-                mapCount: beatmaps.length,
-              }
-            })}
-            onConfirm={handleDeleteBeatmapset}
-          />
+          <ActionsContainer>
+            <NeutralButton as={Link} to={`/play/${mapsetId}`}>
+              {text(`to-play`)}
+            </NeutralButton>
+            <NeutralButton as={Link} to={`/edit/${mapsetId}/metadata`}>
+              {text(`editor-map-edit-metadata`)}
+            </NeutralButton>
+            <ConfirmPopup
+              button={<DeleteButton>
+                <Line size="3.5em" margin="-12px 0 0 -16px" style={{'width': '40px'}}>-</Line>
+                <Line size="1em" margin="0">{text(`menu-mapset-delete`)}</Line>
+              </DeleteButton>}
+              warningText={elem((<></>), `menu-warning-mapset-delete`, {
+                elems: {
+                  Line: <Line size="1.25em" margin="1em 0 0 0"/>,
+                  BigLine: <Line size="1.75em" margin="1em 0 0.5em 0"/>,
+                },
+                vars: {
+                  name: mapset.name,
+                  mapCount: beatmaps.length,
+                }
+              })}
+              onConfirm={handleDeleteBeatmapset}
+            />
+          </ActionsContainer>
         </Sidebar>
         <GameContainer>
           <BottomHalf>

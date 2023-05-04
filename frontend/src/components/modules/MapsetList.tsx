@@ -3,23 +3,25 @@ import React, { useContext, useState }  from "react";
 import ConfirmPopup from "@/components/modules/ConfirmPopup";
 import YTThumbnail from "@/components/modules/YTThumbnail";
 
-import { Beatmapset } from "@/utils/types";
+import { Beatmapset, MapID, MapsetID } from "@/utils/types";
 
 import { getL10nFunc, getL10nElementFunc } from '@/providers/l10n';
 import { Config, configContext } from '@/providers/config';
 
 import { getArtist, getTitle, getSetAvg } from "@/utils/beatmaputils";
 
-import styled from 'styled-components';
+import styled, { StyledComponentProps } from 'styled-components';
 import '@/utils/styles.css';
 import { MainBox, SubBox, Link, Line, BlackLine, Thumbnail } from '@/utils/styles';
 import { httpDelete } from "@/utils/functions";
 
 type Props = {
-  getBeatmapsets: () => void,
+  getBeatmapsets?: () => void,
   mapsets: Beatmapset[],
-  includeCreate: boolean,
-  link: (mapsetId: number, mapId?: number|string) => string,
+  includeMapsetCreate: boolean,
+  includeMapCreate: boolean,
+  onObjectClick?: (mapsetId: MapsetID, mapId?: MapID) => void
+  link?: (mapsetId: MapsetID, mapId?: MapID) => string
 };
 
 const SetLink = styled(MainBox)`
@@ -76,6 +78,7 @@ const HoverContainer = styled(MainBox)`
   box-sizing: border-box;
   background-color: var(--clr-primary);
   display: flex;
+  cursor: pointer;
   transition: var(--tt-long);
   & > ${DiffsContainer} { display: none; }
 `;
@@ -98,46 +101,91 @@ const SongBox = styled(MainBox)`
   }
 `;
 
+const NewMapBox = styled(SongBox)`
+  background-color: var(--clr-create-map);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: black;
+  transition: var(--tt-short);
+  &:hover, &:focus {
+    background-color: var(--clr-create-map-light);
+    color: black;
+  }
+`;
+
+const NewMapsetBox = styled(NewMapBox)`
+  background-color: var(--clr-create-mapset);
+  &:hover, &:focus {
+    background-color: var(--clr-create-mapset-light);
+  }
+`;
+
 const Info = styled.div`
   margin-left: var(--s);
   min-width: 0;
 `;
 
-const MapsetList = ({ getBeatmapsets, mapsets, includeCreate, link } : Props) => {
+type TargetProps = {
+  as?: React.ComponentType,
+  to?: string,
+  onClick?: () => void,
+}
+
+const MapsetList = ({ getBeatmapsets, mapsets, includeMapsetCreate, includeMapCreate, onObjectClick: onTargetClick, link } : Props) => {
   const text = getL10nFunc();
   const elem = getL10nElementFunc();
   const config = useContext(configContext);
 
   const handleDeleteBeatmapset = async (mapsetId: number) => {
     const res = await httpDelete(`/api/beatmapsets/${mapsetId}`);
-    if (res && res.success) {
+    if (res && res.success && getBeatmapsets) {
       getBeatmapsets();
     }
   };
 
+  const makeTargetProps = (mapsetId: MapsetID, mapId?: MapID) => {
+    let props: TargetProps = link ? {
+      as: Link,
+      to: link(mapsetId, mapId),
+    } : {}
+    if (onTargetClick) props = {...props, onClick: () => onTargetClick(mapsetId, mapId)}
+    return props;
+  }
+
   return (
     <>
+      {/* optional create buttons come first */}
+      {includeMapsetCreate ?
+        <NewMapsetBox {...makeTargetProps("new")}>
+          <Line size="6em" margin="-5px 20px 0 0">+</Line>
+          <BlackLine as="h2" size="1.5em">{text(`menu-mapset-new`)}</BlackLine>
+        </NewMapsetBox> : null}
+      {includeMapCreate ? 
+        <NewMapBox {...makeTargetProps("new", "new")}>
+          <Line size="6em" margin="-5px 20px 0 0">+</Line>
+          <BlackLine as="h2" size="1.5em">{text(`menu-map-new`)}</BlackLine>
+        </NewMapBox> : null}
+      {/* next, the actual beatmaps */}
       {mapsets?.map((mapset) => {
         const {icon_url, owner, beatmaps} = mapset;
         const mapCount = beatmaps.length;
         return (
           <SongBox key={mapset.id}>
             <HoverContainer>
-              <SetLink as={Link} to={link(mapset.id)}>
+              <SetLink {...makeTargetProps(mapset.id)}>
                 <Thumbnail src={icon_url} width={120} height={90} />
                 <Info>
                   <Line size='1.25em' as='h2' margin="0">{mapset.name}</Line>
-                  {/* <Line size='1em' margin="0">by {getArtist(mapset, config)}</Line> */}
                   <Line size='1em' margin="0">{mapset.description}</Line>
                   <Line size='0.8em' margin="0">{text(`menu-mapset-owner`, {owner: owner.name})}</Line>
                   <Line size='0.8em' margin="0">{text(`menu-mapset-mapcount`, {mapCount})} | {text(`menu-mapset-kpm`, {kpm: Math.round(getSetAvg(mapset, 'kpm'))})}</Line>
                 </Info>
               </SetLink>
               <DiffsContainer>
+                {/* the actual diffs come first here */}
                 {beatmaps.map((map) => 
-                  <Diff
-                    as={Link} 
-                    to={link(mapset.id, map.id)} 
+                  <Diff {...makeTargetProps(mapset.id, map.id)}
                     color={"secondary"}
                     changeHeight={true}
                     key={map.id}
@@ -153,11 +201,9 @@ const MapsetList = ({ getBeatmapsets, mapsets, includeCreate, link } : Props) =>
                     </DiffRightSide>
                   </Diff>
                 )}
-                {/* below only when in editor mode */}
-                {includeCreate ? <>
-                  <Diff
-                    as={Link} 
-                    to={link(mapset.id, "new")} 
+                {/* then optional create diff buttons */}
+                {includeMapCreate ? <>
+                  <Diff {...makeTargetProps(mapset.id, "new")}
                     color={"create-map"}
                     key={"new"}
                   >
@@ -172,8 +218,8 @@ const MapsetList = ({ getBeatmapsets, mapsets, includeCreate, link } : Props) =>
                     warningText={
                       elem((<></>), `menu-warning-mapset-delete`, {
                         elems: {
-                          Line: <Line size="1.25em" margin="1.5em 0 0 0" />,
-                          BigLine: <Line size="1.75em" margin="1.5em 0 0 0" />,
+                          Line: <Line size="1.25em" margin="1em 0 0 0"/>,
+                          BigLine: <Line size="1.75em" margin="1em 0 0.5em 0"/>,
                         },
                         vars: {
                           name: mapset.name,
@@ -181,12 +227,6 @@ const MapsetList = ({ getBeatmapsets, mapsets, includeCreate, link } : Props) =>
                         }
                       })
                     }
-                    // {<>
-                    //   <Line size="1.25em" margin="1.5em 0 0 0">Are you sure you want to delete this beatmapset:</Line>
-                    //   <Line size="1.75em" margin="1.5em 0 0 0">{mapset.name}?</Line>
-                    //   <Line size="1.25em" margin="1.5em 0 0 0">All {mapCount} beatmap(s) will be deleted.</Line>
-                    //   <Line size="1.25em" margin="1.5em 0 0 0">This action is permanent and cannot be undone.</Line>
-                    // </>}
                     onConfirm={() => handleDeleteBeatmapset(mapset.id)}
                   />
                 </> : null}

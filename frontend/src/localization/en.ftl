@@ -9,7 +9,7 @@ loading = Loading...
 not-found = This page could not be found. <LinkTo>Go Home</LinkTo>
 
 editing-prefix = {"Editing: "}
-to-play = Open in Play View
+to-play = To Play View
 to-editor = Open in Editor
 map-display-default-artist = <artist>
 map-display-default-title = <title>
@@ -23,6 +23,15 @@ invalid-access-mapset = This collection doesn't exist, or you don't have the per
 confirm-delete = Delete
 confirm-cancel = Cancel
 
+copy-map-button = Copy to...
+copy-map-header = Copy to Collection:
+copy-map-cancel = Cancel
+copy-map-confirm-dialog =
+  <Line>Copy this map to collection:</Line>
+  <BigLine>{ $name }?</BigLine>
+copy-map-select = Confirm
+copy-map-back = Back
+
 diffs-mapset-owner =
   Collection created by <LinkTo>{ $owner }</LinkTo>
 diffs-header = Select Beatmap:
@@ -34,8 +43,8 @@ diffs-section-actions = Manage Collection
 
 editor-header = { editing-prefix }{ map-display }
 editor-section-actions = Manage Beatmap
-editor-map-edit-metadata = Edit Metadata
-editor-map-delete = Delete Beatmap
+editor-map-edit-metadata = Metadata
+editor-map-delete = Delete
 editor-warning-map-delete = 
   <Line>Are you sure you want to delete this beatmap:</Line>
   <BigLine>{ map-display }?</BigLine>

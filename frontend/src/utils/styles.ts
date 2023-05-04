@@ -153,7 +153,12 @@ export const BasicContainer = styled.div`
   padding-left: 1.5rem;
 `;
 
-export const Button = styled(MainBox)`
+export const Button = styled.button`
+  /* inherit from mainbox; inheriting twice breaks stuff */
+  padding: var(--s);
+  border-radius: var(--s);
+  background-color: var(--clr-primary);
+
   max-width: 400px;
   height: 60px;
   display: flex;

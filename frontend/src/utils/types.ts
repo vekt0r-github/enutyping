@@ -119,3 +119,6 @@ export type GameState = {
     score: number,
   },
 };
+
+export type MapsetID = number|"new" // new for linking to editor
+export type MapID = number|"new" // new for linking to editor
