@@ -45,13 +45,12 @@ const Slider = styled.input`
   margin: 0;
   background: #0000;
   outline: none;
-  -webkit-transition: .2s;
-  transition: opacity .2s;
-  &::-webkit-slider-thumb {
+  &::-webkit-slider-thumb,
+  &::-moz-range-thumb {
     appearance: none;
-    width: 4px; 
-    height: 24px; 
-    background-color: var(--clr-primary-dim); 
+    width: 4px;
+    height: 24px;
+    background-color: var(--clr-primary-dim);
   }
 `;
 

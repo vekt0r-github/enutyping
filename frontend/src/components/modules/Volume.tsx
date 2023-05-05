@@ -77,9 +77,9 @@ const Slider = styled.input`
   margin: 0;
   background: #0000;
   outline: none;
-  -webkit-transition: .2s;
-  transition: opacity .2s;
-  &::-webkit-slider-thumb {
+  transition: opacity var(--tt-short);
+  &::-webkit-slider-thumb,
+  &::-moz-range-thumb {
     appearance: none;
     width: var(--thumb-size); 
     height: var(--thumb-size); 

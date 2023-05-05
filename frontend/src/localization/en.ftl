@@ -10,7 +10,7 @@ not-found = This page could not be found. <LinkTo>Go Home</LinkTo>
 
 editing-prefix = {"Editing: "}
 to-play = To Play View
-to-editor = Open in Editor
+to-editor = To Editor
 map-display-default-artist = <artist>
 map-display-default-title = <title>
 map-display-default-diffname = <identifier>
