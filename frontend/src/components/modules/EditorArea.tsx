@@ -380,6 +380,12 @@ const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap }
         } else { // finish editing something
           writeFromEditingState(editingState);
           setEditingState({ status: NOT, unsaved: true });
+          if (editingState.status === SYLLABLE && editingState.content) {
+            // copied code to seek to next tick
+            let beat = ttbn(beatSnapDivisor, time, true);
+            let newTime = Math.min(Math.round(gtob(beatSnapDivisor, beat + 1)), beatmap.duration);
+            setSeekingTo(newTime);
+          }
         }
       } else if (e.code === "Backspace") { // delete the last something
         if (editingState.status !== NOT) { return; } // probably a mistake
