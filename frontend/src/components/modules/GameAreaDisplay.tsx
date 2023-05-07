@@ -1,24 +1,22 @@
 import React, { useState, useContext } from "react";
 import { Navigate } from "react-router-dom";
-import { Localized } from "@fluent/react";
 
 import GameVideo from "@/components/modules/GameVideo";
 import GameLine from "@/components/modules/GameLine";
 import { InfoDisplay, InfoPair } from "@/components/modules/InfoDisplay";
 
 import { getL10nFunc } from '@/providers/l10n';
-import { Config, configContext } from '@/providers/config';
+import { configContext } from '@/providers/config';
 
 import { 
-  User, Beatmap, LineData,
-  GameStatus, GameState, LineState, KanaState,
+  User, Beatmap, GameStatus, GameState,
 } from "@/utils/types";
-import { computeLineKPM, computeLineKeypresses, makeSetFunc, timeToLineIndex, timeToSyllableIndex } from '@/utils/beatmaputils';
-import { makeUpdateGameState } from "@/utils/gameplayutils";
+import { computeLineKPM, computeLineKeypresses, timeToLineIndex } from '@/utils/beatmaputils';
+import { getScoreMultiplier, makeUpdateGameState } from "@/utils/gameplayutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { SubBox, Line, InfoBox, InfoEntry } from '@/utils/styles';
+import { SubBox, Line } from '@/utils/styles';
 
 type Props = {
   user: User | null,
@@ -219,7 +217,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
     (adjustedTime !== undefined) && (currIndex !== undefined) && (currIndex > -1) && (currIndex < lines.length);
   const isPlayingGame = isActive && status === GameStatus.PLAYING;
 
-  const scoreMultiplier = Math.pow(speed, 1/speed);
+  const scoreMultiplier = getScoreMultiplier(speed);
   const updateGameState = makeUpdateGameState(useKanaLayout, scoreMultiplier);
 
   const handleKeyPress = (e: KeyboardEvent) => {

@@ -2,13 +2,18 @@ import { computeLineKana, timeToLineIndex, timeToSyllableIndex } from '@/utils/b
 
 import { LineData, GameState, Beatmap, KanaState, LineState } from '@/utils/types';
 
+export const getScoreMultiplier = (speed: number) => {
+  if (speed < 0) throw Error("speed cannot be negative");
+  return (speed < 1) ? speed ** 2 : (1 + speed) / 2; // https://www.desmos.com/calculator/tfg2xgbexy
+};
+
 /**
  * update stats, including the scoring function
  * @param oldStats 
  * @param hit how many hits to count keypress as
  * @param miss how many misses to count keypress as
  * @param endKana whether this keypress finishes a kana
- * @param scoreEarned how much score to add, after multiplier
+ * @param scoreEarned how much real score to add (after mod multiplier)
  * @returns object of {newStats: GameState['stats'], scoreEarned: number}
  */
 const updateStatsOnKeyPress = (
@@ -126,13 +131,14 @@ export const makeUpdateGameState = (useKanaLayout: boolean, scoreMultiplier: num
 };
 
 /**
+ * returns raw score (before mods) but updates stats with real score (after mods)
  * also assumes this can mutate gameState
  */
 const calcScoreAndUpdateStats = (gameState: GameState, scoreMultiplier: number, hit: number, miss: number, endKana: boolean, error: number) => {
   const effectiveError = error < 0 ? -3 * error : error // penalize early hits more
   const timingMultiplier = 1 + 4 * Math.pow(0.5, (effectiveError / 1000));
   let scoreEarned = -5 * miss;
-  scoreEarned += 5 * hit * timingMultiplier * scoreMultiplier;
-  gameState.stats = updateStatsOnKeyPress(gameState.stats, hit, miss, endKana, scoreEarned);
+  scoreEarned += 5 * hit * timingMultiplier
+  gameState.stats = updateStatsOnKeyPress(gameState.stats, hit, miss, endKana, scoreEarned * scoreMultiplier);
   return scoreEarned;
 };
