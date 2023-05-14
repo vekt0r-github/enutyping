@@ -11,10 +11,12 @@ not-found = This page could not be found. <LinkTo>Go Home</LinkTo>
 editing-prefix = {"Editing: "}
 to-play = To Play View
 to-editor = To Editor
+
 map-display-default-artist = <artist>
 map-display-default-title = <title>
 map-display-default-diffname = <identifier>
 map-display = { $artist } - { $title } [{ $diffname }]
+
 invalid-access-map = This beatmap doesn't exist, or you don't have the permissions to edit it. <LinkTo>Create a new one?</LinkTo>
 invalid-access-mapset = This collection doesn't exist, or you don't have the permissions to edit it. <LinkTo>Create a new one?</LinkTo>
 
@@ -63,7 +65,9 @@ editor-shortcut-timing-remove = Delete last timing point
 editor-shortcut-beat-snap = Change beat snap divisor
 editor-shortcut-beat-snap-desc = Each white tick in the timeline is one beat, and the colored lines are subdivisions.
 editor-shortcut-line-add = Place a new line
-editor-shortcut-line-add-desc = Place a line whenever a line of lyrics starts, and enter the lyrics in the textbox. You can join or split lines to make the beatmap more readable!
+editor-shortcut-line-add-desc =
+  Place a line whenever a line of lyrics starts, and enter the lyrics in the textbox.
+  You can join or split lines to make the beatmap more readable!
 editor-shortcut-line-remove = Delete the previous line
 editor-shortcut-syllable-add = Place a new syllable
 editor-shortcut-syllable-add-desc = Write the exact kana or letters you want the player to type at the current time.
@@ -97,9 +101,13 @@ form-mapset-submit-update = Update Collection Metadata
 form-warning-metadata = Make sure your metadata is correct! You can still change it after you've started mapping.
 
 game-leaderboard-header = Leaderboard
+game-leaderboard-score = { $score } pts ({ $speed }x{ $mods })
 game-mods-header = Map Modifications
-game-mods-speed = Map Playback Speed: 
+game-mods-multiplier = Current Score Multiplier
+game-mods-speed = Map Playback Speed
 game-mods-speed-desc = Use this to change how fast the map is (slower is easier, faster is harder)!
+game-mods-hidden = Hidden (Fading Syllables)
+game-mods-hidden-desc = With Hidden enabled, the syllables will fade out before it's time to type them. You'll have to remember what they were!
 game-stats-correct-keys = Correct Keystrokes
 game-stats-incorrect-keys = Incorrect Keystrokes
 game-stats-kana-typed = Kana Typed
@@ -216,6 +224,6 @@ user-info-total-score = Total Score
 userpage-section-scores = Recent Scores
 userpage-no-scores = No recent plays for this player!
 userpage-score-map-display = <emph>{ $artist } - { $title }</emph> [{ $diffname }]
-userpage-score-score = <emph>{ $score }</emph> points (<emph>{ $speed }x</emph> speed)
+userpage-score-score = <emph>{ $score }</emph> points (<emph>{ $speed }x</emph> speed, <emph>{ $mods }</emph>)
 userpage-score-date = Played at { $date }
 userpage-score-acc = <emph>{ $keyAcc }%</emph> key, <emph>{ $kanaAcc }%</emph> kana

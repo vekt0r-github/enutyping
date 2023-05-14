@@ -26,6 +26,7 @@ class ScoreSchema(Schema):
     user = fields.Nested(UserSchema(only=("id", "name", "avatar_url")), dump_only=True)
     time_unix = fields.Int()
     speed_modification = fields.Float()
+    mod_flag = fields.Int()
 
 score_schema = ScoreSchema()
 # Nice to for account page since we know the user

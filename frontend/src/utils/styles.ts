@@ -129,18 +129,20 @@ export const SongsContainer = styled.div`
   margin: 0 var(--s);
 `;
 
-export const InfoBox = styled(SubBox)<{width: number}>`
+export const InfoBox = styled(SubBox)`
   display: flex;
   flex-direction: column;
-  width: ${(props) => props.width}%;
-  margin: var(--s);
+  width: 100%;
+  padding: var(--s);
+  /* margin: var(--s); */
   justify-content: center;
+  box-sizing: border-box;
 `;
 
 export const InfoEntry = styled.div`
+  width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
   margin: 2px 0;
 `;
 

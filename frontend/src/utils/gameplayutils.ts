@@ -1,10 +1,12 @@
 import { computeLineKana, timeToLineIndex, timeToSyllableIndex } from '@/utils/beatmaputils';
 
-import { LineData, GameState, Beatmap, KanaState, LineState } from '@/utils/types';
+import { LineData, GameState, Beatmap, KanaState, LineState, ModCombo } from '@/utils/types';
 
-export const getScoreMultiplier = (speed: number) => {
+export const getScoreMultiplier = (speed: number, modCombo: ModCombo) => {
   if (speed < 0) throw Error("speed cannot be negative");
-  return (speed < 1) ? speed ** 2 : (1 + speed) / 2; // https://www.desmos.com/calculator/tfg2xgbexy
+  let mult = (speed < 1) ? speed ** 1.5 : speed ** 0.4; // https://www.desmos.com/calculator/tfg2xgbexy
+  if (modCombo.hidden) mult *= 1.05
+  return mult;
 };
 
 /**

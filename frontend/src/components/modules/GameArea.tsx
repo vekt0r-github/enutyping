@@ -8,7 +8,7 @@ import { Config, configContext } from '@/providers/config';
 import { post } from '@/utils/functions';
 import { 
   User, Beatmap, LineData,
-  GameStatus, GameState,
+  GameStatus, GameState, ModCombo, getModFlag,
 } from "@/utils/types";
 import { 
   makeLineStateAt,
@@ -25,9 +25,11 @@ import {} from '@/utils/styles';
 type Props = {
   user: User | null,
   beatmap: Beatmap,
-	speed: number,
   afterGameEnd: () => void,
 	setAvailableSpeeds: React.Dispatch<React.SetStateAction<number[]>>,
+	speed: number,
+  modCombo: ModCombo,
+  modSelectComponent: JSX.Element, // hacky fix to place this
 };
 
 const initStatsState = () => ({
@@ -48,7 +50,7 @@ const makeInitState = (lines: LineData[], config: Config, speed: number) : GameS
   keyLog: [],
 });
 
-const GameArea = ({ user, beatmap, speed, afterGameEnd, setAvailableSpeeds } : Props) => {
+const GameArea = ({ user, beatmap, afterGameEnd, setAvailableSpeeds, speed, modCombo, modSelectComponent } : Props) => {
   const config = useContext(configContext);
 
   const initState = () => makeInitState(beatmap.lines as LineData[], config, speed);
@@ -130,8 +132,9 @@ const GameArea = ({ user, beatmap, speed, afterGameEnd, setAvailableSpeeds } : P
       // Do not provide user_id as the backend should have stored in session
       score: Math.round(stats.score),
       key_accuracy: stats.hits / (stats.hits + stats.misses),
+      kana_accuracy: stats.kanaHits / stats.totalKana,
 			speed_modification: speed ?? 1,
-      kana_accuracy: stats.kanaHits / stats.totalKana
+      mod_flag: getModFlag(modCombo),
       // if replay ever does get sent to the server
       // server will also need to store useKanaKeyboard
     }
@@ -160,6 +163,8 @@ const GameArea = ({ user, beatmap, speed, afterGameEnd, setAvailableSpeeds } : P
       setGameState={setGameState}
 			setAvailableSpeeds={setAvailableSpeeds}
 			speed={speed}
+      modCombo={modCombo}
+      modSelectComponent={modSelectComponent}
     />
   );
 }

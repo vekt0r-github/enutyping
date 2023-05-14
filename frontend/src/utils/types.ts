@@ -12,6 +12,20 @@ export type UserStats = {
   total_score: number;
 };
 
+export type ModCombo = {
+  hidden: boolean,
+}
+
+export const getModCombo = (modFlag: number): ModCombo => {
+  return {
+    hidden: (modFlag & 1) == 1
+  }
+}
+
+export const getModFlag = (modCombo: ModCombo): number => {
+  return modCombo.hidden ? 1 : 0
+}
+
 export type Score = {
   id: number;
   beatmap_id: number;
@@ -19,7 +33,8 @@ export type Score = {
   key_accuracy: number;
   kana_accuracy: number;
   time_unix: number;
-	speed_modification: number;
+  speed_modification: number;
+	mod_flag: number;
   user?: User;
 }
 

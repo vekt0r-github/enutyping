@@ -11,10 +11,12 @@ not-found = このページは見つかりませんでした。<LinkTo>ホーム
 editing-prefix = 編集中：
 to-play = プレイで見る
 to-editor = 編集する
+
 map-display-default-artist = <作家名>
 map-display-default-title = <曲名>
 map-display-default-diffname = <識別名>
 map-display = { $artist } - { $title } [{ $diffname }]
+
 invalid-access-map = このビートマップは存在しません。あるいは、編集の権限を持っていません。<LinkTo>新しいのを作りましょうか。</LinkTo>
 invalid-access-mapset = このコレクションは存在しません。あるいは、編集の権限を持っていません。<LinkTo>新しいのを作りましょうか。</LinkTo>
 
@@ -100,9 +102,13 @@ form-mapset-submit-update = コレクションを更新する
 form-warning-metadata = 入力内容を確認してください。しかし、このデータは全部後で変更できます。
 
 game-leaderboard-header = リーダーボード
+game-leaderboard-score = { $score }分（{ $speed }x{ $mods }）
 game-mods-header = モディフィケーション
+game-mods-multiplier = 現在のスコア倍率
 game-mods-speed = ゲームプレイ速度
 game-mods-speed-desc = これで動画の再生速度を変わって、難しさを調整できます。
+game-mods-hidden = HD（消えるシラブル）
+game-mods-hidden-desc = HDを付けたら、シラブルがタイプすべき時間前に消えるから、難しさが上がります。
 game-stats-correct-keys = 正確な打鍵
 game-stats-incorrect-keys = 不正確な打鍵
 game-stats-kana-typed = タイプできた仮名
@@ -212,6 +218,6 @@ user-info-total-score = トータルスコア
 userpage-section-scores = 最近稼働
 userpage-no-scores = 最近のスコアはありません。
 userpage-score-map-display = <emph>{ $artist } - { $title }</emph> [{ $diffname }]
-userpage-score-score = スコア <emph>{ $score }</emph> (速度 <emph>{ $speed }x</emph>)
+userpage-score-score = スコア <emph>{ $score }</emph> (速度 <emph>{ $speed }x</emph>、<emph>{ $mods }</emph>)
 userpage-score-date = 達成日 { $date }
 userpage-score-acc = 打鍵 <emph>{ $keyAcc }%</emph>、仮名 <emph>{ $kanaAcc }%</emph>

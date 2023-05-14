@@ -101,6 +101,7 @@ const MapsetSelectPopup = ({ user, button, onSelect }: Props) => {
             return <SelectContainer onClick={(e) => {
               e.stopPropagation();
             }}>
+              <Line as="h1">{text(`copy-map-header`)}</Line>
               <SongsScrollContainer>
                 <SongsContainer>
                   <MapsetList

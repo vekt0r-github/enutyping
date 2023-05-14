@@ -1,4 +1,4 @@
-import React  from "react";
+import React from "react";
 
 import { getL10nFunc, L10nFunc } from "@/providers/l10n";
 
@@ -9,33 +9,60 @@ import styled from 'styled-components';
 import '@/utils/styles.css';
 import { Line, Link, InfoBox, InfoEntry } from '@/utils/styles';
 
-// the first entry of InfoPair is now the FTL key
-export type InfoPair = [string, string | number | JSX.Element | undefined];
+export type InfoPair = [
+  string, // FTL key for text on the left
+  string | number | JSX.Element | undefined, // value on the right
+  (string | number | JSX.Element)?, // optional description below
+];
+
+const Header = styled.h2`
+  /* margin: var(--s); */
+  width: 100%;
+  text-align: center;
+`;
+
+const InfoDisplayEntry = styled(InfoEntry)`
+  justify-content: space-between;
+  display: flex;
+  align-items: center;
+  line-height: 1.5em;
+`;
 
 const NoWrapSpan = styled.span`
+  font-weight: bold;
 	white-space: nowrap;
 	margin-right: var(--s);
 `;
+
 const OverflowSpan = styled.span`
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 `;
 
+const Description = styled.p`
+  font-size: 0.8em;
+  margin: 0 0 var(--s) 0;
+  width: fit-content;
+  position: relative;
+  left: var(--s);
+`;
+
 export const InfoDisplay = <Props,>(title: string, infoPairs: (p: Props, text: L10nFunc) => InfoPair[]) => (props: Props) => {
   const text = getL10nFunc();
   
-  const infoElements = infoPairs(props, text).map((entry: InfoPair) => (
-    <InfoEntry key={entry[0]}>
-      <NoWrapSpan><b>{text(entry[0])}:</b></NoWrapSpan>
-      <OverflowSpan>{entry[1]}</OverflowSpan>
-    </InfoEntry>
-  ));
+  const infoElements = infoPairs(props, text).map(([label, value, desc]: InfoPair) => (<>
+    <InfoDisplayEntry key={label}>
+      {label ? <NoWrapSpan>{text(label)}:</NoWrapSpan> : null}
+      {["string", "number"].includes(typeof value) ? <OverflowSpan>{value}</OverflowSpan> : value}
+    </InfoDisplayEntry>
+    {desc ? <Description>{desc}</Description> : null}
+  </>));
 
   return (
     <>
-      {title ? <h2>{text(title)}</h2> : null}
-      <InfoBox width={90}>
+      {title ? <Header>{text(title)}</Header> : null}
+      <InfoBox>
         {infoElements}
       </InfoBox>
     </>

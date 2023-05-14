@@ -4,7 +4,7 @@ import { getL10nFunc } from '@/providers/l10n';
 
 import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
-import { Line, SubBox, Sidebar } from '@/utils/styles';
+import { Line, SubBox, Sidebar, InfoEntry } from '@/utils/styles';
 
 type Props = {
 
@@ -16,7 +16,7 @@ const info = [
   [`Ctrl+S`, `editor-shortcut-save`],
   [`T`, `editor-shortcut-timing-add`, `editor-shortcut-timing-add-desc`],
   [`U`, `editor-shortcut-timing-remove`],
-  [`[ and ]`, `editor-shortcut-beat-snap`, `editor-shortcut-beat-snap-desc`],
+  [`[ ]`, `editor-shortcut-beat-snap`, `editor-shortcut-beat-snap-desc`],
   [`Ctrl+Enter`, `editor-shortcut-line-add`, `editor-shortcut-line-add-desc`],
   [`Ctrl+⌫`, `editor-shortcut-line-remove`],
   [`Enter`, `editor-shortcut-syllable-add`, `editor-shortcut-syllable-add-desc`],
@@ -27,11 +27,8 @@ const info = [
   [`Esc`, `editor-shortcut-testing-exit`],
 ]
 
-const InfoEntry = styled.div`
-  width: 100%;
-  position: relative;
-  margin-bottom: var(--xs);
-  display: flex;
+const ShortcutInfoEntry = styled(InfoEntry)`
+  position: relative; /* to enable the dropdown descriptions */
 `;
 
 const InfoLabel = styled(Line)`
@@ -81,14 +78,14 @@ const EditorShortcutsDisplay = ({  } : Props) => {
         const [key, inst, desc] = line;
         const active = i === curr;
         return (
-          <InfoEntry key={i}>
+          <ShortcutInfoEntry key={i}>
             <InfoLabel>{key}: </InfoLabel>
             <InfoInst>{text(inst)}</InfoInst>
             {desc ? <>
               <InfoToggle active={active} onClick={() => setCurr(c => c === i ? undefined : i)}>&gt;</InfoToggle>
               {active ? <InfoDesc>{text(desc)}</InfoDesc> : null}
             </> : null}
-          </InfoEntry>
+          </ShortcutInfoEntry>
         )
       })}
     </Sidebar>

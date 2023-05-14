@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 
 import ProgressBar from "@/components/modules/ProgressBar";
 
-import { KanaState, LineState } from '@/utils/types'
+import { KanaState, LineState, ModCombo } from '@/utils/types'
 import { getCurrentRomanization, getVisualPosition, withOverlapOffsets } from "@/utils/beatmaputils";
 
 import styled, { css } from 'styled-components';
@@ -14,6 +14,7 @@ type Props = {
   lineState: LineState,
   keyCallback: (e: KeyboardEvent) => void,
   isPlayingGame: boolean,
+  modCombo: ModCombo,
 }
 
 enum ActiveStatus { MISSED, PAST, PRESENT, FUTURE };
@@ -36,60 +37,6 @@ const TimelineBar = styled.div`
   position: absolute;
   top: 42px;
   left: 0;
-`;
-
-type SyllableProps = { pos?: [string, string] };
-const Syllable = styled.span.attrs<SyllableProps>(({pos}) =>({
-  style: {
-    ...(pos ? {
-      position: 'absolute',
-      left: pos[0],
-      top: pos[1],
-    } : {}),
-  },
-}))<SyllableProps>`
-  font-size: 1.125em;
-`;
-
-const SyllableText = styled(Syllable)`
-  position: absolute;
-  width: fit-content;
-  white-space: nowrap;
-`;
-
-const CharText = styled.span<{active: ActiveStatus}>`
-  ${(props) => {
-    switch (props.active) {
-      case ActiveStatus.MISSED:
-        return css`
-          color: var(--clr-warn);
-          opacity: 0.5;
-          background-color: transparent;
-          z-index: 1;
-        `;
-      case ActiveStatus.PAST:
-        return css`
-          color: var(--clr-medgrey);
-          opacity: 0.5;
-          background-color: transparent;
-          z-index: 1;
-        `;
-      case ActiveStatus.PRESENT:
-        return css`
-          color: black;
-          background-color: var(--clr-highlight);
-          box-shadow: 2px 2px 5px #aaa;
-          z-index: 3;
-        `;
-      case ActiveStatus.FUTURE:
-        return css`
-          color: black;
-          background-color: var(--clr-grey);
-          box-shadow: 2px 2px 5px #aaa;
-          z-index: 2;
-        `;
-    }
-  }}
 `;
 
 // middle is 42 + 8 = 50px;
@@ -128,10 +75,81 @@ const ScoreMarker = styled.div<{value: number}>` // value 0-1
   top: 40px;
   z-index: 1;
   background-color: hsl(calc(0 + 120 * ${({value}) => value}), 100%, 50%);
-  filter: blur(2px); 
+  filter: blur(2px);
 `;
 
-const GameLine = ({ currTime, lineState, keyCallback, isPlayingGame } : Props) => {
+type SyllableTextProps = { pos?: [string, string] };
+const SyllableText = styled.span.attrs<SyllableTextProps>(({pos}) =>({
+  style: {
+    ...(pos ? {
+      position: 'absolute',
+      left: pos[0],
+      top: pos[1],
+    } : {}),
+  },
+}))<SyllableTextProps>`
+  font-size: 1.125em;
+  position: absolute;
+  width: fit-content;
+  white-space: nowrap;
+`;
+
+type SyllableProps = { pos?: [string, string], opacity: number };
+const Syllable = styled.span.attrs<SyllableProps>(({pos}) =>({
+  style: {
+    ...(pos ? {
+      position: 'absolute',
+      left: pos[0],
+      top: pos[1],
+    } : {}),
+  },
+}))<SyllableProps>`
+  font-size: 1.125em;
+  /* this is so hacky */
+  /* to leave the score indicator at full opacity: */
+  & > ${SyllableText},
+  & > ${Connector},
+  & > ${Tick} {
+    opacity: ${({opacity}) => opacity};
+  }
+`;
+
+const CharText = styled.span<{active: ActiveStatus}>`
+  ${(props) => {
+    switch (props.active) {
+      case ActiveStatus.MISSED:
+        return css`
+          color: var(--clr-warn);
+          opacity: 0.5;
+          background-color: transparent;
+          z-index: 1;
+        `;
+      case ActiveStatus.PAST:
+        return css`
+          color: var(--clr-medgrey);
+          opacity: 0.5;
+          background-color: transparent;
+          z-index: 1;
+        `;
+      case ActiveStatus.PRESENT:
+        return css`
+          color: black;
+          background-color: var(--clr-highlight);
+          box-shadow: 2px 2px 5px #aaa;
+          z-index: 3;
+        `;
+      case ActiveStatus.FUTURE:
+        return css`
+          color: black;
+          background-color: var(--clr-grey);
+          box-shadow: 2px 2px 5px #aaa;
+          z-index: 2;
+        `;
+    }
+  }}
+`;
+
+const GameLine = ({ currTime, lineState, keyCallback, isPlayingGame, modCombo } : Props) => {
   const {line, syllables} = lineState;
   const sPos = lineState.position;
 
@@ -198,10 +216,21 @@ const GameLine = ({ currTime, lineState, keyCallback, isPlayingGame } : Props) =
       </>);
     }
     const timeRatio = getVisualPosition(time, line);
+
+    // IMPLEMENTATION OF HIDDEN (for syllables)
+    // scales with line length; not fixed time fading
+    const fadingInterval = 0.04; // units of line length
+    const fadingCompletionTime = timeRatio + 0.02 - (0.22 * timeRatio);
+    const currTimeRatio = getVisualPosition(currTime, line);
+    const opacity = (fadingCompletionTime - currTimeRatio) / fadingInterval;
+
     return (
       <Syllable 
         key={index}
         pos={[`${timeRatio * 100}%`, '0']}
+        opacity={modCombo.hidden
+          ? Math.min(Math.max(opacity, 0), 1)
+          : 1}
       >
         <SyllableText pos={[`${offset}px`, "0"]}>{topContent}</SyllableText>
         {offset >= 2 ? <>

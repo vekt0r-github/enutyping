@@ -300,16 +300,15 @@ def new_score(user_id):
         data = score_schema.load(json_data)
     except ValidationError as err:
         return err.messages, 400
-    bid, score, key_accuracy, kana_accuracy, speed_modification = itemgetter('beatmap_id', 'score', 'key_accuracy', 'kana_accuracy', 'speed_modification')(data)
-    s = Score(beatmap_id=bid, user_id=user_id, score=score, key_accuracy=key_accuracy, kana_accuracy=kana_accuracy, time_unix=int(time()), speed_modification=speed_modification)
+    s = Score(**data, user_id=user_id, time_unix=int(time()))
     user = User.query.filter_by(id=user_id).first()
     if not user:
        return 'Invalid User', 400
 
-    user.key_accuracy = (user.key_accuracy * user.play_count + key_accuracy) / (user.play_count + 1)
-    user.kana_accuracy = (user.kana_accuracy * user.play_count + kana_accuracy) / (user.play_count + 1)
+    user.key_accuracy = (user.key_accuracy * user.play_count + s.key_accuracy) / (user.play_count + 1)
+    user.kana_accuracy = (user.kana_accuracy * user.play_count + s.kana_accuracy) / (user.play_count + 1)
     user.play_count += 1
-    user.total_score += score
+    user.total_score += s.score
     db_session.add(s)
     db_session.commit()
 

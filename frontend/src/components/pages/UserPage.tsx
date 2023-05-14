@@ -9,11 +9,11 @@ import { getL10nFunc, getL10nElementFunc } from "@/providers/l10n";
 import { configContext } from "@/providers/config";
 
 import { get } from "@/utils/functions";
-import { Beatmap, Score, User, UserStats } from "@/utils/types";
+import { Beatmap, Score, User, UserStats, getModCombo } from "@/utils/types";
 import { getArtist, getTitle } from "@/utils/beatmaputils";
 
 import styled from 'styled-components';
-import { InfoBox, InfoEntry } from '@/utils/styles';
+import { InfoBox } from '@/utils/styles';
 import { withParamsAsKey } from "@/utils/componentutils";
 
 type Props = {
@@ -61,8 +61,17 @@ const Scores = styled.div`
   padding: 1rem;
   align-items: center;
   border-radius: var(--s);
+  & > ${InfoBox} + ${InfoBox} {
+    margin-top: var(--s);
+  }
 `;
 
+const ScoreLine = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 2px 0;
+`;
 
 const UserInfoDisplay = InfoDisplay("", (stats: UserStats) => [
   // ["Username", user.name],
@@ -107,12 +116,14 @@ const UserPage = ({ yourUser }: Props) => {
     })).then(() => setScoreBeatmaps(beatmaps));
   }, [scores]);
 
-  const prettyScore = (score: Score, beatmap: Beatmap) => {
+  const prettyScore = (scoreInfo: Score, beatmap: Beatmap) => {
+    const {score, speed_modification, mod_flag, time_unix, key_accuracy, kana_accuracy} = scoreInfo;
     const {diffname} = beatmap;
     const [artist, title] = [getArtist(beatmap, config), getTitle(beatmap, config)];
+    const {hidden} = getModCombo(mod_flag);
     return (
       <>
-        <InfoEntry>
+        <ScoreLine>
           {elem((<span></span>), `userpage-score-map-display`, {
             elems: {emph: <b></b>},
             vars: {artist, title, diffname},
@@ -120,21 +131,22 @@ const UserPage = ({ yourUser }: Props) => {
           {elem((<span></span>), `userpage-score-score`, {
             elems: {emph: <b></b>},
             vars: {
-              score: score.score,
-              speed: score.speed_modification,
+              score: score,
+              speed: speed_modification,
+              mods: hidden ? 'HD' : '-',
             },
           })}
-        </InfoEntry>
-        <InfoEntry>
-          <span>{text(`userpage-score-date`, {date: new Date(score.time_unix * 1000).toLocaleString()})}</span>
+        </ScoreLine>
+        <ScoreLine>
+          <span>{text(`userpage-score-date`, {date: new Date(time_unix * 1000).toLocaleString()})}</span>
           {elem((<span></span>), `userpage-score-acc`, {
             elems: {emph: <b></b>},
             vars: {
-              keyAcc: (score.key_accuracy * 100).toFixed(2),
-              kanaAcc: (score.kana_accuracy * 100).toFixed(2),
+              keyAcc: (key_accuracy * 100).toFixed(2),
+              kanaAcc: (kana_accuracy * 100).toFixed(2),
             },
           })}
-        </InfoEntry>
+        </ScoreLine>
       </>
     );
   };
@@ -165,7 +177,7 @@ const UserPage = ({ yourUser }: Props) => {
           { (scores && scores.length > 0) ?
             <>
               {scores.map((score, i) =>
-                <InfoBox width={100} key={score.id}>
+                <InfoBox key={score.id}>
                   {scoreBeatmaps[i] ? prettyScore(score, scoreBeatmaps[i]) : null} 
                 </InfoBox>
               )}

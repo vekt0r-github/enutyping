@@ -10,7 +10,7 @@ import { getL10nFunc } from '@/providers/l10n';
 import { Config, configContext } from "@/providers/config";
 
 import { get, post } from "@/utils/functions";
-import { User, Beatmap } from "@/utils/types";
+import { User, Beatmap, getModCombo, ModCombo } from "@/utils/types";
 import { getArtist, getTitle, processBeatmap } from '@/utils/beatmaputils';
 import { withParamsAsKey } from "@/utils/componentutils";
 
@@ -20,7 +20,7 @@ import {
   Line, Link, SubBox, Sidebar, 
   GamePageContainer, NeutralButton, NewButton
 } from '@/utils/styles';
-import SpeedSelect from "../modules/SpeedSelect";
+import ModSelect from "../modules/ModSelect";
 import MapsetSelectPopup from "../modules/MapsetSelectPopup";
 
 type Props = {
@@ -83,6 +83,7 @@ const Game = ({ user } : Props) => {
 
 	const [availableSpeeds, setAvailableSpeeds] = useState<number[]>([1]);
 	const [speed, setSpeed] = useState<number>(1);
+  const [modCombo, setModCombo] = useState<ModCombo>(getModCombo(0));
 
   const [map, setMap] = useState<Beatmap | null>();
   if (map === undefined) { return <Loading />; }
@@ -91,17 +92,21 @@ const Game = ({ user } : Props) => {
   const {owner} = beatmapset;
   const [artist, title] = map ? [getArtist(map, config), getTitle(map, config)] : [undefined, undefined];
 
+  const ModSelectComponent = 
+    <ModSelect
+      speed={speed}
+      setSpeed={setSpeed}
+      modCombo={modCombo}
+      setModCombo={setModCombo}
+      availableSpeeds={availableSpeeds}
+    />
+
   return (
     <>
       <h1>{artist} - {title} [{diffname}]</h1>
       <GamePageContainer>
         <Sidebar>
           <MapInfoDisplay {...map} />
-          <SpeedSelect
-            speed={speed}
-            setSpeed={setSpeed}
-            availableSpeeds={availableSpeeds}
-          />
           <ActionsContainer>
             {user ? 
               <MapsetSelectPopup
@@ -133,24 +138,31 @@ const Game = ({ user } : Props) => {
           user={user}
           beatmap={map}
           afterGameEnd={refreshBeatmap}
-					speed={speed}
 					setAvailableSpeeds={setAvailableSpeeds}
+					speed={speed}
+          modCombo={modCombo}
+          modSelectComponent={ModSelectComponent}
         />
         <Sidebar>
           <h2>{text(`game-leaderboard-header`)}</h2>
           <LBContainer>
-            { map?.scores?.slice(0, MAX_NUM_LEADERBOARD).map((score) =>
+            { map?.scores?.slice(0, MAX_NUM_LEADERBOARD).map(({id, user, score, speed_modification, mod_flag}) => {
               // XXX: hmm is this okay to be optional?
-              <LBEntry key={score.id}>
-                <Link to={`/user/${score.user?.id}`}>
-                  <UserAvatar src={score.user?.avatar_url} />
+              const {hidden} = getModCombo(mod_flag);
+              return <LBEntry key={id}>
+                <Link to={`/user/${user?.id}`}>
+                  <UserAvatar src={user?.avatar_url} />
                 </Link>
-                <Link to={`/user/${score.user?.id}`}>
-                  {score.user?.name + ":"}
+                <Link to={`/user/${user?.id}`}>
+                  {user?.name}
                 </Link>
-                {`${score.score} pts (${score.speed_modification}x)`}
+                {text(`game-leaderboard-score`, {
+                  score: score,
+                  speed: speed_modification,
+                  mods: hidden ? ' +HD' : '',
+                })}
               </LBEntry>
-            )}
+            })}
           </LBContainer>
         </Sidebar>
       </GamePageContainer>

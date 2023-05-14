@@ -72,19 +72,14 @@ class Score(Base):
     kana_accuracy = Column(Float)
     time_unix = Column(Integer)
     speed_modification = Column(Float)
+    mod_flag = Column(Integer)
 
     user = relationship('User', back_populates='scores')
     beatmap = relationship('Beatmap', back_populates='scores')
 
-    def __init__(self, user_id, beatmap_id, score, key_accuracy, kana_accuracy, time_unix, speed_modification, id = None):
-        self.user_id = user_id
-        self.beatmap_id = beatmap_id
-        self.score = score
-        self.key_accuracy = key_accuracy
-        self.kana_accuracy = kana_accuracy
-        self.time_unix = time_unix
+    def __init__(self, id = None, **kwargs):
+        super(Score, self).__init__(**kwargs)
         self.id = id
-        self.speed_modification = speed_modification
 
 def init_db():
     from database import db_session, engine
@@ -111,7 +106,7 @@ def init_db():
             duration=78000, \
             diffname="sampai_'s ear damage", \
             content=content,
-            kpm=401),
+            kpm=391),
         Beatmapset(id=1337, 
             owner_id="8484892osu",
             name="flos",
@@ -128,7 +123,7 @@ def init_db():
             duration=280000, \
             diffname="Lythrum", \
             content=flos_content,
-            kpm=273),
+            kpm=333),
        Beatmap(id=272, \
            beatmapset_id=727, \
            artist='YOASOBI', \
@@ -140,7 +135,7 @@ def init_db():
            duration=261000, \
            diffname="don't play this", \
            content=yorunicontent,
-           kpm=381),
+           kpm=370),
        Beatmap(id=2727, \
            beatmapset_id=727, \
            artist='YOASOBI', \
@@ -183,7 +178,7 @@ def init_db():
             duration=105000, \
             diffname="sampai_'s Fun Time", \
             content=my_time_content,
-            kpm=196),
+            kpm=240),
         Beatmapset(id=7270, \
             owner_id="8484892osu", \
             name="カナデトモスソラ",
@@ -202,11 +197,11 @@ def init_db():
             content=kanade_content,
             kpm=275),
 
-        Score(user_id=1234, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, score=727),
-        Score(user_id=1234, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, score=123),
-        Score(user_id=4321, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, score=72727),
-        Score(user_id=4321, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, score=72726),
-        Score(user_id=4321, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, score=72725),
+        Score(user_id=1234, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, mod_flag=1, score=727),
+        Score(user_id=1234, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, mod_flag=0, score=123),
+        Score(user_id=4321, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, mod_flag=1, score=72727),
+        Score(user_id=4321, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, mod_flag=0, score=72726),
+        Score(user_id=4321, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, mod_flag=0, score=72725),
     ]
 
     db_session.bulk_save_objects(objects)

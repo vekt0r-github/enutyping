@@ -10,7 +10,7 @@ import { Config, configContext } from '@/providers/config';
 
 import { 
   User, Beatmap, LineData,
-  GameStatus, GameState 
+  GameStatus, GameState, getModCombo 
 } from "@/utils/types";
 import { 
   makeLineStateAt,
@@ -139,7 +139,6 @@ const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap }
   const [editingState, setEditingState] = useState<EditingState>({ status: NOT, unsaved: copyOf ? true : false });
 
   const {status, offset, currTime, stats} = gameState;
-	const [availableSpeeds, setAvailableSpeeds] = useState<number[]>([1]);
   const currIndex = (currTime !== undefined) ? timeToLineIndex(lines, currTime) : undefined; 
   const isEditing = [GameStatus.PAUSED, GameStatus.AUTOPLAYING].includes(status);
   const isTesting = status === GameStatus.PLAYING;
@@ -587,7 +586,8 @@ const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap }
         gameState={displayGameState}
         setGameState={isTesting ? setGameState : () => {}}
 				speed={1}
-				setAvailableSpeeds={setAvailableSpeeds}
+				setAvailableSpeeds={() => {}}
+        modCombo={getModCombo(0)} // nomod for visuals/testing
       />
       {/* a few absolutely positioned components to overlay */}
       {editingState.status === EditingStatus.LINE ?

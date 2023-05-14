@@ -9,9 +9,9 @@ import { getL10nFunc } from '@/providers/l10n';
 import { configContext } from '@/providers/config';
 
 import { 
-  User, Beatmap, GameStatus, GameState,
+  User, Beatmap, GameStatus, GameState, ModCombo,
 } from "@/utils/types";
-import { computeLineKPM, computeLineKeypresses, timeToLineIndex } from '@/utils/beatmaputils';
+import { computeLineKPM, computeLineKeypresses, getVisualPosition, timeToLineIndex } from '@/utils/beatmaputils';
 import { getScoreMultiplier, makeUpdateGameState } from "@/utils/gameplayutils";
 
 import styled from 'styled-components';
@@ -23,8 +23,10 @@ type Props = {
   beatmap: Beatmap, 
   gameState: GameState, // data in gameState.lines is a superset of beatmap.lines
   setGameState: React.Dispatch<React.SetStateAction<GameState>>,
-	setAvailableSpeeds: React.Dispatch<React.SetStateAction<number[]>>,
+	setAvailableSpeeds: React.Dispatch<React.SetStateAction<number[]>>, // available speeds pulled from YT
 	speed: number,
+  modCombo: ModCombo,
+  modSelectComponent?: JSX.Element, // hacky fix to place this
 };
 
 export const GameContainer = styled.div`
@@ -46,11 +48,12 @@ const TopHalf = styled.div`
   top: 0;
 `;
 
-const LyricLine = styled.div`
+const LyricLine = styled.div<{opacity: number}>`
   font-size: 1.5em;
   color: black;
   width: 100%;
   text-align: center;
+  opacity: ${({opacity}) => opacity};
 `;
 
 export const BottomHalf = styled(TopHalf)`
@@ -58,14 +61,16 @@ export const BottomHalf = styled(TopHalf)`
   display: flex;
 `;
 
+// used as the two boxes bordering video
 export const StatBox = styled(SubBox)`
   flex-basis: 0;
   flex-grow: 1;
+  width: calc(200px - 2*var(--s)); // to fit nicely
   height: 300px;
   margin: var(--s);
 	margin-top: 0;
-	padding-top: 0;
-	padding-bottom: 0;
+	padding: var(--xs);
+  box-sizing: border-box;
 `;
 
 const ResultsContainer = styled.div`
@@ -73,8 +78,10 @@ const ResultsContainer = styled.div`
 	flex-direction: column;
 	position: absolute;
   background-color: var(--clr-primary-light);
-	width: 100%;
-	height: 100%;
+	width: calc(100% - 2*var(--s));
+	height: calc(100% - 2*var(--s));
+  padding: var(--s);
+  box-sizing: content-box;
 	align-items: center;
 	justify-content: space-between;
 `;
@@ -82,7 +89,7 @@ const ResultsContainer = styled.div`
 export const Overlay = styled.div`
   width: 100%;
   height: 100%;
-  padding-bottom: calc(var(--game-height) / 3);
+  /* padding-bottom: calc(var(--game-height) / 3); */
   box-sizing: border-box;
   position: absolute;
   left: 0;
@@ -186,7 +193,7 @@ const FinalStatsDisplay = InfoDisplay("",
 );
 
 
-const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableSpeeds, speed } : Props) => {
+const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableSpeeds, speed, modCombo, modSelectComponent } : Props) => {
   const config = useContext(configContext);
   const text = getL10nFunc();
 
@@ -217,7 +224,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
     (adjustedTime !== undefined) && (currIndex !== undefined) && (currIndex > -1) && (currIndex < lines.length);
   const isPlayingGame = isActive && status === GameStatus.PLAYING;
 
-  const scoreMultiplier = getScoreMultiplier(speed);
+  const scoreMultiplier = getScoreMultiplier(speed, modCombo);
   const updateGameState = makeUpdateGameState(useKanaLayout, scoreMultiplier);
 
   const handleKeyPress = (e: KeyboardEvent) => {
@@ -228,6 +235,12 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
     setGameState((state) => updateGameState(state, e.key, adjustedTime));
   };
 
+  // IMPLEMENTATION OF HIDDEN (for lyric line)
+  const fadingInterval = 0.4
+  const fadingCompletionTime = 0.4
+  const currTimeRatio = lineState ? getVisualPosition(adjustedTime ?? 0, lineState.line) : 0;
+  const lyricOpacity = (fadingCompletionTime - currTimeRatio) / fadingInterval;
+
   return (
     <GameContainer>
 				<> 
@@ -236,11 +249,15 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
 							<GameLine // current line
 								key={currIndex}
 								currTime={adjustedTime}
-								lineState={lines[currIndex]}
+								lineState={lineState!}
 								keyCallback={handleKeyPress}
                 isPlayingGame={isPlayingGame}
+                modCombo={modCombo}
 							/>
-							<LyricLine>{lines[currIndex].line.lyric}</LyricLine>
+							<LyricLine
+                opacity={modCombo.hidden
+                  ? Math.min(Math.max(lyricOpacity, 0), 1)
+                  : 1}>{lineState!.line.lyric}</LyricLine>
 						</> : null}
 						{status === GameStatus.SUBMITTING ?
 							<h2>{text(`game-submitting`)}</h2>
@@ -283,6 +300,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
 								}}></OffsetInput>
 							</Line>
 							<Line size="1em" margin="0">{text(`game-start-offset-desc`)}</Line>
+              {modSelectComponent ? modSelectComponent : null}
 						</Overlay>
 						: null}
 					{status === GameStatus.ENDED ?

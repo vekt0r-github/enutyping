@@ -67,7 +67,8 @@ const GameVideo = ({ yt_id, status, currTime, startGame, setAvailableSpeeds, spe
     } else if (playing && status === GameStatus.PAUSED) { 
       player?.pauseVideo();
     } else if(playing) {
-			setAvailableSpeeds([e.target.getPlaybackRate()]);
+			setAvailableSpeeds([]); // denotes inability to change
+      // previously e.target.getPlaybackRate()
 		} else if(!playing) {	
 			setAvailableSpeeds(e.target.getAvailablePlaybackRates());
 		}
