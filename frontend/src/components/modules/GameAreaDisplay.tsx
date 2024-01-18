@@ -217,7 +217,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
   };
   
   if (status === GameStatus.GOBACK) {
-    return <Navigate to={`/play/${beatmap.beatmapset.id}`} replace={true} />;
+    return <Navigate to={`/play`} replace={true} />;
   }
 
   const isActive = [GameStatus.PLAYING, GameStatus.PAUSED, GameStatus.AUTOPLAYING].includes(status) &&

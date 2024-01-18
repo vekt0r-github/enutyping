@@ -109,7 +109,7 @@ const EditorDiffSelect = ({ user } : Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />
   }
-  const Invalid = elem((<p></p>), `invalid-access-mapset`, {elems: {LinkTo: <Link to="/edit/new" />}});
+  const Invalid = elem((<p></p>), `invalid-access-mapset`, {elems: {LinkTo: <Link to="/edit/collection/new" />}});
   if (status === GOBACK) { return <Navigate to={`/edit`} replace={true} />; }
   if (status === INVALID) { return Invalid; }
   if (status === LOADING || !mapset) { return <Loading />; }
@@ -136,10 +136,10 @@ const EditorDiffSelect = ({ user } : Props) => {
           <p>{mapset.description}</p>
           <Line as="h2" size="1.5em">{text(`diffs-section-actions`)}</Line>
           <ActionsContainer>
-            <NeutralButton as={Link} to={`/play/${mapsetId}`}>
+            <NeutralButton as={Link} to={`/play/collection/${mapsetId}`}>
               {text(`to-play`)}
             </NeutralButton>
-            <NeutralButton as={Link} to={`/edit/${mapsetId}/metadata`}>
+            <NeutralButton as={Link} to={`/edit/collection/${mapsetId}/metadata`}>
               {text(`editor-map-edit-metadata`)}
             </NeutralButton>
             <ConfirmPopup
@@ -176,7 +176,7 @@ const EditorDiffSelect = ({ user } : Props) => {
               {beatmaps.map((map) => 
                 <Diff
                   as={Link}
-                  to={`/edit/${mapset.id}/${map.id}`}
+                  to={`/edit/${map.id}`}
                   key={map.id}
                   onMouseEnter={() => setSelectedMap(map)}
                   onFocus={() => setSelectedMap(map)}
@@ -197,7 +197,7 @@ const EditorDiffSelect = ({ user } : Props) => {
                   })}
                 </Diff>
               )}
-              <NewButton as={Link} to={`/edit/${mapset.id}/new`}>
+              <NewButton as={Link} to={`/edit/collection/${mapset.id}/new`}>
                 <Line size="3.5em" margin="-3px -4px 0 -8px" style={{'width': '40px'}}>+</Line>
                 <Line size="1em" margin="0">{text(`menu-map-new-diff`)}</Line>
               </NewButton>

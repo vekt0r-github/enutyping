@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState }  from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
 import YTVideo from "@/components/modules/YTVideo";
@@ -93,29 +93,18 @@ const EditorMetadata = ({ user } : Props) => {
   // this component has two paths leading to it!
   // if creating a new map, mapId is undefined
   // if editing an existing map's metadata, it's not
-  const { mapsetId, mapId } = useParams();
-  const isNewMapset = (mapsetId === 'new');
+  const { mapId } = useParams();
+  const [searchParams, _] = useSearchParams();
+  const mapsetId = searchParams.get('collection');
   const isNewMap = (mapId === undefined);
 
   const createOrUpdateMap = async () => {
     const {artist, title, artist_original, title_original, yt_id, preview_point, diffname} = map;
     const duration = (player?.getDuration() ?? 0) * 1000;
     if (!artist || !title || !artist_original || !title_original || !yt_id || !duration || !diffname) { return; }
-    let mapsetId, newMapset : Beatmapset;
-    if (isNewMapset) { // automatically generate collection title from artist and title
-      newMapset = await post(`/api/beatmapsets`, {
-        name: getTitle(map, config), // match the user's current setting
-        description: getArtist(map, config),
-        icon_url: `http://img.youtube.com/vi/${yt_id}/hqdefault.jpg`
-      });
-      mapsetId = newMapset.id;
-    } else {
-      mapsetId = mapset?.id;
-    }
-    if (!mapsetId) return;
     const data = {
       artist, title, artist_original, title_original, yt_id, preview_point, duration, diffname,
-      beatmapset_id: mapsetId,
+      beatmapset_id: mapset?.id,
     };
     const callback = (beatmap : BeatmapMetadata) => {
       setState(({map, mapset}) => ({
@@ -123,7 +112,7 @@ const EditorMetadata = ({ user } : Props) => {
         map: { ...map,
           id: beatmap.id,
         },
-        mapset: mapset ?? newMapset,
+        mapset: mapset,
       }));
     }
     if (isNewMap) {
@@ -138,37 +127,38 @@ const EditorMetadata = ({ user } : Props) => {
   };  
   
   useEffect(() => {
-    console.log(isNewMapset)
-    if (isNewMapset) {
+    if (!mapsetId && isNewMap) {
       setStatus(LOADED);
       return;
     }
-    get(`/api/beatmapsets/${mapsetId}`)
-      .then((beatmapset) => {
-        if (!beatmapset || !beatmapset.id) {
-          throw new Error; // mapset not found
-        } else if (beatmapset.owner.id !== user?.id) {
-          throw new Error; // no perms
-        } else {
-          setMapset(beatmapset);
-        }
-      })
-      .then(() => {
-        if (isNewMap) {
-          setStatus(LOADED);
-          return;
-        }
-        get(`/api/beatmaps/${mapId}`)
-          .then((beatmap) => {
-            if (!beatmap || !beatmap.id) {
-              throw new Error; // map not found
-            } else {
-              setMap(beatmap);
+    if (mapsetId) {
+      get(`/api/beatmapsets/${mapsetId}`)
+        .then((beatmapset) => {
+          if (!beatmapset || !beatmapset.id) {
+            throw new Error; // mapset not found
+          } else if (beatmapset.owner.id !== user?.id) {
+            throw new Error; // no perms
+          } else {
+            setMapset(beatmapset);
+            if (isNewMap) {
               setStatus(LOADED);
             }
-          })
-      })
-      .catch(err => setStatus(INVALID));
+          }
+        })
+        .catch(err => setStatus(INVALID));
+    }
+    if (!isNewMap) {
+      get(`/api/beatmaps/${mapId}`)
+        .then((beatmap) => {
+          if (!beatmap || !beatmap.id) {
+            throw new Error; // map not found
+          } else {
+            setMap(beatmap);
+            setStatus(LOADED);
+          }
+        })
+        .catch(err => setStatus(INVALID));
+    }
   }, []);
 
   const onKeyPress = (e: KeyboardEvent) => {
@@ -187,11 +177,11 @@ const EditorMetadata = ({ user } : Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />
   }
-  const Invalid = elem((<p></p>), `invalid-access-map`, {elems: {LinkTo: <Link to="/edit/new" />}});
-  if (status === GOBACK) { return <Navigate to={`/edit/${mapsetId}`} replace={true} />; }
+  const Invalid = elem((<p></p>), `invalid-access-map`, {elems: {LinkTo: <Link to="/edit/collection/new" />}});
+  if (status === GOBACK) { return <Navigate to={`/edit`} replace={true} />; }
   if (status === INVALID) { return Invalid; }
   if (status === LOADING) { return <Loading />; }
-  if (status === FINISHED) { return <Navigate to={`/edit/${mapset?.id}/${map.id}`} replace={true} />; }
+  if (status === FINISHED) { return <Navigate to={`/edit/${map.id}`} replace={true} />; }
   const {yt_id, diffname} = map;
   const [artist, title] = [getArtist(map, config), getTitle(map, config)];
 

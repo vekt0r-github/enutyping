@@ -146,11 +146,11 @@ const EditorMapsetMetadata = ({ user } : Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />
   }
-  const Invalid = elem((<p></p>), `invalid-access-mapset`, {elems: {LinkTo: <Link to="/edit/new" />}});
+  const Invalid = elem((<p></p>), `invalid-access-mapset`, {elems: {LinkTo: <Link to="/edit/collection/new" />}});
   if (status === GOBACK) { return <Navigate to={`/edit`} replace={true} />; }
   if (status === INVALID) { return Invalid; }
   if (status === LOADING || !mapset) { return <Loading />; }
-  if (status === FINISHED) { return <Navigate to={`/edit/${mapset.id}${isNewMapset ? '/new' : ''}`} replace={true} />; }
+  if (status === FINISHED) { return <Navigate to={`/edit/collection/${mapset.id}${isNewMapset ? '/new' : ''}`} replace={true} />; }
 
   const {name, icon_url, owner} = mapset;
 

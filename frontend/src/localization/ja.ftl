@@ -128,7 +128,7 @@ game-start-offset-desc = （ビートマップのタイミングは音楽に対�
 game-results-header = リザルト
 game-results-score = ファイナルスコア：{ $score }
 
-home-title = 好きな歌を聴きながら、歌詞をタイプする！
+home-title = 好きな歌を聴きながら、歌詞をタイプしよう！
 home-subtitle = 無料で、osu!に次いで最高のリズムゲーム
 home-try-now = ゲームへ
   

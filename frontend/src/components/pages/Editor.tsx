@@ -50,7 +50,7 @@ const Editor = ({ user } : Props) => {
   const config = useContext(configContext);
 
   const navigate = useNavigate();
-  const { mapId, mapsetId } = useParams();
+  const { mapId } = useParams();
 
   const [state, setState] = useState<BeatmapState>({ status: LOADING });
   /**
@@ -77,8 +77,8 @@ const Editor = ({ user } : Props) => {
   const handleDeleteBeatmap = async () => {
     setState((state) => ({...state, status: LOADING}))
     const res = await httpDelete(`/api/beatmaps/${mapId}`) 
-    if (res && res.success && res.beatmapset_id) {
-      navigate(`/edit/${res.beatmapset_id}`)
+    if (res && res.success) {
+      navigate(`/edit`)
     }
   };
   
@@ -102,9 +102,9 @@ const Editor = ({ user } : Props) => {
   // handle loading map
   useEffect(() => {
     get(`/api/beatmaps/${mapId}`).then((beatmap) => {
-      if (!beatmap || !beatmap.id || beatmap.beatmapset.id != mapsetId) {
+      if (!beatmap || !beatmap.id) {
         setState({ status: INVALID }); // map not found or param is wrong
-      } else if (beatmap.beatmapset.owner.id !== user?.id) {
+      } else if (beatmap.owner.id !== user?.id) {
         setState({ status: NO_PERMS }); // user doesn't own mapset
       } else {
         processAndLoad(() => beatmap, true);
@@ -122,7 +122,7 @@ const Editor = ({ user } : Props) => {
   if (!user) { // include this in every restricted page
     return <Navigate to='/login' replace={true} />
   }
-  const Invalid = elem((<p></p>), `invalid-access-map`, {elems: {LinkTo: <Link to="/edit/new" />}});
+  const Invalid = elem((<p></p>), `invalid-access-map`, {elems: {LinkTo: <Link to="/edit/collection/new" />}});
   if (status === LOADING) { return <Loading />; }
   if (status === NO_PERMS) { return Invalid; }
   if (status === INVALID || !beatmap) { return Invalid; }
@@ -146,13 +146,14 @@ const Editor = ({ user } : Props) => {
           />
           <Line as="h2" size="1.5em">{text(`editor-section-actions`)}</Line>
           <ActionsContainer>
-            <NeutralButton as={Link} to={`/play/${mapsetId}/${mapId}`}>
+            <NeutralButton as={Link} to={`/play/${mapId}`}>
               {text(`to-play`)}
             </NeutralButton>
-            <NeutralButton as={Link} to={`/edit/${mapsetId}/${mapId}/metadata`}>
+            <NeutralButton as={Link} to={`/edit/${mapId}/metadata`}>
               {text(`editor-map-edit-metadata`)}
             </NeutralButton>
-            <MapsetSelectPopup
+            {/* TODO: use this example for future needs for inline map/collection select */}
+            {/* <MapsetSelectPopup
               user={user}
               button={<NewButton>
                 <Line size="1em" margin="0">{text(`copy-map-button`)}</Line>
@@ -172,7 +173,7 @@ const Editor = ({ user } : Props) => {
                     window.location.assign(`/edit/${destMapsetId}/${beatmapRes.id}`);
                   });
               }}
-            />
+            /> */}
             <ConfirmPopup 
               button={<DeleteButton>
                 <Line size="3.5em" margin="-12px 0 0 -16px" style={{'width': '40px'}}>-</Line>

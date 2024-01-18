@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState }  from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 
 import Loading from "@/components/modules/Loading";
 import GameArea from "@/components/modules/GameArea";
@@ -65,11 +65,11 @@ const Game = ({ user } : Props) => {
   const text = getL10nFunc();
   const config = useContext(configContext);
 
-  const { mapId, mapsetId } = useParams();
+  const { mapId } = useParams();
   
   const refreshBeatmap = () => {
     get(`/api/beatmaps/${mapId}`).then((beatmap) => {
-      if (!beatmap || (beatmap.id === undefined) || beatmap.beatmapset.id != mapsetId) {
+      if (!beatmap || (beatmap.id === undefined)) {
         setMap(null); // map not found or param is wrong
       } else {
         processBeatmap(beatmap, config); // mutates
@@ -88,8 +88,7 @@ const Game = ({ user } : Props) => {
   const [map, setMap] = useState<Beatmap | null>();
   if (map === undefined) { return <Loading />; }
   if (map === null) { return <NotFound />; }
-  const {beatmapset, diffname} = map;
-  const {owner} = beatmapset;
+  const {owner, diffname} = map;
   const [artist, title] = map ? [getArtist(map, config), getTitle(map, config)] : [undefined, undefined];
 
   const ModSelectComponent = 
@@ -108,27 +107,9 @@ const Game = ({ user } : Props) => {
         <Sidebar>
           <MapInfoDisplay {...map} />
           <ActionsContainer>
-            {user ? 
-              <MapsetSelectPopup
-                user={user}
-                button={<NewButton>{text(`copy-map-button`)}</NewButton>}
-                onSelect={(destMapsetId) => {
-                  // copy to selected collection
-                  const {artist, title, artist_original, title_original, yt_id, preview_point, diffname} = map; // metadata
-                  const {kpm, content} = map; // non-metadata
-                  const data = {artist, title, artist_original, title_original, yt_id, preview_point, diffname, kpm, content,
-                    beatmapset_id: destMapsetId};
-                  post(`/api/beatmaps`, {...data, id: undefined})
-                    .then((beatmapRes) => {
-                      // redirect to new page
-                      // not using navigate; hope nothing bad happens
-                      window.location.assign(`/edit/${destMapsetId}/${beatmapRes.id}`);
-                    });
-                }}
-              />
-            : null}
+            {/* TODO: turn Editor example into an "add to collection" */}
             {user && user.id === owner.id ?
-              <NeutralButton as={Link} to={`/edit/${mapsetId}/${mapId}`}>
+              <NeutralButton as={Link} to={`/edit/${mapId}`}>
                 {text(`to-editor`)}
               </NeutralButton>
             : null}

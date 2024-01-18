@@ -78,7 +78,7 @@ const EditorSongSelect = ({ user } : Props) => {
             mapsets={filteredMapsets}
             includeMapsetCreate={true}
             includeMapCreate={true}
-            link={(mapsetId, mapId) => `/edit/${mapsetId}/${mapId??''}`} 
+            link={(mapsetId, mapId) => (mapId === undefined ? `/edit/collection/${mapsetId}` : `/edit/${mapId}`)} 
           />}
       </SongsContainer>
     </>

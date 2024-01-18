@@ -139,12 +139,12 @@ const App = ({} : Props) => {
           <Route path="/play" element={
             <SongSelect />
           }/>
-          <Route path="/play/:mapsetId" element={
+          <Route path="/play/collection/:mapsetId" element={
             <DiffSelect
               user={user}
             />
           }/>
-          <Route path="/play/:mapsetId/:mapId" element={
+          <Route path="/play/:mapId" element={
             <Game
               user={user}
             />
@@ -154,12 +154,12 @@ const App = ({} : Props) => {
               user={user}
             />
           }/>
-          <Route path="/edit/new" element={
+          <Route path="/edit/collection/new" element={
             <EditorMapsetMetadata
               user={user}
             />
           }/>
-          <Route path="/edit/:mapsetId" element={
+          <Route path="/edit/collection/:mapsetId" element={
             <EditorDiffSelect
               user={user}
             />
@@ -169,17 +169,18 @@ const App = ({} : Props) => {
               user={user}
             />
           }/>
-          <Route path="/edit/:mapsetId/new" element={ // this should also allow new as mapsetId
+          <Route path="/edit/new" element={
+            // ?collection= for adding mapset id to created map
             <EditorMetadata
               user={user}
             />
           }/>
-          <Route path="/edit/:mapsetId/:mapId" element={
+          <Route path="/edit/:mapId" element={
             <Editor
               user={user}
             />
           }/>
-          <Route path="/edit/:mapsetId/:mapId/metadata" element={
+          <Route path="/edit/:mapId/metadata" element={
             <EditorMetadata
               user={user}
             />

@@ -115,7 +115,7 @@ const DiffSelect = ({user} : Props) => {
           <MapsetInfoDisplay {...mapset} />
           <p>{mapset.description}</p>
           {user && user.id === owner.id ?
-            <NeutralButton as={Link} to={`/edit/${mapsetId}`}>
+            <NeutralButton as={Link} to={`/edit/collection/${mapsetId}`}>
               {text(`to-editor`)}
             </NeutralButton>
           : null}
@@ -135,7 +135,7 @@ const DiffSelect = ({user} : Props) => {
               {beatmaps.map((map) => 
                 <Diff
                   as={Link}
-                  to={`/play/${mapset.id}/${map.id}`}
+                  to={`/play/${map.id}`}
                   key={map.id}
                   onMouseEnter={() => setSelectedMap(map)}
                   onFocus={() => setSelectedMap(map)}

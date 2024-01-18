@@ -547,7 +547,7 @@ const EditorArea = ({ user, beatmap, lastSavedBeatmap, setContent, saveBeatmap }
   }, [beatmap.content]);
 
   if (status === GameStatus.GOBACK) {
-    return <Navigate to={`/edit/${beatmap.beatmapset.id}`} replace={true} />;
+    return <Navigate to={`/edit`} replace={true} />;
   }
 
   const displayGameState = (isEditing && currTime !== undefined) ? 

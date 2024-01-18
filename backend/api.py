@@ -103,8 +103,8 @@ def get_beatmap_with_set_and_scores(beatmap_id):
             best_scores_subquery.c.maxscore == Score.score)) \
             .order_by(Score.score.desc()).limit(MAX_NUM_SCORES).all()
     scores_result = scores_schema.dump(scores)
-    beatmapset_result = beatmapset_schema.dump(beatmap.beatmapset)
-    return { **process_beatmap(beatmap_result), 'scores' : scores_result, 'beatmapset' : beatmapset_result }
+    beatmapsets_result = beatmapset_schema.dump(beatmap.beatmapsets)
+    return { **process_beatmap(beatmap_result), 'scores' : scores_result, 'beatmapsets' : beatmapsets_result }
 
 @api.route('/beatmaps', methods=['POST'])
 @login_required
@@ -112,7 +112,7 @@ def add_beatmap(user_id):
     '''
     Data
     ----
-    beatmapset_id
+    beatmapset_id?
     artist
     title
     artist_original
@@ -133,23 +133,30 @@ def add_beatmap(user_id):
         return err.messages, 400
 
     bms_id = data['beatmapset_id']
+    del data['beatmapset_id']
 
     # artist, title, artist_original, title_original, yt_id, preview_point, duration = \
     #     itemgetter('artist', 'title', 'artist_original', 'title_original', 'yt_id', 'preview_point', 'duration')(data)
 
-    exists_subq = Beatmapset.query.filter(
+    mapset = Beatmapset.query.filter(
             Beatmapset.owner_id == user_id,
-            Beatmapset.id == bms_id).exists()
-    exists = db_session.query(exists_subq).scalar()
-    if not exists:
-        return 'Beatmapset does not exist or you do not own it!', 400
+            Beatmapset.id == bms_id,
+        ).first()
 
-    beatmap = Beatmap(**data)
+    owner = User.query.get(user_id)
+    assert owner is not None
+
+    beatmap = Beatmap(**data, owner_id=user_id)
+    if beatmapset is not None:
+        beatmap.beatmapsets.append(mapset)
+    
     db_session.add(beatmap)
     db_session.commit()
 
     res = beatmap_schema.dump(beatmap)
     return res, 201
+
+## TODO: methods for changing mapset membership
 
 @api.route('/beatmaps/<int:beatmap_id>', methods=['PUT'])
 @login_required
@@ -167,16 +174,9 @@ def update_beatmap(user_id, beatmap_id):
         return err.messages, 400
 
     beatmap = Beatmap.query.get(beatmap_id)
-    if not beatmap:
-        return 'Beatmap does not exist!', 400
+    if (not beatmap) or (beatmap.owner_id != user_id):
+        return 'Beatmap does not exist or you do not own it!', 400
     bms_id = beatmap.beatmapset_id
-
-    exists_subq = Beatmapset.query.filter(
-            Beatmapset.owner_id == user_id,
-            Beatmapset.id == bms_id).exists()
-    exists = db_session.query(exists_subq).scalar()
-    if not exists:
-        return 'Beatmapset does not exist or you do not own it!', 400
 
     for k, v in data.items():
         setattr(beatmap, k, v)
@@ -188,16 +188,9 @@ def update_beatmap(user_id, beatmap_id):
 @login_required
 def delete_beatmap(user_id, beatmap_id):
     beatmap = Beatmap.query.get(beatmap_id)
-    if not beatmap:
-        return 'Beatmap does not exist!', 400
-    bms_id = beatmap.beatmapset_id
-
-    exists_subq = Beatmapset.query.filter(
-            Beatmapset.owner_id == user_id,
-            Beatmapset.id == bms_id).exists()
-    exists = db_session.query(exists_subq).scalar()
-    if not exists:
-        return 'Beatmapset does not exist or you do not own it!', 400
+    if (not beatmap) or (beatmap.owner_id != user_id):
+        return 'Beatmap does not exist or you do not own it!', 400
+        
     db_session.delete(beatmap)
     db_session.commit()
     return { 'success': True, 'beatmapset_id': bms_id }
@@ -207,7 +200,7 @@ def delete_beatmap(user_id, beatmap_id):
 ################################################################
 
 @api.route('/beatmapsets/<int:beatmapset_id>', methods=['GET'])
-def get_beatmapset_with_diffs_and_scores(beatmapset_id):
+def get_beatmapset_with_beatmaps_and_scores(beatmapset_id):
     # TODO: do we need to run process_beatmap on result
     beatmapset = Beatmapset.query.get(beatmapset_id)
     if beatmapset is None:

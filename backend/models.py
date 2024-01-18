@@ -27,10 +27,15 @@ class User(Base):
         self.total_score = 0
         self.play_count = 0
 
+map_mapset = db.Table('map_mapset',
+    db.Column('beatmap_id', db.Integer, db.ForeignKey('beatmap.id')),
+    db.Column('beatmapset_id', db.Integer, db.ForeignKey('beatmapset.id'))
+    )
+
 class Beatmap(Base):
     __tablename__ = 'beatmaps'
     id = Column(Integer, primary_key=True)
-    beatmapset_id = Column(Integer, ForeignKey('beatmapsets.id'))
+    owner_id = Column(String(69), ForeignKey('users.id'))
     yt_id = Column(String(15))
     artist = Column(String(100))
     title = Column(String(100))
@@ -43,7 +48,7 @@ class Beatmap(Base):
     scores = relationship('Score', back_populates='beatmap')
     content = deferred(Column(UnicodeText))
 
-    beatmapset = relationship('Beatmapset', back_populates='beatmaps')
+    beatmapsets = db.relationship('Beatmapset', secondary=map_mapset, backref='beatmaps')
     kpm = Column(Float)
 
     def __init__(self, id = None, **kwargs):
@@ -59,7 +64,7 @@ class Beatmapset(Base):
     icon_url = Column(String(100))
 
     owner = relationship('User', back_populates='beatmapsets')
-    beatmaps = relationship('Beatmap', back_populates='beatmapset', cascade="all, delete, delete-orphan")
+    beatmaps = db.relationship('Beatmap', secondary=map_mapset, backref='beatmapsets')
 
 class Score(Base):
     __tablename__ = 'scores'

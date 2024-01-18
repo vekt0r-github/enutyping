@@ -37,9 +37,10 @@ scores_schema = ScoreSchema(many=True)
 
 class BeatmapSchema(Schema):
     id = fields.Int(dump_only=True)
+    owner = fields.Nested(UserSchema(only=("name", "id")), dump_only=True)
     scores = fields.Nested(score_schema, dump_only=True)
     # beatmapset_id = fields.Int(required=True, load_only=True)
-    beatmapset_id = fields.Int(load_only=True)
+    beatmapsets = fields.Nested(BeatmapsetSchema(only=("id", "name", "icon_url")), many=True)
     artist = fields.Str()
     title = fields.Str()
     artist_original = fields.Str()
@@ -60,7 +61,7 @@ class BeatmapsetSchema(Schema):
     name = fields.Str()
     description = fields.Str()
     icon_url = fields.Str()
-    beatmaps = fields.Nested(BeatmapSchema(exclude=("scores", "content")), many=True, dump_only=True)
+    beatmaps = fields.Nested(BeatmapSchema(exclude=("scores", "content")), many=True)
 
 beatmapset_schema = BeatmapsetSchema()
 beatmapsets_schema = BeatmapsetSchema(many=True)

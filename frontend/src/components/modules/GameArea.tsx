@@ -152,7 +152,7 @@ const GameArea = ({ user, beatmap, afterGameEnd, setAvailableSpeeds, speed, modC
   }, [status]); // may eventually depend on other things
 
   if (status === GameStatus.GOBACK) {
-    return <Navigate to={`/play/${beatmap.beatmapset.id}`} replace={true} />;
+    return <Navigate to={`/play`} replace={true} />;
   }
   
   return (

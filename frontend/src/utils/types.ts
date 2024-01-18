@@ -76,7 +76,8 @@ export type BeatmapMetadata = {
 };
 
 export type Beatmap = BeatmapMetadata & {
-  beatmapset: Beatmapset;
+  owner: User;
+  beatmapsets: Beatmapset[]; // can be in zero or more collections
   content: string;
   timingPoints: TimingPoint[];
   lines: LineData[]; // processed content
