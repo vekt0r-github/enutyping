@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, UnicodeText, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, UnicodeText, ForeignKey, Table
 from sqlalchemy.orm import deferred, relationship
 from time import time
 from database import Base
@@ -27,15 +27,16 @@ class User(Base):
         self.total_score = 0
         self.play_count = 0
 
-map_mapset = db.Table('map_mapset',
-    db.Column('beatmap_id', db.Integer, db.ForeignKey('beatmap.id')),
-    db.Column('beatmapset_id', db.Integer, db.ForeignKey('beatmapset.id'))
-    )
-
+class MapMapsetRelationship(Base):
+    __tablename__ = 'map_mapset'
+    id = Column(Integer, primary_key=True)
+    beatmap_id = Column(Integer, ForeignKey('beatmaps.id'), nullable=False)
+    beatmapset_id = Column(Integer, ForeignKey('beatmapsets.id'), nullable=False)
+    
 class Beatmap(Base):
     __tablename__ = 'beatmaps'
     id = Column(Integer, primary_key=True)
-    owner_id = Column(String(69), ForeignKey('users.id'))
+    owner_id = Column(String(69), ForeignKey('users.id'), nullable=False)
     yt_id = Column(String(15))
     artist = Column(String(100))
     title = Column(String(100))
@@ -48,7 +49,7 @@ class Beatmap(Base):
     scores = relationship('Score', back_populates='beatmap')
     content = deferred(Column(UnicodeText))
 
-    beatmapsets = db.relationship('Beatmapset', secondary=map_mapset, backref='beatmaps')
+    beatmapsets = relationship('Beatmapset', secondary=MapMapsetRelationship.__table__)
     kpm = Column(Float)
 
     def __init__(self, id = None, **kwargs):
@@ -64,7 +65,7 @@ class Beatmapset(Base):
     icon_url = Column(String(100))
 
     owner = relationship('User', back_populates='beatmapsets')
-    beatmaps = db.relationship('Beatmap', secondary=map_mapset, backref='beatmapsets')
+    beatmaps = relationship('Beatmap', secondary=MapMapsetRelationship.__table__)
 
 class Score(Base):
     __tablename__ = 'scores'

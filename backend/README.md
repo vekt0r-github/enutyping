@@ -14,6 +14,23 @@
   - `export FLASK_ENV=development`
 2. Run with `flask run`
 
+# Migrations and testing migrations
+
+Currently using Alembic for migrations; to test a given one, you need:
+- the git commit hashes for before and after changes
+- the alembic hash of the given and/or previous migration
+- backups of any meaningful local testing data (db will be wiped)
+
+The steps are:
+- git checkout commit hash for before this migration (and/or git stash your changes)
+- delete `persistent/data.db` and run `python models.py` to remake the db
+- alembic stamp the hash of the previous migration
+- git checkout commit hash for after migration (and/or git stash pop your changes)
+- alembic upgrade +1, and if that succeeded, test that the data migrated the way you want!
+  - note: if migration requires previous models, do this on the old commit hash
+
+Make sure to update the bottom section of `models.py` to be consistent with your new schema!
+
 # Deploying
 
 1. Be sure to run `npm run build` in frontend to build our React app.
