@@ -27,7 +27,8 @@ The steps are:
 - alembic stamp the hash of the previous migration
 - git checkout commit hash for after migration (and/or git stash pop your changes)
 - alembic upgrade +1, and if that succeeded, test that the data migrated the way you want!
-  - note: if migration requires previous models, do this on the old commit hash
+
+note: when writing a migration that involves data, use this method: https://stackoverflow.com/a/24623979
 
 Make sure to update the bottom section of `models.py` to be consistent with your new schema!
 
