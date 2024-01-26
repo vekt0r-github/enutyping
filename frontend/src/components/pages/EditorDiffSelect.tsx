@@ -197,7 +197,7 @@ const EditorDiffSelect = ({ user } : Props) => {
                   })}
                 </Diff>
               )}
-              <NewButton as={Link} to={`/edit/collection/${mapset.id}/new`}>
+              <NewButton as={Link} to={`/edit/new?collection=${mapset.id}`}>
                 <Line size="3.5em" margin="-3px -4px 0 -8px" style={{'width': '40px'}}>+</Line>
                 <Line size="1em" margin="0">{text(`menu-map-new-diff`)}</Line>
               </NewButton>

@@ -10,6 +10,7 @@ class User(Base):
     name = Column(String(50), unique=True)
     avatar_url = Column(String(100))
     scores = relationship('Score', lazy="dynamic", order_by="desc(Score.id)", back_populates='user')
+    beatmaps = relationship('Beatmap', back_populates='owner')
     beatmapsets = relationship('Beatmapset', back_populates='owner')
     join_time = Column(Integer())
     key_accuracy = Column(Float())
@@ -49,6 +50,7 @@ class Beatmap(Base):
     scores = relationship('Score', back_populates='beatmap')
     content = deferred(Column(UnicodeText))
 
+    owner = relationship('User', back_populates='beatmaps')
     beatmapsets = relationship('Beatmapset', secondary=MapMapsetRelationship.__table__)
     kpm = Column(Float)
 

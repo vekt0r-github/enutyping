@@ -103,8 +103,10 @@ def get_beatmap_with_set_and_scores(beatmap_id):
             best_scores_subquery.c.maxscore == Score.score)) \
             .order_by(Score.score.desc()).limit(MAX_NUM_SCORES).all()
     scores_result = scores_schema.dump(scores)
-    beatmapsets_result = beatmapset_schema.dump(beatmap.beatmapsets)
-    return { **process_beatmap(beatmap_result), 'scores' : scores_result, 'beatmapsets' : beatmapsets_result }
+    return {
+        **process_beatmap(beatmap_result),
+        'scores' : scores_result,
+    }
 
 @api.route('/beatmaps', methods=['POST'])
 @login_required

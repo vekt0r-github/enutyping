@@ -164,7 +164,7 @@ const App = ({} : Props) => {
               user={user}
             />
           }/>
-          <Route path="/edit/:mapsetId/metadata" element={
+          <Route path="/edit/collection/:mapsetId/metadata" element={
             <EditorMapsetMetadata
               user={user}
             />
