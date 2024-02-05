@@ -63,6 +63,7 @@ export type TimingPoint = {
 export type BeatmapMetadata = {
   // TODO populate this from the backend
   id: number;
+  owner: User;
   artist: string;
   title: string;
   artist_original: string;
@@ -76,7 +77,6 @@ export type BeatmapMetadata = {
 };
 
 export type Beatmap = BeatmapMetadata & {
-  owner: User;
   beatmapsets: Beatmapset[]; // can be in zero or more collections
   content: string;
   timingPoints: TimingPoint[];

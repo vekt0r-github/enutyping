@@ -24,7 +24,7 @@ type Props = {
   link?: (mapsetId: MapsetID, mapId?: MapID) => string
 };
 
-const SetLink = styled(MainBox)`
+const MapsetLink = styled(MainBox)`
   position: absolute;
   left: 0;
   top: 0;
@@ -83,7 +83,7 @@ const HoverContainer = styled(MainBox)`
   & > ${DiffsContainer} { display: none; }
 `;
 
-const SongBox = styled(MainBox)`
+const MapsetBox = styled(MainBox)`
   height: 90px;
   min-width: 360px;
   max-width: 480px;
@@ -101,7 +101,7 @@ const SongBox = styled(MainBox)`
   }
 `;
 
-const NewMapBox = styled(SongBox)`
+const NewMapBox = styled(MapsetBox)`
   background-color: var(--clr-create-map);
   display: flex;
   justify-content: center;
@@ -171,9 +171,9 @@ const MapsetList = ({ getBeatmapsets, mapsets, includeMapsetCreate, includeMapCr
         const {icon_url, owner, beatmaps} = mapset;
         const mapCount = beatmaps.length;
         return (
-          <SongBox key={mapset.id}>
+          <MapsetBox key={mapset.id}>
             <HoverContainer>
-              <SetLink {...makeTargetProps(mapset.id)}>
+              <MapsetLink {...makeTargetProps(mapset.id)}>
                 <Thumbnail src={icon_url} width={120} height={90} />
                 <Info>
                   <Line size='1.25em' as='h2' margin="0">{mapset.name}</Line>
@@ -181,7 +181,7 @@ const MapsetList = ({ getBeatmapsets, mapsets, includeMapsetCreate, includeMapCr
                   <Line size='0.8em' margin="0">{text(`menu-mapset-owner`, {owner: owner.name})}</Line>
                   <Line size='0.8em' margin="0">{text(`menu-mapset-mapcount`, {mapCount})} | {text(`menu-mapset-kpm`, {kpm: Math.round(getSetAvg(mapset, 'kpm'))})}</Line>
                 </Info>
-              </SetLink>
+              </MapsetLink>
               <DiffsContainer>
                 {/* the actual diffs come first here */}
                 {beatmaps.map((map) => 
@@ -208,7 +208,7 @@ const MapsetList = ({ getBeatmapsets, mapsets, includeMapsetCreate, includeMapCr
                     key={"new"}
                   >
                     <BlackLine size="2.5em" margin="-1.5px 8px 0 0">+</BlackLine>
-                    <BlackLine size="1em">{text(`menu-map-new-diff`)}</BlackLine>
+                    <BlackLine size="1em">{text(`menu-diff-new`)}</BlackLine>
                   </Diff>
                   <ConfirmPopup 
                     button={<Diff color="warn">
@@ -232,7 +232,7 @@ const MapsetList = ({ getBeatmapsets, mapsets, includeMapsetCreate, includeMapCr
                 </> : null}
               </DiffsContainer>
             </HoverContainer>
-          </SongBox>
+          </MapsetBox>
         );
       })}
     </>

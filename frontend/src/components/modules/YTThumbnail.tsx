@@ -10,9 +10,11 @@ type Props = {
 };
 
 const YTThumbnail = ({ yt_id, width, height } : Props) => {
-  let quality = ""; 
-  if (width > 120 && height > 90) {
-    quality = "hq"; // mq thumbnails are 16:9; don't use
+  let quality = ""; // 4:3 thumbnail
+  if (width/height > 1.5) { // more like 16:9 than 4:3
+    quality = "mq"; // 16:9 thumbnail
+  } else if (width > 120 && height > 90) {
+    quality = "hq"; // 4:3 thumbnail
   }
   return (
     <Thumbnail 

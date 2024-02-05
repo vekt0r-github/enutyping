@@ -9,12 +9,15 @@ import { getL10nElementFunc, getL10nFunc } from '@/providers/l10n';
 import { get } from "@/utils/functions";
 import { Beatmapset, MapsetID, User } from "@/utils/types";
 
-import '@/utils/styles.css'
-import { Line, MainBox, NewButton, NeutralButton, SongsContainer } from '@/utils/styles';
+import '@/utils/styles.css';
+import { Line, MainBox, NewButton, NeutralButton } from '@/utils/styles';
+import { MapsetsContainer } from '@/components/pages/SongSelect';
 
 /**
  * in the future this can be more general;
  * right now the text assumes copying a beatmap to a collection
+ * 
+ * TODO: actually rework what this does
  */
 
 type Props = {
@@ -103,7 +106,7 @@ const MapsetSelectPopup = ({ user, button, onSelect }: Props) => {
             }}>
               <Line as="h1">{text(`copy-map-header`)}</Line>
               <SongsScrollContainer>
-                <SongsContainer>
+                <MapsetsContainer>
                   <MapsetList
                     mapsets={mapsets}
                     includeMapsetCreate={false}
@@ -112,7 +115,7 @@ const MapsetSelectPopup = ({ user, button, onSelect }: Props) => {
                       setSelectedMapsetId(mapsetId);
                     }}
                   />
-                </SongsContainer>
+                </MapsetsContainer>
               </SongsScrollContainer>
               <Buttons>
                 <NeutralButton onClick={() => setOpenState(CLOSED)}>

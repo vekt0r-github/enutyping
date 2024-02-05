@@ -69,11 +69,12 @@ export const InfoDisplay = <Props,>(title: string, infoPairs: (p: Props, text: L
   );
 }
 
-const mapInfoPairs = ({ title, artist, diffname, kpm, source }: BeatmapMetadata, text: L10nFunc): InfoPair[] => [
+const mapInfoPairs = ({ title, artist, diffname, owner, kpm, source }: BeatmapMetadata, text: L10nFunc): InfoPair[] => [
    // TODO: add creator or something
   ["map-info-title", title],
   ["map-info-artist", artist],
   ["map-info-diffname", diffname],
+  ["map-info-owner", owner.name],
   ["map-info-kpm", kpm ? Math.round(kpm) : 0],
   ["map-info-source", source?.length ? 
     <Link as="a" href={source}>{text(`map-info-source-link`)}</Link>

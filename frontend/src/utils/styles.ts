@@ -31,11 +31,13 @@ export const Spacer = styled.div`
 
 export const Line = styled.span<{
   size?: string,
+  lineHeightRatio?: number,
   margin?: string,
 }>`
   max-width: 100%;
-  ${({size}) => `font-size: ${size}` ?? ''};
-  ${({margin}) => `margin: ${margin}` ?? ''};
+  ${({size}) => size ? `font-size: ${size};` : ''}
+  ${({size, lineHeightRatio}) => (lineHeightRatio && size) ? `line-height: calc(${lineHeightRatio} * ${size});` : ''}
+  ${({margin}) => margin ? `margin: ${margin};` : ''}
   display: block;
   flex-shrink: 0;
   overflow: hidden;
@@ -91,21 +93,6 @@ export const GamePageContainer = styled.div`
   }
 `;
 
-export const SearchBar = styled.input`
-  font-size: 18px;
-  min-width: 40%;
-  max-width: 500px;
-`;
-
-export const SearchContainer = styled.div`
-  display: flex;
-	flex-direction: row;
-	justify-content: center;
-  align-items: center;
-  min-width: 1000px;
-  margin: var(--m) 0;
-`;
-
 export const InputContainer = styled.div`
   margin: 0 var(--s);
   & > label {
@@ -114,19 +101,6 @@ export const InputContainer = styled.div`
   & > input, & > select {
     margin: 0;
   };
-`;
-
-export const SongsContainer = styled.div`
-  display: grid;
-  width: 100%;
-  grid-template-columns: 1fr;
-  max-width: 500px;
-  @media (min-width: 800px) {
-    grid-template-columns: 1fr 1fr;
-    max-width: 1000px;
-  }
-  justify-content: center;
-  margin: 0 var(--s);
 `;
 
 export const InfoBox = styled(SubBox)`

@@ -9,7 +9,6 @@ import Login from "@/components/pages/Login";
 import SongSelect from "@/components/pages/SongSelect";
 import DiffSelect from "@/components/pages/DiffSelect";
 import Game from "@/components/pages/Game";
-import EditorSongSelect from "@/components/pages/EditorSongSelect";
 import EditorDiffSelect from "@/components/pages/EditorDiffSelect";
 import EditorMapsetMetadata from "@/components/pages/EditorMapsetMetadata";
 import EditorMetadata from "@/components/pages/EditorMetadata";
@@ -137,7 +136,20 @@ const App = ({} : Props) => {
             }/>
           </Route>
           <Route path="/play" element={
-            <SongSelect />
+            <SongSelect
+              key='play'
+              user={null}
+              isEditor={false}
+              groupMapsets={false}
+            />
+          }/>
+          <Route path="/play/collection" element={
+            <SongSelect
+              key='play'
+              user={null}
+              isEditor={false}
+              groupMapsets={true}
+            />
           }/>
           <Route path="/play/collection/:mapsetId" element={
             <DiffSelect
@@ -150,8 +162,19 @@ const App = ({} : Props) => {
             />
           }/>
           <Route path="/edit" element={
-            <EditorSongSelect
+            <SongSelect
+              key='edit'
               user={user}
+              isEditor={true}
+              groupMapsets={false}
+            />
+          }/>
+          <Route path="/edit/collection" element={
+            <SongSelect
+              key='edit'
+              user={user}
+              isEditor={true}
+              groupMapsets={true}
             />
           }/>
           <Route path="/edit/collection/new" element={
