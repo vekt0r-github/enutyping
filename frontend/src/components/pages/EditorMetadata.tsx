@@ -155,6 +155,12 @@ const EditorMetadata = ({ user } : Props) => {
           if (!beatmap || !beatmap.id) {
             throw new Error; // map not found
           } else {
+            if (beatmap.artist !== beatmap.artist_original) {
+              setArtistRoman(true);
+            }
+            if (beatmap.title !== beatmap.title_original) {
+              setTitleRoman(true);
+            }
             setMap(beatmap);
             setStatus(LOADED);
           }

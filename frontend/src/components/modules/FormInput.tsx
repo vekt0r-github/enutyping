@@ -79,7 +79,7 @@ const FormInput = <T, F extends string & keyof T>({obj, set, field, label, descr
       {description ? <NewMapDescription size="0.8em">{text(description)}</NewMapDescription> : null}
       {roman ? <NewMapSubcontainer>
         <NewMapLabel htmlFor={roman} size="1em">{text(`form-map-romanized`, {field: text(label)})}</NewMapLabel>
-        <input type="checkbox" onChange={(e) => {
+        <input type="checkbox" checked={active} onChange={(e) => {
           setActive!(e.target.checked);
           set(roman)(obj[field] as string);
         }}></input>
