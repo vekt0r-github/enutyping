@@ -51,7 +51,7 @@ class Beatmap(Base):
     content = deferred(Column(UnicodeText))
 
     owner = relationship('User', back_populates='beatmaps')
-    beatmapsets = relationship('Beatmapset', secondary=MapMapsetRelationship.__table__)
+    beatmapsets = relationship('Beatmapset', secondary=MapMapsetRelationship.__table__, back_populates='beatmaps')
     kpm = Column(Float)
 
     def __init__(self, id = None, **kwargs):
@@ -67,7 +67,7 @@ class Beatmapset(Base):
     icon_url = Column(String(100))
 
     owner = relationship('User', back_populates='beatmapsets')
-    beatmaps = relationship('Beatmap', secondary=MapMapsetRelationship.__table__)
+    beatmaps = relationship('Beatmap', secondary=MapMapsetRelationship.__table__, back_populates='beatmapsets')
 
 class Score(Base):
     __tablename__ = 'scores'
@@ -98,13 +98,14 @@ def init_db():
         User(id=1234, name='ppfarmer', avatar_url='https://avatars.githubusercontent.com/u/34809632'),
         User(id=4321, name='songenjoyer', avatar_url='https://avatars.githubusercontent.com/u/1700346'),
         User(id="8484892osu", name='vekt0r', avatar_url='https://a.ppy.sh/8484892?1594621695.jpeg'),
+        User(id="12236584osu", name='sampai_', avatar_url='https://a.ppy.sh/12236584?1670038522.png'),
         Beatmapset(id=727, 
             owner_id=1234,
             name="dev test map collection",
             description="\o/",
             icon_url="https://cdn.discordapp.com/attachments/963645781112406059/1094859695203819670/nyaruhodo_remake.png"),
         Beatmap(id=727, \
-            beatmapset_id=727, \
+            owner_id=1234,
             artist='Nanahira', \
             title='Nanahira singing from the window to a fucking van', \
             artist_original='ななひら', \
@@ -115,13 +116,14 @@ def init_db():
             diffname="sampai_'s ear damage", \
             content=content,
             kpm=391),
+        MapMapsetRelationship(id=1, beatmap_id=727, beatmapset_id=727),
         Beatmapset(id=1337, 
             owner_id="8484892osu",
             name="flos",
             description="猫又おかゆ",
             icon_url="http://img.youtube.com/vi/4muYzftomAE/hqdefault.jpg"),
         Beatmap(id=1337, \
-            beatmapset_id=1337, \
+            owner_id="8484892osu",
             artist='Nekomata Okayu', \
             title='flos', \
             artist_original='猫又おかゆ', \
@@ -132,30 +134,33 @@ def init_db():
             diffname="Lythrum", \
             content=flos_content,
             kpm=333),
-       Beatmap(id=272, \
-           beatmapset_id=727, \
-           artist='YOASOBI', \
-           title='Yoru ni Kakeru', \
-           artist_original='YOASOBI', \
-           title_original='夜に駆ける', \
-           yt_id='xtfXl7TZTac', \
-           preview_point=0, \
-           duration=261000, \
-           diffname="don't play this", \
-           content=yorunicontent,
-           kpm=370),
-       Beatmap(id=2727, \
-           beatmapset_id=727, \
-           artist='YOASOBI', \
-           title='Yoru ni Kakeru', \
-           artist_original='YOASOBI', \
-           title_original='夜に駆ける', \
-           yt_id='xtfXl7TZTac', \
-           preview_point=0, \
-           duration=261000, \
-           diffname="dev map", \
-           content=test_map_content,
-           kpm=189),
+        MapMapsetRelationship(id=2, beatmap_id=1337, beatmapset_id=1337),
+        Beatmap(id=272, \
+            owner_id=1234,
+            artist='YOASOBI', \
+            title='Yoru ni Kakeru', \
+            artist_original='YOASOBI', \
+            title_original='夜に駆ける', \
+            yt_id='xtfXl7TZTac', \
+            preview_point=0, \
+            duration=261000, \
+            diffname="don't play this", \
+            content=yorunicontent,
+            kpm=370),
+        # MapMapsetRelationship(id=3, beatmap_id=272, beatmapset_id=727),
+        Beatmap(id=2727, \
+            owner_id=1234,
+            artist='YOASOBI', \
+            title='Yoru ni Kakeru', \
+            artist_original='YOASOBI', \
+            title_original='夜に駆ける', \
+            yt_id='xtfXl7TZTac', \
+            preview_point=0, \
+            duration=261000, \
+            diffname="dev map", \
+            content=test_map_content,
+            kpm=189),
+        MapMapsetRelationship(id=4, beatmap_id=2727, beatmapset_id=727),
         # Beatmapset(id=1338, 
         #     owner_id="8484892osu",
         #     artist='Minato Aqua & Nekomata Okayu', \
@@ -171,12 +176,12 @@ def init_db():
         #     content=turing_content,
         #     kpm=427),
         Beatmapset(id=6789, \
-            owner_id="1234", \
+            owner_id="12236584osu", \
             name="Bo en - My Time",
             description="from OMORI",
             icon_url="http://img.youtube.com/vi/erzgjfU271g/hqdefault.jpg"),
         Beatmap(id=2730, \
-            beatmapset_id=6789, \
+            owner_id="12236584osu", \
             artist='Bo en', \
             title='My Time', \
             artist_original='Bo en', \
@@ -187,13 +192,9 @@ def init_db():
             diffname="sampai_'s Fun Time", \
             content=my_time_content,
             kpm=240),
-        Beatmapset(id=7270, \
-            owner_id="8484892osu", \
-            name="カナデトモスソラ",
-            description="25時、ナイトコードで。 × 巡音ルカ ",
-            icon_url="http://img.youtube.com/vi/AICkt9OIFKA/hqdefault.jpg"),
+        MapMapsetRelationship(id=5, beatmap_id=2730, beatmapset_id=6789),
         Beatmap(id=2731, \
-            beatmapset_id=7270, \
+            owner_id="8484892osu", \
             artist='25-ji, Nightcord de. x Megurine Luka', \
             title='Kanadetomosusora', \
             artist_original='25時、ナイトコードで。 × 巡音ルカ ', \
