@@ -1,9 +1,9 @@
-import React, { useContext, useState }  from "react";
+import React, { useContext, useEffect, useState }  from "react";
 
 import ConfirmPopup from "@/components/modules/ConfirmPopup";
 import YTThumbnail from "@/components/modules/YTThumbnail";
 
-import { Beatmapset, MapID, MapsetID } from "@/utils/types";
+import { Beatmapset, MapID, MapsetID, Score, User, getModCombo, rankColors } from "@/utils/types";
 
 import { getL10nFunc, getL10nElementFunc } from '@/providers/l10n';
 import { Config, configContext } from '@/providers/config';
@@ -12,10 +12,12 @@ import { getArtist, getTitle, getSetAvg } from "@/utils/beatmaputils";
 
 import styled, { StyledComponentProps } from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, SubBox, Link, Line, BlackLine, Thumbnail } from '@/utils/styles';
-import { httpDelete } from "@/utils/functions";
+import { MainBox, SubBox, Link, Line, BlackLine, Thumbnail, RankDisplay } from '@/utils/styles';
+import { get, httpDelete } from "@/utils/functions";
+import { getRank } from "@/utils/gameplayutils";
 
 type Props = {
+  user: User | null,
   getBeatmapsets?: () => void,
   mapsets: Beatmapset[],
   includeMapsetCreate: boolean,
@@ -61,6 +63,12 @@ const Diff = styled(SubBox)<{color: string, changeHeight?: boolean}>`
       white-space: normal;
     }
   }
+`;
+
+const DiffRankDisplay = styled(RankDisplay)`
+  position: absolute;
+  font-size: 2.4rem;
+  left: 18px;
 `;
 
 const DiffRightSide = styled.span`
@@ -132,10 +140,35 @@ type TargetProps = {
   onClick?: () => void,
 }
 
-const MapsetList = ({ getBeatmapsets, mapsets, includeMapsetCreate, includeMapCreate, onObjectClick: onTargetClick, link } : Props) => {
+const MapsetList = ({ user, getBeatmapsets, mapsets, includeMapsetCreate, includeMapCreate, onObjectClick: onTargetClick, link } : Props) => {
   const text = getL10nFunc();
   const elem = getL10nElementFunc();
   const config = useContext(configContext);
+
+  const [userScores, setUserScores] = useState<Score[]>([]);
+
+  const submittedRankOn = (mapId: number) => {
+    let bestScore = 0;
+    let bestRank = null;
+    for (const score of userScores) {
+      if (score.beatmap_id === mapId && score.score > bestScore) {
+        bestScore = score.score;
+        bestRank = getRank(score.score, score.speed_modification, getModCombo(score.mod_flag));
+      }
+    }
+    return bestRank;
+  }
+
+  useEffect(() => {
+    if (!user) return;
+    get(`/api/users/${user.id}`).then((res) => {
+      if (!res || !res.user) {
+        return;
+      } else {
+        setUserScores(res.scores);
+      }
+    });
+  }, []);
 
   const handleDeleteBeatmapset = async (mapsetId: number) => {
     const res = await httpDelete(`/api/beatmapsets/${mapsetId}`);
@@ -184,23 +217,27 @@ const MapsetList = ({ getBeatmapsets, mapsets, includeMapsetCreate, includeMapCr
               </SetLink>
               <DiffsContainer>
                 {/* the actual diffs come first here */}
-                {beatmaps.map((map) => 
-                  <Diff {...makeTargetProps(mapset.id, map.id)}
-                    color={"secondary"}
-                    changeHeight={true}
-                    key={map.id}
-                  >
-                    <YTThumbnail yt_id={map.yt_id} width={32} height={24} />
-                    <DiffRightSide>
-                      <Line size="1em" margin="0">{text(`menu-map-display`, {
-                        artist: getArtist(map, config),
-                        title: getTitle(map, config),
-                        diffname: map.diffname,
-                        kpm: Math.round(map.kpm ?? 0),
-                      })}</Line>
-                    </DiffRightSide>
-                  </Diff>
-                )}
+                {beatmaps.map((map) => {
+                  const rank = submittedRankOn(map.id);
+                  return (
+                    <Diff {...makeTargetProps(mapset.id, map.id)}
+                      color={"secondary"}
+                      changeHeight={true}
+                      key={map.id}
+                    >
+                      <YTThumbnail yt_id={map.yt_id} width={32} height={24} />
+                      <DiffRightSide>
+                        <Line size="1em" margin="0">{text(`menu-map-display`, {
+                          artist: getArtist(map, config),
+                          title: getTitle(map, config),
+                          diffname: map.diffname,
+                          kpm: Math.round(map.kpm ?? 0),
+                        })}</Line>
+                      </DiffRightSide>
+                      {rank ? <DiffRankDisplay color={rankColors[rank]}>{rank}</DiffRankDisplay> : null}
+                    </Diff>
+                  )
+                })}
                 {/* then optional create diff buttons */}
                 {includeMapCreate ? <>
                   <Diff {...makeTargetProps(mapset.id, "new")}

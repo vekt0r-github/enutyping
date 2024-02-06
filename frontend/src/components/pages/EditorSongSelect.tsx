@@ -73,7 +73,8 @@ const EditorSongSelect = ({ user } : Props) => {
       </SearchContainer>
       <SongsContainer>
         {(filteredMapsets === undefined) ? <Loading /> :
-          <MapsetList 
+          <MapsetList
+            user={user}
             getBeatmapsets={getBeatmapsets}
             mapsets={filteredMapsets}
             includeMapsetCreate={true}

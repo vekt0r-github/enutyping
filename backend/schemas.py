@@ -33,6 +33,13 @@ score_schema = ScoreSchema()
 scores_without_user_schema = ScoreSchema(many=True, exclude=("user",))
 scores_schema = ScoreSchema(many=True)
 
+class ReplaySchema(Schema):
+    id = fields.Int(dump_only=True)
+    score_id = fields.Int()
+    data = fields.Str()
+
+replay_schema = ReplaySchema()
+
 # TODO: probably a lot of these schemas are required=True, but w/e
 
 class BeatmapSchema(Schema):
@@ -50,6 +57,7 @@ class BeatmapSchema(Schema):
     diffname = fields.Str()
     content = fields.Str()
     kpm = fields.Float()
+    base_key_score = fields.Float()
 
 beatmap_schema = BeatmapSchema()
 beatmaps_schema = BeatmapSchema(many=True)

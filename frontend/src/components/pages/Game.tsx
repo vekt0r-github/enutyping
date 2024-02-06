@@ -113,10 +113,11 @@ const Game = ({ user } : Props) => {
                 user={user}
                 button={<NewButton>{text(`copy-map-button`)}</NewButton>}
                 onSelect={(destMapsetId) => {
+                  // WARNING: duplicate of code in Editor
                   // copy to selected collection
-                  const {artist, title, artist_original, title_original, yt_id, preview_point, diffname} = map; // metadata
-                  const {kpm, content} = map; // non-metadata
-                  const data = {artist, title, artist_original, title_original, yt_id, preview_point, diffname, kpm, content,
+                  const {artist, title, artist_original, title_original, yt_id, preview_point, duration, diffname} = map; // metadata
+                  const {kpm, base_key_score, content} = map; // non-metadata
+                  const data = {artist, title, artist_original, title_original, yt_id, preview_point, duration, diffname, kpm, base_key_score, content,
                     beatmapset_id: destMapsetId};
                   post(`/api/beatmaps`, {...data, id: undefined})
                     .then((beatmapRes) => {
