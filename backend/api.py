@@ -129,27 +129,27 @@ def add_beatmap(user_id):
     json_data = request.get_json()
     if not json_data:
         return 'No input provided', 400
+    print(json_data)
+    bms_id = json_data.get('beatmapset_id')
+    mapset = None
+    
+    if bms_id is not None:
+        del json_data['beatmapset_id']
+        mapset = Beatmapset.query.filter(
+                Beatmapset.owner_id == user_id,
+                Beatmapset.id == bms_id,
+            ).first()
+
     try:
         data = beatmap_schema.load(json_data)
     except ValidationError as err:
         return err.messages, 400
 
-    bms_id = data['beatmapset_id']
-    del data['beatmapset_id']
-
-    # artist, title, artist_original, title_original, yt_id, preview_point, duration = \
-    #     itemgetter('artist', 'title', 'artist_original', 'title_original', 'yt_id', 'preview_point', 'duration')(data)
-
-    mapset = Beatmapset.query.filter(
-            Beatmapset.owner_id == user_id,
-            Beatmapset.id == bms_id,
-        ).first()
-
     owner = User.query.get(user_id)
     assert owner is not None
 
     beatmap = Beatmap(**data, owner_id=user_id)
-    if beatmapset is not None:
+    if mapset is not None:
         beatmap.beatmapsets.append(mapset)
     
     db_session.add(beatmap)
@@ -178,7 +178,6 @@ def update_beatmap(user_id, beatmap_id):
     beatmap = Beatmap.query.get(beatmap_id)
     if (not beatmap) or (beatmap.owner_id != user_id):
         return 'Beatmap does not exist or you do not own it!', 400
-    bms_id = beatmap.beatmapset_id
 
     for k, v in data.items():
         setattr(beatmap, k, v)

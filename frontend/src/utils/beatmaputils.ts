@@ -96,10 +96,10 @@ export const getSetAvg = (mapset: Beatmapset, prop: KeysMatching<BeatmapMetadata
   return cleanVals.reduce((a, b) => a + b) / vals.length;
 }
 
-export const getArtist = (map: BeatmapMetadata, config: Config) => 
+export const getArtist = <T extends {artist: string, artist_original: string}>(map: T, config: Config) => 
   map[`artist${config.localizeMetadata ? '' : '_original'}`];
 
-export const getTitle = (map: BeatmapMetadata, config: Config) => 
+export const getTitle = <T extends {title: string, title_original: string}>(map: T, config: Config) => 
   map[`title${config.localizeMetadata ? '' : '_original'}`];
 
 // -1 to lines.length

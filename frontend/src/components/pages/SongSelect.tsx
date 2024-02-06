@@ -215,7 +215,9 @@ const SongSelect = ({user, isEditor, groupMapsets} : Props) => {
             includeMapCreate={isEditor}
             includeMapsetCreate={isEditor}
             link={(mapsetId, mapId) => {
-              if (isEditor && mapId === "new") return `/edit/${mapId}?collection=${mapsetId}`;
+              if (isEditor && mapsetId !== "new" && mapId === "new") {
+                return `/edit/${mapId}?collection=${mapsetId}`;
+              }
               const base = isEditor ? 'edit' : 'play';
               return mapId === undefined ? `/${base}/collection/${mapsetId}` : `/${base}/${mapId}`;
             }} 

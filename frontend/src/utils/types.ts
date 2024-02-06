@@ -4,6 +4,13 @@ export type User = {
   avatar_url: string;
 };
 
+// dumb workaround for situations where possibly-null user must be initialized
+export const nullUser = {
+  id: -1,
+  name: '',
+  avatar_url: '',
+}
+
 export type UserStats = {
   join_time: number;
   kana_accuracy: number;

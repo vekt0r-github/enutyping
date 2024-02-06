@@ -11,7 +11,7 @@ import { getL10nFunc, getL10nElementFunc } from '@/providers/l10n';
 import { Config, configContext } from "@/providers/config";
 
 import { get, httpDelete, post, put } from "@/utils/functions";
-import { Beatmapset, User, BeatmapMetadata } from "@/utils/types";
+import { Beatmapset, User, BeatmapMetadata, nullUser } from "@/utils/types";
 import { getArtist, getTitle, makeSetFunc } from "@/utils/beatmaputils"
 import { withParamsAsKey } from "@/utils/componentutils";
 
@@ -42,6 +42,7 @@ type Props = {
 enum Status { LOADING, LOADED, INVALID, GOBACK, FINISHED };
 const { LOADING, LOADED, INVALID, GOBACK, FINISHED } = Status;
 
+// Partial<BeatmapMetadata> & Pick<BeatmapMetadata, 'artist' | 'artist_original' | 'title' | 'title_original' | 'diffname'>
 type State = {
   status: Status,
   map: BeatmapMetadata,
@@ -59,7 +60,7 @@ const Overlay = styled(GameOverlay)`
 
 const FormSubmit = styled(NewButton)`
   margin: var(--m) 0 0 0;
-`
+`;
 
 const EditorMetadata = ({ user } : Props) => {
   const text = getL10nFunc();
@@ -70,6 +71,7 @@ const EditorMetadata = ({ user } : Props) => {
     status: LOADING,
     map: {
       id: -1,
+      owner: user ?? nullUser,
       artist: '',
       title: '',
       artist_original: '',
@@ -200,7 +202,7 @@ const EditorMetadata = ({ user } : Props) => {
       </h1>
       <GamePageContainer>
         <Sidebar>
-          <MapInfoDisplay 
+          <MapInfoDisplay
             {...map}
             source={yt_id.length ? `https://www.youtube.com/watch?v=${yt_id}` : ''}
           />
