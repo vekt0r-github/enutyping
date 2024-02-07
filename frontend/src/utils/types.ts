@@ -33,6 +33,18 @@ export const getModFlag = (modCombo: ModCombo): number => {
   return modCombo.hidden ? 1 : 0
 }
 
+export type Rank = 'E' | 'D' | 'C' | 'B' | 'A' | 'S' | 'SS';
+
+export const rankColors: {[key in Rank]: string} = {
+  'E': 'maroon',
+  'D': 'red',
+  'C': 'purple',
+  'B': 'teal',
+  'A': 'green',
+  'S': 'yellow',
+  'SS': 'yellow',
+}
+
 export type Score = {
   id: number;
   beatmap_id: number;
@@ -68,7 +80,6 @@ export type TimingPoint = {
 };
 
 export type BeatmapMetadata = {
-  // TODO populate this from the backend
   id: number;
   owner: User;
   artist: string;
@@ -80,6 +91,7 @@ export type BeatmapMetadata = {
   preview_point: number;
   duration: number;
   diffname: string;
+  base_key_score?: number;
   kpm?: number;
 };
 
@@ -113,7 +125,8 @@ export type KanaState = {
   prefix: string, // the correct keystrokes user has typed for this kana
   suffix: string, // one possible romaji completion of this kana after prefix
   minKeypresses: number, // fewest keystrokes to type this kana
-  score: number, // amount of RAW score earned for this kana (max being proportional to minKeypresses)
+  scoreRatio: number, // minKeypresses * (fraction of max possible score earned for this kana)
+  misses: number, // number of times user has missed on this (already taken into account in score)
 };
 
 export type LineState = {
@@ -128,13 +141,13 @@ export type LineState = {
   nBuffer: [number, number] | null,
 };
 
-type KeyEvent = {
+export type KeyEvent = {
   key: string,
   timestamp: number,
 }
 
 export type GameState = {
-  status: GameStatus,
+  status: GameStatus, // maybe this shouldn't be included here...
   offset: number,
   currTime?: number,
   lines: LineState[],

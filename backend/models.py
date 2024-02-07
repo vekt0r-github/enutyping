@@ -48,11 +48,15 @@ class Beatmap(Base):
     duration = Column(Integer)
 
     scores = relationship('Score', back_populates='beatmap')
+    
+    # beatmap file holding all the map's objects, in string form
+    # this should really be in a file, or at least in another table
     content = deferred(Column(UnicodeText))
 
     owner = relationship('User', back_populates='beatmaps')
     beatmapsets = relationship('Beatmapset', secondary=MapMapsetRelationship.__table__, back_populates='beatmaps')
     kpm = Column(Float)
+    base_key_score = Column(Float) # how much score user should get per object
 
     def __init__(self, id = None, **kwargs):
         super(Beatmap, self).__init__(**kwargs)
@@ -84,10 +88,21 @@ class Score(Base):
 
     user = relationship('User', back_populates='scores')
     beatmap = relationship('Beatmap', back_populates='scores')
+    replay = relationship('Replay', back_populates='score')
 
     def __init__(self, id = None, **kwargs):
         super(Score, self).__init__(**kwargs)
         self.id = id
+
+class Replay(Base):
+    __tablename__ = 'replays'
+    id = Column(Integer, primary_key=True)
+    score_id = Column(String(69), ForeignKey('scores.id'))
+    score = relationship('Score', back_populates='replay')
+    
+    # replay data; it's about the size of a beatmap's content
+    # this should be stored on the filesystem but whatever for now
+    data = deferred(Column(UnicodeText))
 
 def init_db():
     from database import db_session, engine
@@ -115,7 +130,8 @@ def init_db():
             duration=78000, \
             diffname="sampai_'s ear damage", \
             content=content,
-            kpm=391),
+            kpm=391,
+            base_key_score=8771.929824561403), # warning: this should be recomputed if content ever changes
         MapMapsetRelationship(id=1, beatmap_id=727, beatmapset_id=727),
         Beatmapset(id=1337, 
             owner_id="8484892osu",
@@ -133,7 +149,8 @@ def init_db():
             duration=280000, \
             diffname="Lythrum", \
             content=flos_content,
-            kpm=333),
+            kpm=333,
+            base_key_score=825.7638315441784), # warning: this should be recomputed if content ever changes
         MapMapsetRelationship(id=2, beatmap_id=1337, beatmapset_id=1337),
         Beatmap(id=272, \
             owner_id=1234,
@@ -146,7 +163,8 @@ def init_db():
             duration=261000, \
             diffname="don't play this", \
             content=yorunicontent,
-            kpm=370),
+            kpm=370,
+            base_key_score=677.0480704129993), # warning: this should be recomputed if content ever changes
         # MapMapsetRelationship(id=3, beatmap_id=272, beatmapset_id=727),
         Beatmap(id=2727, \
             owner_id=1234,
@@ -159,7 +177,8 @@ def init_db():
             duration=261000, \
             diffname="dev map", \
             content=test_map_content,
-            kpm=189),
+            kpm=203,
+            base_key_score=13333.333333333334), # warning: this should be recomputed if content ever changes
         MapMapsetRelationship(id=4, beatmap_id=2727, beatmapset_id=727),
         # Beatmapset(id=1338, 
         #     owner_id="8484892osu",
@@ -191,7 +210,8 @@ def init_db():
             duration=105000, \
             diffname="sampai_'s Fun Time", \
             content=my_time_content,
-            kpm=240),
+            kpm=240,
+            base_key_score=1), # 3610.1083032490856
         MapMapsetRelationship(id=5, beatmap_id=2730, beatmapset_id=6789),
         Beatmap(id=2731, \
             owner_id="8484892osu", \
@@ -204,7 +224,8 @@ def init_db():
             duration=151000, \
             diffname="拒んだもの", \
             content=kanade_content,
-            kpm=275),
+            kpm=275,
+            base_key_score=1), # 2127.659574468085
 
         Score(user_id=1234, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, mod_flag=1, score=727),
         Score(user_id=1234, beatmap_id=727, key_accuracy=1.0, kana_accuracy=1.0, time_unix=time(), speed_modification=1.0, mod_flag=0, score=123),

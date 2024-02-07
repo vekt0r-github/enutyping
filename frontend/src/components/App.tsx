@@ -138,7 +138,7 @@ const App = ({} : Props) => {
           <Route path="/play" element={
             <SongSelect
               key='play'
-              user={null}
+              user={user}
               isEditor={false}
               groupMapsets={false}
             />
@@ -146,7 +146,7 @@ const App = ({} : Props) => {
           <Route path="/play/collection" element={
             <SongSelect
               key='play'
-              user={null}
+              user={user}
               isEditor={false}
               groupMapsets={true}
             />

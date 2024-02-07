@@ -3,7 +3,8 @@ import React, { useEffect } from "react";
 import ProgressBar from "@/components/modules/ProgressBar";
 
 import { KanaState, LineState, ModCombo } from '@/utils/types'
-import { getCurrentRomanization, getVisualPosition, withOverlapOffsets } from "@/utils/beatmaputils";
+import { getVisualPosition } from "@/utils/beatmaputils";
+import { getCurrentRomanization, withOverlapOffsets } from "@/utils/gameplayutils";
 
 import styled, { css } from 'styled-components';
 import '@/utils/styles.css';
@@ -74,7 +75,7 @@ const ScoreMarker = styled.div<{value: number}>` // value 0-1
   left: 1px;
   top: 40px;
   z-index: 1;
-  background-color: hsl(calc(0 + 120 * ${({value}) => value}), 100%, 50%);
+  background-color: hsl(calc(0 + 180 * ${({value}) => value}), 100%, 50%);
   filter: blur(2px);
 `;
 
@@ -171,8 +172,8 @@ const GameLine = ({ currTime, lineState, keyCallback, isPlayingGame, modCombo } 
     kana.forEach(ks => {
       prefixes += ks.prefix;
       suffixes += ks.suffix;
-      score += ks.score;
-      maxScore += 25 * ks.minKeypresses; // TODO: hardcode alert
+      score += ks.scoreRatio; // refer to KanaState in types.ts
+      maxScore += ks.minKeypresses; // and calcScoreAndUpdateStats()
     });
 
     let active;

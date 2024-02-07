@@ -120,6 +120,11 @@ export const InfoEntry = styled.div`
   margin: 2px 0;
 `;
 
+export const RankDisplay = styled.div<{color?: string}>`
+  color: ${({color}) => color};
+  font-weight: bold;
+`;
+
 export const BasicContainer = styled.div`
   width: 100%;
   max-width: 1296px; // 0.675 ratio

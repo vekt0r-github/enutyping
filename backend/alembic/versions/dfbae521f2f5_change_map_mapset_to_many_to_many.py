@@ -1,7 +1,7 @@
 """change map_mapset to many-to-many
 
 Revision ID: dfbae521f2f5
-Revises: 30c7bc5ec652
+Revises: 67fec9fbbc6b
 Create Date: 2024-01-18 20:43:47.383071
 
 """
@@ -21,7 +21,7 @@ Base = declarative_base()
 
 # revision identifiers, used by Alembic.
 revision = 'dfbae521f2f5'
-down_revision = '30c7bc5ec652'
+down_revision = '67fec9fbbc6b'
 branch_labels = None
 depends_on = None
 

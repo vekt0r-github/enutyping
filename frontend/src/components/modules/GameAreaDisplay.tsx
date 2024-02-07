@@ -5,18 +5,18 @@ import GameVideo from "@/components/modules/GameVideo";
 import GameLine from "@/components/modules/GameLine";
 import { InfoDisplay, InfoPair } from "@/components/modules/InfoDisplay";
 
-import { getL10nFunc } from '@/providers/l10n';
+import { getL10nElementFunc, getL10nFunc } from '@/providers/l10n';
 import { configContext } from '@/providers/config';
 
 import { 
-  User, Beatmap, GameStatus, GameState, ModCombo,
+  User, Beatmap, GameStatus, GameState, ModCombo, Rank, rankColors,
 } from "@/utils/types";
-import { computeLineKPM, computeLineKeypresses, getVisualPosition, timeToLineIndex } from '@/utils/beatmaputils';
-import { getScoreMultiplier, makeUpdateGameState } from "@/utils/gameplayutils";
+import { calculateBaseKeyScore, computeLineKPM, computeLineKeypresses, getVisualPosition, timeToLineIndex } from '@/utils/beatmaputils';
+import { getRank, getScoreMultiplier, makeUpdateGameState } from "@/utils/gameplayutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
-import { SubBox, Line } from '@/utils/styles';
+import { SubBox, Line, RankDisplay } from '@/utils/styles';
 
 type Props = {
   user: User | null,
@@ -116,6 +116,17 @@ const OffsetInput = styled.input`
 const Warning = styled.div`
   background-color: var(--clr-warn);
   padding: var(--s) 0;
+  margin: 0 0 var(--s) 0;
+  font-size: 1.5em;
+  font-style: italic;
+  text-align: center;
+`;
+
+const FinalRankDisplay = styled(RankDisplay)`
+  font-size: 8rem;
+  margin: -4rem 0 -2rem 0;
+  color: ${({color}) => color};
+  font-weight: bold;
 `;
 
 // computation and component utils
@@ -130,9 +141,10 @@ type ComputedStats = GameState["stats"] & {
   currentKPM: number;
   keyAcc: string;
   kanaAcc: string;
+  rank: Rank;
 };
 
-const getComputedStats = (time: number | undefined, {lines, stats}: GameState): ComputedStats => {
+const getComputedStats = (time: number | undefined, {lines, stats}: GameState, speed: number, modCombo: ModCombo): ComputedStats => {
   const {hits, misses, kanaHits, kanaMisses} = stats;
   let drainTime: number = 0;
   if (time) {
@@ -148,15 +160,17 @@ const getComputedStats = (time: number | undefined, {lines, stats}: GameState): 
   const currentKPM = drainTime ? (Math.round(hits * 60000 / drainTime)) : 0;
   const keyAcc = acc(hits, misses).toFixed(2);
   const kanaAcc = acc(kanaHits, kanaMisses).toFixed(2);
-  return {...stats, currentKPM, keyAcc, kanaAcc};
+  const rank = getRank(stats.score, speed, modCombo);
+  return {...stats, currentKPM, keyAcc, kanaAcc, rank};
 }
 
 const IngameStatsDisplay = InfoDisplay("", 
-  ({keyAcc, kanaAcc, score, currentKPM} : ComputedStats) : InfoPair[] => {
+  ({score, rank, keyAcc, kanaAcc, currentKPM} : ComputedStats) : InfoPair[] => {
     return [
+      [`game-stats-score`, Math.round(score)],
+      [`game-stats-rank`, rank],
       [`game-stats-key-acc`, keyAcc],
       [`game-stats-kana-acc`, kanaAcc],
-      [`game-stats-score`, Math.round(score)],
       [`game-stats-kpm`, currentKPM],
     ]
   }
@@ -179,7 +193,7 @@ const IngameMapStatsDisplay = InfoDisplay("",
 );
 
 const FinalStatsDisplay = InfoDisplay("", 
-  ({hits, misses, kanaHits, kanaMisses, keyAcc, kanaAcc, score, currentKPM} : ComputedStats) : InfoPair[] => {
+  ({hits, misses, kanaHits, kanaMisses, keyAcc, kanaAcc, currentKPM} : ComputedStats) : InfoPair[] => {
     return [
       [`game-stats-correct-keys`, hits],
       [`game-stats-incorrect-keys`, misses],
@@ -196,6 +210,7 @@ const FinalStatsDisplay = InfoDisplay("",
 const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableSpeeds, speed, modCombo, modSelectComponent } : Props) => {
   const config = useContext(configContext);
   const text = getL10nFunc();
+  const elem = getL10nElementFunc();
 
   const { volume, useKanaLayout } = config;
 
@@ -204,7 +219,7 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
 
   const {status, currTime, lines, stats} = gameState;
 	const adjustedTime = currTime ? currTime * speed : currTime;
-  const computedStats = getComputedStats(adjustedTime, gameState);
+  const computedStats = getComputedStats(adjustedTime, gameState, speed, modCombo);
   const currIndex = (adjustedTime !== undefined) ? timeToLineIndex(beatmap.lines, adjustedTime) : undefined;
   const lineState = currIndex !== undefined ? lines[currIndex] : undefined;
 
@@ -225,7 +240,10 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
   const isPlayingGame = isActive && status === GameStatus.PLAYING;
 
   const scoreMultiplier = getScoreMultiplier(speed, modCombo);
-  const updateGameState = makeUpdateGameState(useKanaLayout, scoreMultiplier);
+  if (!beatmap.base_key_score) {
+    beatmap.base_key_score = calculateBaseKeyScore(beatmap);
+  }
+  const updateGameState = makeUpdateGameState(beatmap.base_key_score, scoreMultiplier, useKanaLayout);
 
   const handleKeyPress = (e: KeyboardEvent) => {
     if (["Escape"].includes(e.key)) { return; } // GameArea is handling it
@@ -243,75 +261,74 @@ const GameAreaDisplay = ({ user, beatmap, gameState, setGameState, setAvailableS
 
   return (
     <GameContainer>
-				<> 
-					<TopHalf>
-						{isActive ? <>
-							<GameLine // current line
-								key={currIndex}
-								currTime={adjustedTime}
-								lineState={lineState!}
-								keyCallback={handleKeyPress}
-                isPlayingGame={isPlayingGame}
-                modCombo={modCombo}
-							/>
-							<LyricLine
-                opacity={modCombo.hidden
-                  ? Math.min(Math.max(lyricOpacity, 0), 1)
-                  : 1}>{lineState!.line.lyric}</LyricLine>
-						</> : null}
-						{status === GameStatus.SUBMITTING ?
-							<h2>{text(`game-submitting`)}</h2>
-							: null}
-					</TopHalf>
-					<BottomHalf>
-						<StatBox>
-              <IngameStatsDisplay {...computedStats} />
-						</StatBox>
-						<GameVideo
-							yt_id={beatmap.yt_id}
-							status={status}
-							currTime={adjustedTime}
-							startGame={() => startGame(totalOffset)}
-							setAvailableSpeeds={setAvailableSpeeds}
-							speed={speed}
-							volume={volume}
-						/>
-						<StatBox>
-              <IngameMapStatsDisplay
-                beatmap={beatmap}
-                lineIndex={isPlayingGame ? currIndex : null}
-                speedMultiplier={speed}
-              />
-						</StatBox>
-					</BottomHalf>
-					{status === GameStatus.UNSTARTED ? 
-						<Overlay>
-							{!user && <>
-								<Warning>
-									<Line size="1.5em" margin="0 0 0.5em 0">{text(`game-start-warning-login`)}</Line>
-								</Warning>
-							</>}
-							<Line size="1.5em" margin="0">{text(`game-start-message-header`)}</Line>
-							<Line size="1em" margin="0">{text(`game-start-message-subheader`)}</Line>
-							<Line size="1em" margin="0.5em 0 0 0">{text(`game-start-offset`)}
-								<OffsetInput size={3} defaultValue={offset} onChange={(e) => {
-									const intValue = parseInt(e.target.value)
-									if (!isNaN(intValue)) { setOffset(intValue); }
-								}}></OffsetInput>
-							</Line>
-							<Line size="1em" margin="0">{text(`game-start-offset-desc`)}</Line>
-              {modSelectComponent ? modSelectComponent : null}
-						</Overlay>
-						: null}
-					{status === GameStatus.ENDED ?
-						<ResultsContainer>
-							<h1><u>{text(`game-results-header`)}</u></h1>
-							<h1>{text(`game-results-score`, {score: Math.round(stats.score)})}</h1>
-							<FinalStatsDisplay {...computedStats} />
-						</ResultsContainer>
-						: null} 
-
-				</>
+      <TopHalf>
+        {isActive ? <>
+          <GameLine // current line
+            key={currIndex}
+            currTime={adjustedTime}
+            lineState={lineState!}
+            keyCallback={handleKeyPress}
+            isPlayingGame={isPlayingGame}
+            modCombo={modCombo}
+          />
+          <LyricLine
+            opacity={modCombo.hidden
+              ? Math.min(Math.max(lyricOpacity, 0), 1)
+              : 1}>{lineState!.line.lyric}</LyricLine>
+        </> : null}
+        {status === GameStatus.SUBMITTING ?
+          <h2>{text(`game-submitting`)}</h2>
+          : null}
+      </TopHalf>
+      <BottomHalf>
+        <StatBox>
+          <IngameStatsDisplay {...computedStats} />
+        </StatBox>
+        <GameVideo
+          yt_id={beatmap.yt_id}
+          status={status}
+          currTime={adjustedTime}
+          startGame={() => startGame(totalOffset)}
+          setAvailableSpeeds={setAvailableSpeeds}
+          speed={speed}
+          volume={volume}
+        />
+        <StatBox>
+          <IngameMapStatsDisplay
+            beatmap={beatmap}
+            lineIndex={isPlayingGame ? currIndex : null}
+            speedMultiplier={speed}
+          />
+        </StatBox>
+      </BottomHalf>
+      {status === GameStatus.UNSTARTED ? 
+        <Overlay>
+          {!user && <>
+            <Warning>{text(`game-start-warning-login`)}</Warning>
+          </>}
+          {config.useKanaLayout && <>
+            <Warning>{text(`game-start-warning-kana`)}</Warning>
+          </>}
+          <Line size="1.5em" margin="0">{text(`game-start-message-header`)}</Line>
+          <Line size="1em" margin="0">{text(`game-start-message-subheader`)}</Line>
+          <Line size="1em" margin="0.5em 0 0 0">{text(`game-start-offset`)}
+            <OffsetInput size={3} defaultValue={offset} onChange={(e) => {
+              const intValue = parseInt(e.target.value)
+              if (!isNaN(intValue)) { setOffset(intValue); }
+            }}></OffsetInput>
+          </Line>
+          <Line size="1em" margin="0">{text(`game-start-offset-desc`)}</Line>
+          {modSelectComponent ? modSelectComponent : null}
+        </Overlay>
+        : null}
+      {status === GameStatus.ENDED ?
+        <ResultsContainer>
+          <h1>{text(`game-results-header`)}</h1>
+          <FinalRankDisplay color={rankColors[computedStats.rank]}>{computedStats.rank}</FinalRankDisplay>
+          <h1>{text(`game-results-score`, {score: Math.round(stats.score)})}</h1>
+          <FinalStatsDisplay {...computedStats} />
+        </ResultsContainer>
+        : null}
     </GameContainer>
   );
 }

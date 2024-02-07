@@ -10,13 +10,12 @@ import {
   User, Beatmap, LineData,
   GameStatus, GameState, ModCombo, getModFlag,
 } from "@/utils/types";
-import { 
-  makeLineStateAt,
+import {
   makeSetFunc,
   timeToLineIndex, 
   GAME_FPS,
 } from '@/utils/beatmaputils';
-import { updateStateOnLineEnd } from "@/utils/gameplayutils";
+import { makeInitGameState, serializeReplay, updateStateOnLineEnd } from "@/utils/gameplayutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';
@@ -32,28 +31,10 @@ type Props = {
   modSelectComponent: JSX.Element, // hacky fix to place this
 };
 
-const initStatsState = () => ({
-  hits: 0,
-  misses: 0,
-  kanaHits: 0,
-  kanaMisses: 0,
-  totalKana: 0,
-  score: 0,
-});
-
-const makeInitState = (lines: LineData[], config: Config, speed: number) : GameState => ({
-  status: GameStatus.UNSTARTED,
-  offset: 0,
-  currTime: undefined, // maintained via timer independent of video
-  lines: lines.map((lineData) => makeLineStateAt(0, lineData, config)),
-  stats: initStatsState(),
-  keyLog: [],
-});
-
 const GameArea = ({ user, beatmap, afterGameEnd, setAvailableSpeeds, speed, modCombo, modSelectComponent } : Props) => {
   const config = useContext(configContext);
 
-  const initState = () => makeInitState(beatmap.lines as LineData[], config, speed);
+  const initState = () => makeInitGameState(beatmap.lines as LineData[], config);
 
   const [gameState, setGameState] = useState<GameState>(initState());
   const set = makeSetFunc(setGameState);
@@ -62,7 +43,7 @@ const GameArea = ({ user, beatmap, afterGameEnd, setAvailableSpeeds, speed, modC
   // maybe need later but idk
   // const [duration, setDuration] = useState<number>(Infinity);
 
-  const {status, offset, currTime, lines, stats} = gameState;
+  const {status, offset, currTime, lines, stats, keyLog} = gameState;
   const currIndex = (currTime !== undefined) ? timeToLineIndex(beatmap.lines, currTime * speed) : undefined;
 
   const prepareStartGame = () => {
@@ -126,7 +107,12 @@ const GameArea = ({ user, beatmap, afterGameEnd, setAvailableSpeeds, speed, modC
 
   useEffect(() => {
     if (status !== GameStatus.SUBMITTING) { return; }
-    if (!user) { endGame(); return; }
+    if (!user || config.useKanaLayout || !stats.score) {
+      // user was warned: score will not submit
+      // also don't submit if score is 0 or undefined or something
+      endGame();
+      return;
+    }
     const data = {
       beatmap_id: beatmap.id,
       // Do not provide user_id as the backend should have stored in session
@@ -135,8 +121,9 @@ const GameArea = ({ user, beatmap, afterGameEnd, setAvailableSpeeds, speed, modC
       kana_accuracy: stats.kanaHits / stats.totalKana,
 			speed_modification: speed ?? 1,
       mod_flag: getModFlag(modCombo),
-      // if replay ever does get sent to the server
+      // if kana keyboard is allowed to submit
       // server will also need to store useKanaKeyboard
+      replay_data: serializeReplay(keyLog),
     }
     post('/api/scores', data).then((score) => {
       afterGameEnd();

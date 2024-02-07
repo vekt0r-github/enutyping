@@ -121,6 +121,8 @@ const EditorMetadata = ({ user } : Props) => {
       // add default values for content
       post(`/api/beatmaps`, {
         ...data,
+        // kpm and base_key_score aren't well defined yet
+        // but they'll be calculated on all subsequent saves
         content: "ishpytoing file format v1\n\n[TimingPoints]\n\n\n[Lines]\n",
       }).then(callback);
     } else {

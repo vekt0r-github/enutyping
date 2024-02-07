@@ -12,8 +12,7 @@ import {
   User, Beatmap, LineData,
   GameStatus, GameState, getModCombo 
 } from "@/utils/types";
-import { 
-  makeLineStateAt,
+import {
   makeSetFunc,
   timeToLineIndex, 
   GAME_FPS,
@@ -25,7 +24,7 @@ import {
   getTimeOfBeat,
   timeToBeatNumber,
 } from '@/utils/beatmaputils';
-import { updateStateOnLineEnd } from "@/utils/gameplayutils";
+import { makeLineStateAt, updateStateOnLineEnd } from "@/utils/gameplayutils";
 
 import styled from 'styled-components';
 import '@/utils/styles.css';

@@ -12,7 +12,7 @@ import { configContext } from "@/providers/config";
 
 import { get, put, httpDelete, post } from "@/utils/functions";
 import { User, Beatmap } from "@/utils/types";
-import { getArtist, getTitle, processBeatmap } from '@/utils/beatmaputils';
+import { calculateBaseKeyScore, getArtist, getTitle, processBeatmap } from '@/utils/beatmaputils';
 import { withParamsAsKey } from "@/utils/componentutils";
 
 import styled from 'styled-components';
@@ -64,7 +64,6 @@ const Editor = ({ user } : Props) => {
       let newBeatmapCopy : Beatmap | undefined;
       if (saved) { newBeatmapCopy = newBeatmap && {...newBeatmap}; }
       newBeatmap && processBeatmap(newBeatmap, config); // mutates
-      console.log(newBeatmap)
       return { status: LOADED, beatmap: newBeatmap, lastSavedBeatmap: newBeatmapCopy ?? oldState.lastSavedBeatmap };
     });
   };
@@ -89,6 +88,7 @@ const Editor = ({ user } : Props) => {
     if (!beatmap.content.length) { return; }
     const data = {
       kpm: kpm,
+      base_key_score: calculateBaseKeyScore(beatmap),
       content: beatmap.content,
     }
     put(`/api/beatmaps/${mapId}`, data)
@@ -159,12 +159,13 @@ const Editor = ({ user } : Props) => {
                 <Line size="1em" margin="0">{text(`copy-map-button`)}</Line>
               </NewButton>}
               onSelect={(destMapsetId) => {
+                // WARNING: duplicate of code in Game
                 // copy to selected collection
                 // it's dumb to not check if map's saved, but theoretically
                 // the user can just copy it back if they messed up...
-                const {artist, title, artist_original, title_original, yt_id, preview_point, diffname} = beatmap; // metadata
-                const {kpm, content} = beatmap; // non-metadata
-                const data = {artist, title, artist_original, title_original, yt_id, preview_point, diffname, kpm, content,
+                const {artist, title, artist_original, title_original, yt_id, preview_point, duration, diffname} = beatmap; // metadata
+                const {kpm, base_key_score, content} = beatmap; // non-metadata
+                const data = {artist, title, artist_original, title_original, yt_id, preview_point, duration, diffname, kpm, base_key_score, content,
                   beatmapset_id: destMapsetId};
                 post(`/api/beatmaps`, {...data, id: undefined})
                   .then((beatmapRes) => {

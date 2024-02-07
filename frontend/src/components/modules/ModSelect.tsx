@@ -24,7 +24,7 @@ const ModSelectContainer = styled(MainBox)`
   width: 600px;
   /* position: absolute; */
   align-self: center;
-  opacity: 0.9;
+  opacity: 0.94;
   margin-top: 3em;
 `;
 
