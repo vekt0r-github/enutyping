@@ -103,8 +103,8 @@ const SongSelect = ({user} : Props) => {
             user={user}
             getBeatmapsets={getBeatmapsets}
             mapsets={filteredMapsets}
-            includeMapsetCreate={false}
             includeMapCreate={false}
+            includeMapsetCreate={false}
             link={(mapsetId, mapId) => `/play/${mapsetId}/${mapId??''}`} 
           />}
       </SongsContainer>

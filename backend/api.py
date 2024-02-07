@@ -82,6 +82,12 @@ def get_users():
 ######################### BEATMAP METHODS #########################
 ################################################################
 
+@api.route('/beatmaps', methods=['GET'])
+def get_beatmap_list():
+    search_query = request.args.get('search', '')
+    owner_result = Beatmap.query.filter(Beatmap.owner_id.ilike('%' + search_query + '%')).all()
+    return { 'beatmaps': list(beatmaps_schema.dump(owner_result)) }
+
 @api.route('/beatmaps/<int:beatmap_id>', methods=['GET'])
 def get_beatmap_with_set_and_scores(beatmap_id):
     beatmap = Beatmap.query.get(beatmap_id)

@@ -30,9 +30,9 @@ const EditorSongSelect = ({ user } : Props) => {
 
   const [mapsets, setMapsets] = useState<Beatmapset[]>();
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [sortLabel, setSortLabel] = useState<keyof typeof sortFuncs>(defaultSort);
+  const [sortLabel, setSortLabel] = useState<keyof typeof editorSortFuncs>(defaultSort);
   const [sortReverse, setSortReverse] = useState<boolean>(true);
-  let sortFunc = sortFuncs[sortLabel];
+  let sortFunc = editorSortFuncs[sortLabel];
   if (sortReverse) sortFunc = sortFunc.reverse();
 
   const filteredMapsets = mapsets?.filter((set: Beatmapset) => {  
@@ -65,7 +65,7 @@ const EditorSongSelect = ({ user } : Props) => {
       <h1>{text(`menu-editor-header`)}</h1>
       <SearchContainer>
         <SearchBar value={searchQuery} placeholder={text(`menu-search-placeholder`)} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} />
-        {withLabel(<select onChange={(e) => setSortLabel(e.target.value as keyof typeof sortFuncs)}>
+        {withLabel(<select onChange={(e) => setSortLabel(e.target.value as keyof typeof editorSortFuncs)}>
           {Object.keys(editorSortFuncs).map(k => <option value={k}>{text(k)}</option>)}
         </select>, "song-select-sort", text("menu-label-sort"))}
         {withLabel(<input type="checkbox" checked={sortReverse} onChange={(e) => setSortReverse(e.target.checked)}></input>, 

@@ -1,7 +1,6 @@
 ## enuTyping
 
-No longer hosted at https://enutyping.timmy.moe
-Hosted at https://enutyping.vekt0r.dev
+Hosted at https://enutyping.vekt0r.dev (previously https://enutyping.timmy.moe)
 
 # Python modules used
 ```
@@ -44,7 +43,7 @@ Google logo: https://google.com
 
 Fonts (Open Sans, Fredoka One, Roboto): https://fonts.googleapis.com/css2?family=Fredoka+One&family=Open+Sans&family=Roboto:wght@500&display=swap
 
-Catppucin Color Palette: https://github.com/catppuccin/palette 
+Catppuchin Color Palette: https://github.com/catppuccin/palette 
 
 All logo usage is compliant with company branding guidelines.
 

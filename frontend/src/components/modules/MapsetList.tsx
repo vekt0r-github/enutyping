@@ -140,7 +140,7 @@ type TargetProps = {
   onClick?: () => void,
 }
 
-const MapsetList = ({ user, getBeatmapsets, mapsets, includeMapsetCreate, includeMapCreate, onObjectClick: onTargetClick, link } : Props) => {
+const MapsetList = ({ user, getBeatmapsets, mapsets, includeMapsetCreate, includeMapCreate, onObjectClick, link } : Props) => {
   const text = getL10nFunc();
   const elem = getL10nElementFunc();
   const config = useContext(configContext);
@@ -182,7 +182,7 @@ const MapsetList = ({ user, getBeatmapsets, mapsets, includeMapsetCreate, includ
       as: Link,
       to: link(mapsetId, mapId),
     } : {}
-    if (onTargetClick) props = {...props, onClick: () => onTargetClick(mapsetId, mapId)}
+    if (onObjectClick) props = {...props, onClick: () => onObjectClick(mapsetId, mapId)}
     return props;
   }
 
