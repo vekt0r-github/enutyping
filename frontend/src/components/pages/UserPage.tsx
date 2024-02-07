@@ -9,12 +9,13 @@ import { getL10nFunc, getL10nElementFunc } from "@/providers/l10n";
 import { configContext } from "@/providers/config";
 
 import { get } from "@/utils/functions";
-import { Beatmap, Score, User, UserStats, getModCombo } from "@/utils/types";
+import { Beatmap, Score, User, UserStats, getModCombo, rankColors } from "@/utils/types";
 import { getArtist, getTitle } from "@/utils/beatmaputils";
 
 import styled from 'styled-components';
-import { InfoBox } from '@/utils/styles';
+import { InfoBox, RankDisplay, SubBox } from '@/utils/styles';
 import { withParamsAsKey } from "@/utils/componentutils";
+import { getRank } from "@/utils/gameplayutils";
 
 type Props = {
   yourUser: User | null,
@@ -61,9 +62,31 @@ const Scores = styled.div`
   padding: 1rem;
   align-items: center;
   border-radius: var(--s);
-  & > ${InfoBox} + ${InfoBox} {
+`;
+
+const ScoreBox = styled(SubBox)`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  padding: var(--s);
+  box-sizing: border-box;
+  & + & {
     margin-top: var(--s);
   }
+`;
+
+const ScoreLeftSide = styled(RankDisplay)`
+  width: 50px;
+  font-size: 2.4rem;
+  margin: 0 4px 0 0;
+  text-align: center;
+`;
+
+const ScoreRightSide = styled.div`
+  /* width: calc(100% - 100px); */
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
 `;
 
 const ScoreLine = styled.div`
@@ -91,7 +114,7 @@ const UserPage = ({ yourUser }: Props) => {
   const [user, setUser] = useState<User | null>();
   const [scores, setScores] = useState<Score[]>([]);
   const [stats, setStats] = useState<UserStats | null>();
-  const [scoreBeatmaps, setScoreBeatmaps] = useState<Beatmap[]>([]);
+  const [scoreBeatmaps, setScoreBeatmaps] = useState<{[map_id: number]: Beatmap}>([]);
 
   useEffect(() => {
     get(`/api/users/${userId}`).then((res) => {
@@ -106,13 +129,18 @@ const UserPage = ({ yourUser }: Props) => {
   }, [yourUser]);
 
   useEffect(() => {
-    let beatmaps: Beatmap[] = [];
-    Promise.all(scores.map(async (score: Score) => {
-      const res = await get(`/api/beatmaps/${score.beatmap_id}`);
-            if (!res)
-                console.log("wtf happened");
-            else
-                beatmaps.push(res);
+    let beatmaps: {[map_id: number]: Beatmap} = {};
+    let beatmap_ids: number[] = []; // just to get unique set
+    for (const score of scores) {
+      if (!beatmap_ids.includes(score.beatmap_id)) beatmap_ids.push(score.beatmap_id);
+    }
+
+    Promise.all(beatmap_ids.map(async (beatmap_id: number) => {
+      const res = await get(`/api/beatmaps/${beatmap_id}`);
+      if (!res)
+          console.log("wtf happened");
+      else
+          beatmaps[beatmap_id] = res;
     })).then(() => setScoreBeatmaps(beatmaps));
   }, [scores]);
 
@@ -120,34 +148,41 @@ const UserPage = ({ yourUser }: Props) => {
     const {score, speed_modification, mod_flag, time_unix, key_accuracy, kana_accuracy} = scoreInfo;
     const {diffname} = beatmap;
     const [artist, title] = [getArtist(beatmap, config), getTitle(beatmap, config)];
-    const {hidden} = getModCombo(mod_flag);
+    const modCombo = getModCombo(mod_flag);
+    const rank = getRank(score, speed_modification, modCombo);
+
     return (
-      <>
-        <ScoreLine>
-          {elem((<span></span>), `userpage-score-map-display`, {
-            elems: {emph: <b></b>},
-            vars: {artist, title, diffname},
-          })}
-          {elem((<span></span>), `userpage-score-score`, {
-            elems: {emph: <b></b>},
-            vars: {
-              score: score,
-              speed: speed_modification,
-              mods: hidden ? 'HD' : '-',
-            },
-          })}
-        </ScoreLine>
-        <ScoreLine>
-          <span>{text(`userpage-score-date`, {date: new Date(time_unix * 1000).toLocaleString()})}</span>
-          {elem((<span></span>), `userpage-score-acc`, {
-            elems: {emph: <b></b>},
-            vars: {
-              keyAcc: (key_accuracy * 100).toFixed(2),
-              kanaAcc: (kana_accuracy * 100).toFixed(2),
-            },
-          })}
-        </ScoreLine>
-      </>
+      <ScoreBox key={scoreInfo.id}>
+        <ScoreLeftSide color={rankColors[rank]}>
+          {rank}
+        </ScoreLeftSide>
+        <ScoreRightSide>
+          <ScoreLine>
+            {elem((<span></span>), `userpage-score-map-display`, {
+              elems: {emph: <b></b>},
+              vars: {artist, title, diffname},
+            })}
+            {elem((<span></span>), `userpage-score-score`, {
+              elems: {emph: <b></b>},
+              vars: {
+                score: score,
+                speed: speed_modification,
+                mods: modCombo.hidden ? 'HD' : '-',
+              },
+            })}
+          </ScoreLine>
+          <ScoreLine>
+            <span>{text(`userpage-score-date`, {date: new Date(time_unix * 1000).toLocaleString()})}</span>
+            {elem((<span></span>), `userpage-score-acc`, {
+              elems: {emph: <b></b>},
+              vars: {
+                keyAcc: (key_accuracy * 100).toFixed(2),
+                kanaAcc: (kana_accuracy * 100).toFixed(2),
+              },
+            })}
+          </ScoreLine>
+        </ScoreRightSide>
+      </ScoreBox>
     );
   };
 
@@ -177,9 +212,7 @@ const UserPage = ({ yourUser }: Props) => {
           { (scores && scores.length > 0) ?
             <>
               {scores.map((score, i) =>
-                <InfoBox key={score.id}>
-                  {scoreBeatmaps[i] ? prettyScore(score, scoreBeatmaps[i]) : null} 
-                </InfoBox>
+                scoreBeatmaps[score.beatmap_id] ? prettyScore(score, scoreBeatmaps[score.beatmap_id]) : null
               )}
             </>
             :

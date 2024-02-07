@@ -5,9 +5,9 @@ from operator import itemgetter
 from sqlalchemy import func, and_
 from time import time
 
-from models import Beatmap, Beatmapset, Score, User
+from models import Beatmap, Beatmapset, Score, User, Replay
 from schemas import beatmap_schema, beatmaps_schema, beatmapset_schema, beatmapsets_schema, \
-                    score_schema, scores_schema, scores_without_user_schema, user_schema, users_schema, user_stats_schema
+                    score_schema, scores_schema, scores_without_user_schema, replay_schema, user_schema, users_schema, user_stats_schema
 from database import db_session
 
 MAX_NUM_SCORES = 50
@@ -299,7 +299,27 @@ def delete_beatmapset(user_id, beatmapset_id):
 def new_score(user_id):
     # XXX: UID probably is in session or something, so we can't fake for someone else
     # TODO: Probably need protection lol fake scores
+    '''
+    Data
+    ----
+    beatmap_id
+    score
+    key_accuracy
+    kana_accuracy
+    time_unix
+    speed_modification
+    mod_flag
+
+    optionally:
+    replay_data
+    '''
     json_data = request.get_json()
+    
+    replay_data = None
+    if "replay_data" in json_data:
+        replay_data = json_data["replay_data"]
+        del json_data["replay_data"]
+
     if not json_data:
         return 'No input provided', 400
     try:
@@ -310,6 +330,10 @@ def new_score(user_id):
     user = User.query.filter_by(id=user_id).first()
     if not user:
        return 'Invalid User', 400
+
+    if replay_data is not None:
+        r = Replay(score_id=s.id, data=replay_data)
+        db_session.add(r)
 
     user.key_accuracy = (user.key_accuracy * user.play_count + s.key_accuracy) / (user.play_count + 1)
     user.kana_accuracy = (user.kana_accuracy * user.play_count + s.kana_accuracy) / (user.play_count + 1)

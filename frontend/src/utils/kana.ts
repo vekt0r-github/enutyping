@@ -82,7 +82,7 @@ const getHiraganizations = (kana: string) : string[] => {
       default: return c;
     }
   }).map(c => hiraganaToKey.get(c) ?? c);
-  return [chars.reduce((a, b) => a + b)];
+  return [chars.reduce((a, b) => a + b, '')];
 };
 
 const computeKanaAt = (pos: number, config: Config, syllable: string, nextSyllable?: string) => {

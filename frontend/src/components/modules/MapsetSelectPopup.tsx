@@ -105,6 +105,7 @@ const MapsetSelectPopup = ({ user, button, onSelect }: Props) => {
               <SongsScrollContainer>
                 <SongsContainer>
                   <MapsetList
+                    user={user}
                     mapsets={mapsets}
                     includeMapsetCreate={false}
                     includeMapCreate={false}

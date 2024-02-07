@@ -7,7 +7,7 @@ import { getL10nFunc } from '@/providers/l10n';
 import { Config } from "@/providers/config";
 
 import { get } from "@/utils/functions";
-import { Beatmapset, Beatmap, BeatmapMetadata } from "@/utils/types";
+import { Beatmapset, Beatmap, BeatmapMetadata, User } from "@/utils/types";
 import { withLabel } from "@/utils/componentutils";
 import { getSetAvg } from "@/utils/beatmaputils";
 
@@ -19,7 +19,9 @@ const KPMInput = styled.input`
   width: 60px;
 `;
 
-type Props = {};
+type Props = {
+  user: User | null,
+};
 
 interface SortFunc {
   (a: Beatmapset, b: Beatmapset): number
@@ -47,7 +49,7 @@ export const sortFuncs = {
 }
 const defaultSort = "menu-sorting-date";
 
-const SongSelect = ({} : Props) => {
+const SongSelect = ({user} : Props) => {
   const text = getL10nFunc();
   
   const [mapsets, setMapsets] = useState<Beatmapset[]>();
@@ -98,6 +100,7 @@ const SongSelect = ({} : Props) => {
       <SongsContainer>
         {(filteredMapsets === undefined) ? <Loading /> :
           <MapsetList 
+            user={user}
             getBeatmapsets={getBeatmapsets}
             mapsets={filteredMapsets}
             includeMapCreate={false}

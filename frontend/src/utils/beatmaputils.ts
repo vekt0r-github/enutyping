@@ -1,7 +1,7 @@
 import { defaultConfig, Config } from '@/providers/config';
-import { Beatmap, Beatmapset, LineData, Kana, LineState, TimingPoint, KanaState, BeatmapMetadata } from '@/utils/types';
+import { Beatmap, Beatmapset, LineData, TimingPoint, BeatmapMetadata, KeyEvent } from '@/utils/types';
 import { computeMinKeypresses, parseKana } from '@/utils/kana';
-import getTextWidth from "@/utils/widths";
+import { simulateReplay } from '@/utils/gameplayutils';
 
 export const MS_IN_MINUTE = 60000;
 
@@ -93,7 +93,7 @@ export const getSetAvg = (mapset: Beatmapset, prop: KeysMatching<BeatmapMetadata
   const vals = mapset.beatmaps.map((map) => map[prop]);
   const cleanVals : number[] = vals.filter(x => x !== undefined) as number[]
   if (!cleanVals.length) return defaultValue;
-  return cleanVals.reduce((a, b) => a + b) / vals.length;
+  return cleanVals.reduce((a, b) => a + b, 0) / vals.length;
 }
 
 export const getArtist = (map: BeatmapMetadata, config: Config) => 
@@ -200,52 +200,34 @@ export const makeSetFunc = <State>(setState : (state : State | ((oldState: State
   }
 );
 
-export const getCurrentRomanization = (kana : KanaState[]) => 
-  "".concat.apply("", kana.map(ks => ks.prefix + ks.suffix))
-
-const makeInitOrLastKanaState = (kana: Kana, last: boolean, useKanaLayout: boolean): KanaState => {
-  const fullText = useKanaLayout ? kana.hiraganizations[0] : kana.romanizations[0]
-  return { 
-    kana: kana, 
-    prefix: last ? fullText : "", 
-    suffix: last ? "" : fullText, 
-    minKeypresses: computeMinKeypresses(kana), 
-    score: 0,
-  }
-};
-
-export const makeLineStateAt = (currTime: number, lineData: LineData, config: Config, editor = false) : LineState => ({
-  line: lineData,
-  position: lineData.syllables.filter(s => s.time < currTime).length,
-  syllables: lineData.syllables.map((syllable, i, arr) => {
-    const kana = parseKana(syllable.text, config, arr[i+1]?.text)
-      .map((kana) => makeInitOrLastKanaState(kana, syllable.time < currTime, config.useKanaLayout))
-    return {...syllable,
-      position: (editor && currTime >= syllable.time) ? kana.length : 0,
-      kana: kana,
-    }
-  }),
-  nBuffer: null,
-});
-
 export const getVisualPosition = (currTime: number, lineData: LineData) => {
   const {startTime, endTime} = lineData;
   return (currTime - startTime) / (endTime - startTime);
 }
 
-export const withOverlapOffsets = (lineState : LineState, fontSize : number) : any => {
-  // mutates but probably fine :3
-  // font size is in em
-  const padding = 2; // px
-  let rightmost = 0;
-  lineState.syllables.forEach((syllable : any) => {
-    const {text, time, kana} = syllable;
-    const roman = getCurrentRomanization(kana);
-    const width = Math.max(getTextWidth(text), getTextWidth(roman)) * fontSize + padding;
-    const pos = getVisualPosition(time, lineState.line) * 800; // i love hardcoding
-    syllable.pos = pos;
-    syllable.offset = Math.max(rightmost - pos, 0);
-    rightmost = pos + syllable.offset + width;
-  });
-  return lineState;
+const simulatePerfectReplay = (beatmap: Beatmap) => {
+  const keyLog: KeyEvent[] = [];
+  for (const {syllables} of beatmap.lines) {
+    for (const {time, kana} of syllables) {
+      for (const k of kana) {
+        for (const c of k.romanizations[0]) {
+          // surely if you type perfectly any romanization gives the same score
+          // at least, if we coded it right
+          keyLog.push({key: c, timestamp: time});
+        }
+      }
+    }
+  }
+  return simulateReplay(beatmap, defaultConfig(), 1, keyLog);
+}
+
+export const calculateBaseKeyScore = (beatmap: Beatmap) => {
+  const targetFinalScore = 1000000;
+  beatmap.base_key_score = 1; // hopefully you didn't need that
+  const finalGameState = simulatePerfectReplay(beatmap);
+  if (finalGameState.stats.score === 0) {
+    return 1; // beatmap is empty; do whatever
+  }
+  const baseKeyScore = targetFinalScore / finalGameState.stats.score;
+  return baseKeyScore;
 }
