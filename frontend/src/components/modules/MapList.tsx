@@ -121,7 +121,12 @@ const MapList = ({ getBeatmaps, beatmaps, includeMapCreate, onObjectClick, link 
               <Line size='1em' lineHeightRatio={1.35} margin="0">{getArtist(beatmap, config)}</Line>
               <MapInfo>
                 <Line size='1em' margin="0">{text(`menu-map-kpm`, {kpm: beatmap.kpm ?? 0})}</Line>
-                <Line size='0.8em' margin="0">{text(`menu-map-owner`, {owner: beatmap.owner.name})}</Line>
+                <Line size='0.8em' margin="0">
+                  {elem((<></>), `menu-map-owner`, {
+                    elems: {LinkTo: <Link to={`/user/${beatmap.owner.id}`} />},
+                    vars: {owner: beatmap.owner.name},
+                  })}
+                </Line>
               </MapInfo>
             </MapLink>
           </MapBox>

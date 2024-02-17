@@ -211,8 +211,15 @@ const MapsetList = ({ user, getBeatmapsets, mapsets, includeMapsetCreate, includ
                 <Info>
                   <Line size='1.25em' as='h2' margin="0">{mapset.name}</Line>
                   <Line size='1em' margin="0">{mapset.description}</Line>
-                  <Line size='0.8em' margin="0">{text(`menu-mapset-owner`, {owner: owner.name})}</Line>
-                  <Line size='0.8em' margin="0">{text(`menu-mapset-mapcount`, {mapCount})} | {text(`menu-mapset-kpm`, {kpm: Math.round(getSetAvg(mapset, 'kpm'))})}</Line>
+                  <Line size='0.8em' margin="0">
+                    {elem((<></>), `menu-mapset-owner`, {
+                      elems: {LinkTo: <Link to={`/user/${owner.id}`}/>},
+                      vars: {owner: owner.name},
+                    })}
+                  </Line>
+                  <Line size='0.8em' margin="0">
+                    {text(`menu-mapset-mapcount`, {mapCount})} | {text(`menu-mapset-kpm`, {kpm: Math.round(getSetAvg(mapset, 'kpm'))})}
+                  </Line>
                 </Info>
               </MapsetLink>
               <DiffsContainer>
@@ -227,7 +234,7 @@ const MapsetList = ({ user, getBeatmapsets, mapsets, includeMapsetCreate, includ
                     >
                       <YTThumbnail yt_id={map.yt_id} width={32} height={24} />
                       <DiffRightSide>
-                        <Line size="1em" margin="0">{text(`menu-map-display`, {
+                        <Line size="1em" margin="0">{text(`menu-diff-display`, {
                           artist: getArtist(map, config),
                           title: getTitle(map, config),
                           diffname: map.diffname,

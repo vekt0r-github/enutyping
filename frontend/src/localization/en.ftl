@@ -155,13 +155,13 @@ menu-show-collections = View Collections
 menu-hide-collections = View All Songs
 menu-search-placeholder = Search:
 menu-map-new = Create New Beatmap
-menu-map-owner = Creator: { $owner }
+menu-map-owner = Creator: <LinkTo>{ $owner }</LinkTo>
 menu-map-kpm = KPM: { $kpm }
 menu-diff-new = Create New Beatmap in Collection
-menu-map-display = { $title } // { $artist } [{ $diffname }]
+menu-diff-display = { $title } // { $artist } [{ $diffname }]
 menu-mapset-new = Create New Collection
 menu-mapset-delete = Delete Collection
-menu-mapset-owner = created by { $owner }
+menu-mapset-owner = created by <LinkTo>{ $owner }</LinkTo>
 menu-mapset-mapcount = { $mapCount ->
   [one] 1 map
   *[other] { $mapCount } maps
