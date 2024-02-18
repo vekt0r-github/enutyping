@@ -145,6 +145,7 @@ const MapsetList = ({ user, getBeatmapsets, mapsets, includeMapsetCreate, includ
   const elem = getL10nElementFunc();
   const config = useContext(configContext);
 
+  // TODO: get user best score stuff server-side
   const [userScores, setUserScores] = useState<Score[]>([]);
 
   const submittedRankOn = (mapId: number) => {

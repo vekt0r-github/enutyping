@@ -1,9 +1,9 @@
-import React, { useContext, useState }  from "react";
+import React, { useContext, useEffect, useState }  from "react";
 
 import ConfirmPopup from "@/components/modules/ConfirmPopup";
 import YTThumbnail from "@/components/modules/YTThumbnail";
 
-import { Beatmap, MapID } from "@/utils/types";
+import { User, Beatmap, MapID, Score, getModCombo, Rank, rankColors } from "@/utils/types";
 
 import { getL10nFunc, getL10nElementFunc } from '@/providers/l10n';
 import { Config, configContext } from '@/providers/config';
@@ -12,10 +12,12 @@ import { getArtist, getTitle } from "@/utils/beatmaputils";
 
 import styled, { StyledComponentProps } from 'styled-components';
 import '@/utils/styles.css';
-import { MainBox, Link, Line, BlackLine } from '@/utils/styles';
-import { httpDelete } from "@/utils/functions";
+import { MainBox, Link, Line, BlackLine, RankDisplay, Spacer } from '@/utils/styles';
+import { get, httpDelete } from "@/utils/functions";
+import { getRank } from "@/utils/gameplayutils";
 
 type Props = {
+  user: User | null,
   getBeatmaps?: () => void,
   beatmaps: Beatmap[],
   includeMapCreate: boolean,
@@ -35,6 +37,10 @@ const MapLink = styled(MainBox)`
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
+  & > ${Line} {
+    width: 100%;
+    text-align: center;
+  }
 `;
 
 const MapBox = styled(MainBox)`
@@ -48,10 +54,6 @@ const MapBox = styled(MainBox)`
   &:hover, &:focus {
     z-index: 1;
     background-color: var(--clr-primary-light);
-  }
-  & ${Line} {
-    width: 100%;
-    text-align: center;
   }
 `;
 
@@ -78,7 +80,30 @@ export const NewMapLine = styled.h2`
 
 const MapInfo = styled.div`
   margin-top: var(--s);
+  & + & {margin-top: var(--xxs);}
   width: 100%;
+  display: flex;
+`;
+
+const MapInfoColumn = styled.div`
+  & + & {
+    margin-left: var(--s);
+  }
+`;
+
+const MapRankDisplayContainer = styled.div`
+  position: relative;
+  width: 4.2rem;
+  // display: inline-block;
+`;
+
+const MapRankDisplay = styled(RankDisplay)`
+  line-height: 1rem;
+  font-size: 1.8rem;
+  position: absolute;
+  left: 3rem;
+  top: 0.1rem;
+  display: inline-block;
 `;
 
 type TargetProps = {
@@ -87,10 +112,34 @@ type TargetProps = {
   onClick?: () => void,
 }
 
-const MapList = ({ getBeatmaps, beatmaps, includeMapCreate, onObjectClick, link } : Props) => {
+const MapList = ({ user, getBeatmaps, beatmaps, includeMapCreate, onObjectClick, link } : Props) => {
   const text = getL10nFunc();
   const elem = getL10nElementFunc();
   const config = useContext(configContext);
+
+  // TODO: get user best score stuff server-side
+  const [userScores, setUserScores] = useState<Score[]>([]);
+
+  const submittedScoreOn = (mapId: number) => {
+    let bestScoreObject = null;
+    for (const score of userScores) {
+      if (score.beatmap_id === mapId && (!bestScoreObject || score.score > bestScoreObject.score)) {
+        bestScoreObject = score;
+      }
+    }
+    return bestScoreObject;
+  }
+
+  useEffect(() => {
+    if (!user) return;
+    get(`/api/users/${user.id}`).then((res) => {
+      if (!res || !res.user) {
+        return;
+      } else {
+        setUserScores(res.scores);
+      }
+    });
+  }, []);
 
   const makeTargetProps = (mapId: MapID) => {
     let props: TargetProps = link ? {
@@ -113,6 +162,9 @@ const MapList = ({ getBeatmaps, beatmaps, includeMapCreate, onObjectClick, link 
         </NewMapBox> : null}
       {/* next, the actual beatmaps */}
       {beatmaps?.map((beatmap) => {
+        const score = submittedScoreOn(beatmap.id);
+        let rank = null;
+        if (score !== null) rank = getRank(score.score, score.speed_modification, getModCombo(score.mod_flag));
         return (
           <MapBox key={beatmap.id}>
             <MapLink {...makeTargetProps(beatmap.id)}>
@@ -120,13 +172,43 @@ const MapList = ({ getBeatmaps, beatmaps, includeMapCreate, onObjectClick, link 
               <Line size='1.25em' lineHeightRatio={1.35} as='h2' margin="var(--s) 0 0 0">{getTitle(beatmap, config)}</Line>
               <Line size='1em' lineHeightRatio={1.35} margin="0">{getArtist(beatmap, config)}</Line>
               <MapInfo>
-                <Line size='1em' margin="0">{text(`menu-map-kpm`, {kpm: beatmap.kpm ?? 0})}</Line>
-                <Line size='0.8em' margin="0">
-                  {elem((<></>), `menu-map-owner`, {
-                    elems: {LinkTo: <Link to={`/user/${beatmap.owner.id}`} />},
-                    vars: {owner: beatmap.owner.name},
-                  })}
-                </Line>
+                <MapInfoColumn>
+                  <Line size='1em' margin="0">{text(`menu-map-kpm`, {kpm: beatmap.kpm ?? 0})}</Line>
+                </MapInfoColumn>
+                <Spacer />
+                <MapInfoColumn>
+                  <MapRankDisplayContainer>
+                    <Line size='1em' margin="0">
+                      {text(`menu-map-rank`)}
+                    </Line>
+                    {rank !== null ?
+                        <MapRankDisplay as='span' color={rankColors[rank]}>{rank}</MapRankDisplay>
+                      : null}
+                  </MapRankDisplayContainer>
+                </MapInfoColumn>
+              </MapInfo>
+              <MapInfo>
+                <MapInfoColumn>
+                  <Line size='0.8em' margin="0">
+                    {elem((<></>), `menu-map-owner`, {
+                      elems: {LinkTo: <Link to={`/user/${beatmap.owner.id}`} />},
+                      vars: {owner: beatmap.owner.name},
+                    })}
+                  </Line>
+                </MapInfoColumn>
+                <Spacer />
+                <MapInfoColumn>
+                  <Line size='0.8em' margin="0">
+                    {score !== null ? 
+                      text(`menu-map-score`, {
+                        score: score.score,
+                        speed: score.speed_modification,
+                        mods: getModCombo(score.mod_flag).hidden ? ' +HD' : '',
+                      })
+                      : text(`menu-map-no-score`)
+                    }
+                  </Line>
+                </MapInfoColumn>
               </MapInfo>
             </MapLink>
           </MapBox>

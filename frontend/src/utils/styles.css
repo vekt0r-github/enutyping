@@ -49,10 +49,11 @@
   --tt-short: 0.0727s;
   --tt-long: 0.2181s;
 
-  --xs: 0.25em;
-  --s: 0.5em;
-  --m: 1em;
-  --l: 1.5em;
+  --xxs: 0.125rem;
+  --xs: 0.25rem;
+  --s: 0.5rem;
+  --m: 1rem;
+  --l: 1.5rem;
 
   /* must be equal to effective navbar height */
   --content-offset: 72px;

@@ -227,7 +227,8 @@ const SongSelect = ({user, isEditor, groupMapsets} : Props) => {
         :
       <MapsContainer>
         {(filteredBeatmaps === undefined) ? <Loading /> :
-          <MapList 
+          <MapList
+            user={user}
             getBeatmaps={getBeatmaps}
             beatmaps={filteredBeatmaps}
             includeMapCreate={isEditor}
