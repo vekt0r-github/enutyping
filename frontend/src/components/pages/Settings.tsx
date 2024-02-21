@@ -49,7 +49,7 @@ const KanaBox = styled.div`
 `;
 
 const SettingTitle = styled.span`
-  font-weight: bold;
+  font-weight: var(--fw-bold);
 `;
 
 const ChangeNameBox = styled.div`

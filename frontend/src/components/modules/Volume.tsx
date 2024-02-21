@@ -25,7 +25,7 @@ const IconLabel = styled(Line)`
   /* scuffed alert */
   position: absolute;
   left: 11px;
-  top: calc(22px + var(--s));
+  top: calc(19px + var(--s));
   z-index: 1;
   pointer-events: none;
   user-select: none;

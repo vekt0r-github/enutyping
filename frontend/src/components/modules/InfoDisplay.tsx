@@ -29,7 +29,7 @@ const InfoDisplayEntry = styled(InfoEntry)`
 `;
 
 const NoWrapSpan = styled.span`
-  font-weight: bold;
+  font-weight: var(--fw-bold);
 	white-space: nowrap;
 	margin-right: var(--s);
 `;

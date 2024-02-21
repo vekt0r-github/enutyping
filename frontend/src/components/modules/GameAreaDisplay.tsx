@@ -95,7 +95,7 @@ export const Overlay = styled.div`
   left: 0;
   top: 0;
   background-color: var(--clr-overlay);
-  color: var(--white);
+  color: var(--clr-text-light);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -126,7 +126,7 @@ const FinalRankDisplay = styled(RankDisplay)`
   font-size: 8rem;
   margin: -4rem 0 -2rem 0;
   color: ${({color}) => color};
-  font-weight: bold;
+  font-weight: var(--fw-bold);
 `;
 
 // computation and component utils

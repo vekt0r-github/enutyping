@@ -31,7 +31,7 @@ const ModSelectContainer = styled(MainBox)`
 const MultiplierDisplay = styled.p`
   text-align: center;
   width: 100%;
-  font-weight: bold;
+  font-weight: var(--fw-bold);
   font-size: 1.125em;
 `;
 

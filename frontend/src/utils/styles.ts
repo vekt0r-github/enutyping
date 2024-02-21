@@ -122,7 +122,8 @@ export const InfoEntry = styled.div`
 
 export const RankDisplay = styled.div<{color?: string}>`
   color: ${({color}) => color};
-  font-weight: bold;
+  font-weight: 700;
+  -webkit-text-stroke: 0.03em var(--clr-text-light);
 `;
 
 export const BasicContainer = styled.div`
@@ -188,4 +189,8 @@ export const Thumbnail = styled.img<{
   width: ${(props) => props.width}px;
   height: ${(props) => props.height}px;
   object-fit: contain;
+`;
+
+export const BoldSpan = styled.span`
+  font-weight: var(--fw-bold);
 `;

@@ -93,16 +93,15 @@ const MapInfoColumn = styled.div`
 
 const MapRankDisplayContainer = styled.div`
   position: relative;
-  width: 4.2rem;
-  // display: inline-block;
+  margin-right: 1.6rem;
 `;
 
 const MapRankDisplay = styled(RankDisplay)`
-  line-height: 1rem;
+  // line-height: 1rem;
   font-size: 1.8rem;
   position: absolute;
-  left: 3rem;
-  top: 0.1rem;
+  right: -1.5rem;
+  top: -0.7rem;
   display: inline-block;
 `;
 

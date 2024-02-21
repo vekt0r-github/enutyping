@@ -53,7 +53,7 @@ const ButtonContainer = styled.div`
 
 const Button = styled(Link)`
   font-size: 1.5em;
-  font-weight: bold;
+  font-weight: var(--fw-bold);
   text-decoration: none;
   background-color: var(--teal);
   border-radius: var(--s);

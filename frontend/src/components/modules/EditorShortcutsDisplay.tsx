@@ -32,7 +32,7 @@ const ShortcutInfoEntry = styled(InfoEntry)`
 `;
 
 const InfoLabel = styled(Line)`
-  font-weight: bold;
+  font-weight: var(--fw-bold);
   width: 100px;
   flex-shrink: 0;
   display: inline-block;

@@ -13,7 +13,7 @@ import { Beatmap, Score, User, UserStats, getModCombo, rankColors } from "@/util
 import { getArtist, getTitle } from "@/utils/beatmaputils";
 
 import styled from 'styled-components';
-import { InfoBox, RankDisplay, SubBox } from '@/utils/styles';
+import { BoldSpan, InfoBox, RankDisplay, SubBox } from '@/utils/styles';
 import { withParamsAsKey } from "@/utils/componentutils";
 import { getRank } from "@/utils/gameplayutils";
 
@@ -159,11 +159,11 @@ const UserPage = ({ yourUser }: Props) => {
         <ScoreRightSide>
           <ScoreLine>
             {elem((<span></span>), `userpage-score-map-display`, {
-              elems: {emph: <b></b>},
+              elems: {emph: <BoldSpan />},
               vars: {artist, title, diffname},
             })}
             {elem((<span></span>), `userpage-score-score`, {
-              elems: {emph: <b></b>},
+              elems: {emph: <BoldSpan />},
               vars: {
                 score: score,
                 speed: speed_modification,
@@ -174,7 +174,7 @@ const UserPage = ({ yourUser }: Props) => {
           <ScoreLine>
             <span>{text(`userpage-score-date`, {date: new Date(time_unix * 1000).toLocaleString()})}</span>
             {elem((<span></span>), `userpage-score-acc`, {
-              elems: {emph: <b></b>},
+              elems: {emph: <BoldSpan />},
               vars: {
                 keyAcc: (key_accuracy * 100).toFixed(2),
                 kanaAcc: (kana_accuracy * 100).toFixed(2),
